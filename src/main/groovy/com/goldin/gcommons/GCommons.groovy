@@ -1,6 +1,5 @@
 package com.goldin.gcommons
 
-import com.goldin.gcommons.api.General
 import org.springframework.context.ApplicationContext
 import org.springframework.context.support.ClassPathXmlApplicationContext
 

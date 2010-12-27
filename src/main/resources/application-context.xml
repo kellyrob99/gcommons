@@ -5,6 +5,7 @@
        xsi:schemaLocation = "http://www.springframework.org/schema/beans   http://www.springframework.org/schema/beans/spring-beans.xsd">
 
 
-    <bean class="com.goldin.gcommons.impl.General"/>
+    <bean class="com.goldin.gcommons.General"/>
+    <bean class="com.goldin.gcommons.Verify"/>
 
 </beans>

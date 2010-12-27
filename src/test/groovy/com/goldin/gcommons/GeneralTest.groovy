@@ -1,23 +1,12 @@
 package com.goldin.gcommons
 
-import com.goldin.gcommons.api.General
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.test.context.ContextConfiguration
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
-
 
 /**
- * {@link GCommons} tests
+ * {@link General} tests
  */
-@RunWith( SpringJUnit4ClassRunner.class )
-@ContextConfiguration( "/test-application-context.xml" )
-class GeneralTest
+class GeneralTest extends BaseTest
 {
-    @Autowired
-    General general
-
     @Test
     void shouldPack()
     {
