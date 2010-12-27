@@ -1,6 +1,8 @@
 apply plugin: 'groovy'
 apply plugin: 'maven'
 
+defaultTasks 'clean', 'install'
+
 sourceCompatibility = 1.6
 group               = 'com.goldin'
 version             = '0.1-SNAPSHOT'
@@ -13,8 +15,6 @@ junitVersion        = '4.8.2'
 repositories {
     mavenRepo urls: 'http://evgeny-goldin.org/artifactory/repo/'
 }
-
-defaultTasks 'clean', 'build'
 
 dependencies {
     groovy      "org.codehaus.groovy:groovy-all:$groovyVersion"
