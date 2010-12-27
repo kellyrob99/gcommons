@@ -1,0 +1,20 @@
+apply plugin: 'groovy'
+
+repositories { mavenCentral() }
+
+defaultTasks 'clean', 'build'
+
+def groovyVersion = '1.8.0-beta-3'
+def springVersion = '3.0.5.RELEASE'
+def junitVersion  = '4.8.2'
+
+
+dependencies {
+    groovy      "org.codehaus.groovy:groovy-all:$groovyVersion"
+    compile     "org.springframework:spring-context:$springVersion"
+    testCompile "org.springframework:spring-test:$springVersion"
+    testCompile "junit:junit:$junitVersion"
+}
+
+sourceCompatibility = 1.6
+version             = '0.1'
