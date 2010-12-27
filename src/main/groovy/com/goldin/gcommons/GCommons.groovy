@@ -3,14 +3,20 @@ package com.goldin.gcommons
 import org.springframework.context.ApplicationContext
 import org.springframework.context.support.ClassPathXmlApplicationContext
 
-/**
- * com.goldin.gcommons.GCommons entry point
+ /**
+ * "GCommons" entry points
  */
 class GCommons
 {
-    private static final ApplicationContext CONTEXT = new ClassPathXmlApplicationContext( "/application-context.xml" )
+    static ApplicationContext newContext(){ new ClassPathXmlApplicationContext( Constants.CONTEXT_PATH ) }
+    static General            getGeneral(){ CONTEXT.getBean( General.class ) }
+    static Verify             getVerify (){ CONTEXT.getBean( Verify.class  ) }
 
+    private static ApplicationContext CONTEXT = newContext()
+    private static General            GENERAL = getGeneral()
+    private static Verify             VERIFY  = getVerify()
 
-    static ApplicationContext context()  { CONTEXT }
-    static General            general () { context().getBean( General ) }
+    static ApplicationContext context( boolean refresh = false ) { CONTEXT = ( refresh ? newContext() : CONTEXT ) }
+    static General            general( boolean refresh = false ) { GENERAL = ( refresh ? getGeneral() : GENERAL ) }
+    static Verify             verify ( boolean refresh = false ) { VERIFY  = ( refresh ? getVerify()  : VERIFY  ) }
 }
