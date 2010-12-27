@@ -6,6 +6,7 @@ group               = 'com.goldin'
 version             = '0.1-SNAPSHOT'
 
 groovyVersion       = '1.8.0-beta-3'
+antVersion          = '1.8.1'
 springVersion       = '3.0.5.RELEASE'
 junitVersion        = '4.8.2'
 
@@ -16,8 +17,13 @@ repositories {
 defaultTasks 'clean', 'build'
 
 dependencies {
-    /* Groovy */ groovy      "org.codehaus.groovy:groovy-all:$groovyVersion"
-    /* Spring */ compile     "org.springframework:spring-context:$springVersion"
-    /* Logs   */ compile     "org.slf4j:slf4j-api:1.6.1", "ch.qos.logback:logback-classic:0.9.27"
-    /* Tests  */ testCompile "org.springframework:spring-test:$springVersion", "junit:junit:$junitVersion"
+    groovy      "org.codehaus.groovy:groovy-all:$groovyVersion"
+    compile     "org.springframework:spring-context:$springVersion",
+                "org.apache.ant:ant:$antVersion",
+                "org.apache.ant:ant-nodeps:$antVersion",
+                "org.apache.ant:ant-commons-net:$antVersion",
+                "org.slf4j:slf4j-api:1.6.1",
+                "ch.qos.logback:logback-classic:0.9.27"
+    testCompile "org.springframework:spring-test:$springVersion",
+                "junit:junit:$junitVersion"
 }
