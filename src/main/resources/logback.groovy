@@ -21,4 +21,5 @@ appender( "CONSOLE", ConsoleAppender ) {
 }
 
 root( WARN, [ "CONSOLE" ] )
-logger( "com.goldin", INFO, [ "CONSOLE" ] )
+logger( "org.springframework", WARN, [ "CONSOLE" ] )
+logger( "com.goldin",          INFO, [ "CONSOLE" ] )
