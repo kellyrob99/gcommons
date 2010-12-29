@@ -1,6 +1,6 @@
 package com.goldin.gcommons.beans
 
-/**
+ /**
  * File-related helper utilities.
  */
 class FileBean extends BaseBean
@@ -51,18 +51,8 @@ class FileBean extends BaseBean
     {
         for ( f in files )
         {
-            verify.exists( f )
-            if ( f.isDirectory())
-            {
-                f.eachFileRecurse {
-                    if ( ! it.delete())
-                    {
-                        Thread.sleep( 1000 )
-                        assert it.delete()
-                    }
-                }
-            }
-
+            if ( f.isDirectory() && f.listFiles()) { delete( f.listFiles()) }
+            assert ! f.listFiles()
             assert ( f.delete()) && ( ! f.exists())
         }
 
@@ -79,6 +69,9 @@ class FileBean extends BaseBean
      */
     String checksum ( File file, String algorithm = 'SHA-1' )
     {
+        assert file.isFile(), "File [$file] doesn't exist"
+        verify.notNullOrEmpty( algorithm )
+
         File   tempDir      = tempDirectory()
         File   checksumFile = new File( tempDir, "${ file.name }.${ algorithm }" )
 
