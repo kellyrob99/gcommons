@@ -1,9 +1,10 @@
-package com.goldin.gcommons
+package com.goldin.gcommons.beans
 
 import org.junit.Test
+import com.goldin.gcommons.BaseTest
 
 /**
- * {@link com.goldin.gcommons.beans.GeneralBean} tests
+ * {@link com.goldin.gcommons.beans.FileBean} tests
  */
 class FileBeanTest extends BaseTest
 {

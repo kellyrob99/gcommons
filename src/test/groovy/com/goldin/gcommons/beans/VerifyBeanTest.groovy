@@ -1,7 +1,8 @@
-package com.goldin.gcommons
+package com.goldin.gcommons.beans
 
 import org.junit.Test
-
+import com.goldin.gcommons.BaseTest
+import com.goldin.gcommons.Constants
 
 /**
  * {@link com.goldin.gcommons.beans.VerifyBean} tests
