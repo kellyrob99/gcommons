@@ -1,7 +1,7 @@
 apply plugin: 'groovy'
 apply plugin: 'maven'
 
-defaultTasks 'clean', 'build', 'install'
+defaultTasks 'clean', 'test', 'build', 'install'
 
 sourceCompatibility = 1.6
 group               = 'com.goldin'
