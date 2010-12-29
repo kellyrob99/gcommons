@@ -1,12 +1,11 @@
 package com.goldin.gcommons.beans
 
-import com.goldin.gcommons.Base
 import org.springframework.util.AntPathMatcher
 
- /**
+/**
  * General usage methods
  */
-class GeneralBean extends Base
+class GeneralBean extends BaseBean
 {
 
     /**

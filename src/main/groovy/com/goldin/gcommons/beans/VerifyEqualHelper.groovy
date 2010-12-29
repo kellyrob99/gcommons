@@ -1,11 +1,9 @@
 package com.goldin.gcommons.beans
 
-import com.goldin.gcommons.Base
-
 /**
  * {@link VerifyBean#equal(File, File, boolean, String)} helper class
  */
-class VerifyEqualHelper extends Base
+class VerifyEqualHelper extends BaseBean
 {
     /**
      * Set by Spring

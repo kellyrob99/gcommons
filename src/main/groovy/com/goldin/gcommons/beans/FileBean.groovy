@@ -1,12 +1,9 @@
 package com.goldin.gcommons.beans
 
-import com.goldin.gcommons.Base
-
-
 /**
  * File-related helper utilities.
  */
-class FileBean extends Base
+class FileBean extends BaseBean
 {
     /**
      * Verifier, set by Spring
