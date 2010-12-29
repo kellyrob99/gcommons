@@ -7,7 +7,7 @@ import com.goldin.gcommons.Constants
 /**
  * {@link com.goldin.gcommons.beans.VerifyBean#equal(File, File, boolean, String, String)} tests
  */
-class VerifyEqualTest extends BaseTest
+class VerifyBeanEqualTest extends BaseTest
 {
     @Test
     void shouldFailOnNullInput()
