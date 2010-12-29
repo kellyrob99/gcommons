@@ -28,6 +28,8 @@ class GeneralBean extends BaseBean
     {
         verify.notNullOrEmpty( path, pattern )
 
+        ( path, pattern ) = [ path, pattern ]*.replaceAll( /\\+/, AntPathMatcher.DEFAULT_PATH_SEPARATOR )
+
         if ( path.startsWith( AntPathMatcher.DEFAULT_PATH_SEPARATOR ) != pattern.startsWith( AntPathMatcher.DEFAULT_PATH_SEPARATOR ))
         {   /**
              * Otherwise, false is returned

@@ -2,7 +2,7 @@ package com.goldin.gcommons
 
 import org.junit.Test
 
-/**
+ /**
  * {@link com.goldin.gcommons.beans.VerifyBean#equal(File, File, boolean, String, String)} tests
  */
 class VerifyEqualTest extends BaseTest
@@ -135,22 +135,33 @@ class VerifyEqualTest extends BaseTest
         def d1 = fileBean.tempDirectory()
         def d2 = fileBean.tempDirectory()
 
-        new File( d1, 'a.txt' ).write( 'txt'  )
-        new File( d1, 'a.xml' ).write( 'xml'  )
+        new File( d1, 'a.txt' ).write( 'txt'  ) // Same content for 'txt' files
         new File( d2, 'a.txt' ).write( 'txt'  )
+        new File( d1, 'a.xml' ).write( 'xml1' ) // Different content for 'xml' files
         new File( d2, 'a.xml' ).write( 'xml2' )
 
         shouldFailAssert { verifyBean.equal( d1, d2 ) }
-        shouldFailAssert { verifyBean.equal( d1, d2, true, '**/*.*'   ) }
-//        shouldFailAssert { verifyBean.equal( d1, d2, true, '*.*'      ) }
-        shouldFailAssert { verifyBean.equal( d1, d2, true, '**/*.xml' ) }
-        shouldFailAssert { verifyBean.equal( d1, d2, true, '*.xml'    ) }
-        
+        shouldFailAssert { verifyBean.equal( d1, d2, true, '**/*.*'    ) }
+        shouldFailAssert { verifyBean.equal( d1, d2, true, '**/*.xml'  ) }
+        shouldFailAssert { verifyBean.equal( d1, d2, true, '**\\*.xml' ) }
+        shouldFailAssert { verifyBean.equal( d1, d2, true, '**/a.xml'  ) }
+        shouldFailAssert { verifyBean.equal( d1, d2, true, '**\\a.xml' ) }
+        shouldFailAssert { verifyBean.equal( d1, d2, true, '**//a.xml' ) }
+
+        verifyBean.equal( d1, d2, true, '*.*' )
         verifyBean.equal( d1, d2, true, '**/*.txt' )
         verifyBean.equal( d1, d2, true, '*.txt' )
         verifyBean.equal( d1, d2, true, '*.tx*' )
         verifyBean.equal( d1, d2, true, '*.t*t' )
         verifyBean.equal( d1, d2, true, '*.t*' )
+        verifyBean.equal( d1, d2, true, '**/a.txt' )
+        verifyBean.equal( d1, d2, true, '**\\a.txt' )
+        verifyBean.equal( d1, d2, true, '**//a.txt' )
+        verifyBean.equal( d1, d2, true, 'b.xml' )
+        verifyBean.equal( d1, d2, true, '**/b.xml' )
+        verifyBean.equal( d1, d2, true, '**/c.xml' )
+        verifyBean.equal( d1, d2, true, '**//b.xml' )
+        verifyBean.equal( d1, d2, true, '**\\b.xml' )
 
         fileBean.delete( d1, d2 )
         shouldFailAssert { verifyBean.equal( d1, d2 ) }
