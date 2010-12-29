@@ -1,19 +1,19 @@
-package com.goldin.gcommons
+package com.goldin.gcommons.beans
 
-import org.springframework.util.AntPathMatcher
+import com.goldin.gcommons.Base
 
- /**
- * General useage methods
+
+/**
+ * File-related helper utilities.
  */
-class General
+class FileBean extends Base
 {
-
     /**
      * Verifier, set by Spring
      */
-    Verify verify
+    VerifyBean verify
 
-
+    
     File unpack ( File archive, File directory )
     {
         println "unpack"
@@ -30,7 +30,7 @@ class General
 
     File tempFile()
     {
-        File.createTempFile( General.class.name, '' )
+        File.createTempFile( GeneralBean.class.name, '' )
     }
 
 
@@ -44,11 +44,17 @@ class General
         directory
     }
 
-    
+
+    /**
+     * Deletes files or directories specified. Directories are deleted recursively.
+     * @param files files or directories to delete
+     * @return first object specified
+     */
     File delete ( File ... files )
     {
         for ( f in files )
         {
+            verify.exists( f )
             if ( f.isDirectory())
             {
                 f.eachFileRecurse {
@@ -68,29 +74,12 @@ class General
 
 
     /**
-     * {@link org.springframework.util.PathMatcher#match(String, String)} wrapper
-     * @param path    path to match
-     * @param pattern pattern to use, prepended with {@link org.springframework.util.AntPathMatcher#DEFAULT_PATH_SEPARATOR}
-     *                                if path start with {@link org.springframework.util.AntPathMatcher#DEFAULT_PATH_SEPARATOR}
+     * Generates a checksum for the file specified.
      *
-     * @return true if path specified matches the pattern,
-     *         false otherwise
+     * @param file file to generate a checksum for
+     * @param algorithm checksum algorithm, supported by Ant's {@code <checksum>} task.
+     * @return file's checksum
      */
-    boolean match ( String path, String pattern )
-    {
-        verify.notNullOrEmpty( path, pattern )
-
-        if ( path.startsWith( AntPathMatcher.DEFAULT_PATH_SEPARATOR ) != pattern.startsWith( AntPathMatcher.DEFAULT_PATH_SEPARATOR ))
-        {   /**
-             * Otherwise, false is returned
-             */
-            pattern = "${ AntPathMatcher.DEFAULT_PATH_SEPARATOR }${ pattern }"
-        }
-
-        new AntPathMatcher().match( pattern, path )
-    }
-
-
     String checksum ( File file, String algorithm = 'SHA-1' )
     {
         File   tempDir      = tempDirectory()

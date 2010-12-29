@@ -1,15 +1,18 @@
-package com.goldin.gcommons
+package com.goldin.gcommons.beans
 
- /**
- * {@link Verify#equal(File, File, boolean, String)} helper class
+import com.goldin.gcommons.Base
+
+/**
+ * {@link VerifyBean#equal(File, File, boolean, String)} helper class
  */
 class VerifyEqualHelper extends Base
 {
     /**
      * Set by Spring
      */
-    General general
-    
+    GeneralBean general
+    FileBean    file
+
 
     /**
      * Verifies two files specified are equal, considering the pattern and returns 1 or 0
@@ -45,7 +48,7 @@ class VerifyEqualHelper extends Base
 
             if ( verifyChecksum )
             {
-                def ( file1Checksum,  file2Checksum ) = [ file1, file2 ].collect { general.checksum( it, 'SHA-1' ) }
+                def ( file1Checksum,  file2Checksum ) = [ file1, file2 ].collect { file.checksum( it, 'SHA-1' ) }
 
                 assert file1Checksum  == file2Checksum,  \
                        "( [$file1Path] SHA-1 checksum [$file1Checksum] ) != ( [$file2Path] SHA-1 checksum [$file2Checksum] )"

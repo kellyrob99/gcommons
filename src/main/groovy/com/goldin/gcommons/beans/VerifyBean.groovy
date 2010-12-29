@@ -1,15 +1,16 @@
-package com.goldin.gcommons
+package com.goldin.gcommons.beans
 
- /**
+import com.goldin.gcommons.Base
+
+/**
  * Verification methods
  */
-class Verify extends Base
+class VerifyBean extends Base
 {
     /**
      * Set by Spring
      */
     VerifyEqualHelper verifyEqualHelper
-    General           general
 
 
     /**

@@ -1,5 +1,8 @@
 package com.goldin.gcommons
 
+import com.goldin.gcommons.beans.FileBean
+import com.goldin.gcommons.beans.GeneralBean
+import com.goldin.gcommons.beans.VerifyBean
 import java.nio.BufferOverflowException
 import org.junit.Test
 
@@ -8,8 +11,10 @@ import org.junit.Test
  */
 class BaseTest
 {
-    final General general = GCommons.general()
-    final Verify  verify  = GCommons.verify()
+    final VerifyBean  verifyBean  = GCommons.verify()
+    final GeneralBean generalBean = GCommons.general()
+    final FileBean    fileBean    = GCommons.file()
+    
 
     /**
      * Providing a public access to {@link GroovyTestCase#shouldFail(Class, Closure)}
