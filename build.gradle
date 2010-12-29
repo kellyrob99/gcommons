@@ -18,7 +18,8 @@ repositories {
 
 dependencies {
     groovy      "org.codehaus.groovy:groovy-all:$groovyVersion"
-    compile     "org.springframework:spring-context:$springVersion",
+    compile     "org.codehaus.groovy:groovy-all:$groovyVersion",
+                "org.springframework:spring-context:$springVersion",
                 "org.apache.ant:ant:$antVersion",
                 "org.apache.ant:ant-nodeps:$antVersion",
                 "org.apache.ant:ant-commons-net:$antVersion",
