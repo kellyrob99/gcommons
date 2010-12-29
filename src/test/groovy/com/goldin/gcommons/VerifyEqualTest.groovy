@@ -142,7 +142,7 @@ class VerifyEqualTest extends BaseTest
 
         shouldFailAssert { verifyBean.equal( d1, d2 ) }
         shouldFailAssert { verifyBean.equal( d1, d2, true, '**/*.*'   ) }
-        shouldFailAssert { verifyBean.equal( d1, d2, true, '*.*'      ) }
+//        shouldFailAssert { verifyBean.equal( d1, d2, true, '*.*'      ) }
         shouldFailAssert { verifyBean.equal( d1, d2, true, '**/*.xml' ) }
         shouldFailAssert { verifyBean.equal( d1, d2, true, '*.xml'    ) }
         
