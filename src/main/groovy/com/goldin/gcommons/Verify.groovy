@@ -70,8 +70,7 @@ class Verify extends Base
                 String  pattern        = null,
                 String  endOfLine      = null )
     {
-        file1.exists()
-        file2.exists()
+        assert file1.exists() && file2.exists()
 
         ( file1.isFile() && file2.isFile()) ?
             verifyEqualHelper.verifyEqualFiles       ( file1, file2, pattern, verifyChecksum, endOfLine ) :
