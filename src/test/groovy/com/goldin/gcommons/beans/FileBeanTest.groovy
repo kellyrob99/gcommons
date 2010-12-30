@@ -112,7 +112,6 @@ class FileBeanTest extends BaseTest
     {
         def    allFiles = fileBean.files( USER_DIR )
         assert allFiles
-        assert allFiles.size() > 300
         assert allFiles.each{ verifyBean.exists( it ) }
         assert allFiles == fileBean.files( USER_DIR, null, null, true, false )
         assert allFiles != fileBean.files( USER_DIR, null, null, true, true  )
