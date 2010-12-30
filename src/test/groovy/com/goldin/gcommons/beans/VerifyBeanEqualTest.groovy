@@ -123,17 +123,17 @@ class VerifyBeanEqualTest extends BaseTest
     @Test
     void shouldVerifyEqualDirectoriesWithPattern()
     {
-        def buildDir = new File( USER_DIR, 'build' )
-        def srcDir   = new File( USER_DIR, 'src'   )
+        def buildDir = new File( USER_DIR, 'build/classes' )
+        def srcDir   = new File( USER_DIR, 'src/main'      )
 
         verifyBean.equal( buildDir, buildDir, false )
         verifyBean.equal( buildDir, buildDir, false, '**/*.class' )
         verifyBean.equal( buildDir, buildDir, false, '*.class' )
 
         verifyBean.equal( srcDir, srcDir, true )
-        verifyBean.equal( USER_DIR, USER_DIR, false, '*.class'  )
-        verifyBean.equal( USER_DIR, USER_DIR, true,  '*.groovy' )
-        verifyBean.equal( USER_DIR, USER_DIR, true,  '*.xml'    )
+        verifyBean.equal( srcDir, srcDir, false, '*.class'  )
+        verifyBean.equal( srcDir, srcDir, true,  '*.groovy' )
+        verifyBean.equal( srcDir, srcDir, true,  '*.xml'    )
 
         def d1 = fileBean.tempDirectory()
         def d2 = fileBean.tempDirectory()
