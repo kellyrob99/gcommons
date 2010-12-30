@@ -46,5 +46,7 @@ ideaModule.downloadJavadoc = false
  * http://gradle.org/0.9/docs/javadoc/org/gradle/api/tasks/testing/Test.html
  */
 test.enableTestReport()
-test.testReportDir  = new File(( File ) project.buildDir, 'test/reports' )
-test.testResultsDir = new File(( File ) project.buildDir, 'test/results' )
+test.testReportDir    = new File(( File ) project.buildDir, 'test/reports' )
+test.testResultsDir   = new File(( File ) project.buildDir, 'test/results' )
+test.systemProperties = System.properties.containsKey( 'slowTests' ) ? [ slowTests : 'true' ] : [:]
+test.setDebug( System.properties.containsKey( 'debug' ))
