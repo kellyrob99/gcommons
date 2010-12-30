@@ -1,8 +1,9 @@
 package com.goldin.gcommons.beans
 
-import org.apache.tools.ant.DirectoryScanner
-import groovy.io.FileType
 import com.goldin.gcommons.SingleFileArchiveDetector
+import groovy.io.FileType
+import java.security.MessageDigest
+import org.apache.tools.ant.DirectoryScanner
 
 /**
  * File-related helper utilities.
@@ -72,22 +73,19 @@ class FileBean extends BaseBean
      */
     String checksum ( File file, String algorithm = 'SHA-1' )
     {
-        assert file.isFile(), "File [$file] doesn't exist"
-        verify.notNullOrEmpty( algorithm )
+        verify.file( file )
 
-        File   tempDir      = tempDirectory()
-        File   checksumFile = new File( tempDir, "${ file.name }.${ algorithm }" )
+        StringBuilder checksum = new StringBuilder()
+        MessageDigest md       = MessageDigest.getInstance( verify.notNullOrEmpty( algorithm ))
+        file.eachByte( 10 * 1024 ) { byte[] buffer, int n -> md.update( buffer, 0, n ) }
 
-        assert ( ! checksumFile.isFile()) || ( checksumFile.delete())
+        for ( byte b in md.digest())
+        {
+            String hex = Integer.toHexString(( 0xFF & b ) as int )
+            checksum.append( "${( hex.length() < 2 ) ? '0' : '' }$hex" )
+        }
 
-        new AntBuilder().checksum( file      : file.absolutePath,
-                                   algorithm : algorithm,
-                                   todir     : tempDir )
-
-        def checksum = verify.file( checksumFile ).text.trim()
-        delete( tempDir )
-        
-        checksum
+        verify.notNullOrEmpty( checksum.toString())
     }
 
 
