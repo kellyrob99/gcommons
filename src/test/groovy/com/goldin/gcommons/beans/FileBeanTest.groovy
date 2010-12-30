@@ -1,9 +1,11 @@
 package com.goldin.gcommons.beans
 
-import org.junit.Test
 import com.goldin.gcommons.BaseTest
+import org.junit.Test
+import static com.goldin.gcommons.Constants.*
 
-/**
+
+ /**
  * {@link com.goldin.gcommons.beans.FileBean} tests
  */
 class FileBeanTest extends BaseTest
@@ -108,4 +110,38 @@ class FileBeanTest extends BaseTest
 
         fileBean.delete( dir )
     }
+
+
+    @Test
+    void testFiles()
+    {
+        def    allFiles = fileBean.files( USER_DIR )
+        assert allFiles
+        assert allFiles.size() > 300
+        assert allFiles.each{ verifyBean.exists( it ) }
+        assert allFiles == fileBean.files( USER_DIR, null, null, true, false )
+        assert allFiles != fileBean.files( USER_DIR, null, null, true, true  )
+
+        def buildDir   = new File( USER_DIR, 'build' )
+        def classFiles = fileBean.files( buildDir, ['**/*.class'] )
+        def sources    = fileBean.files( USER_DIR, ['**/*.groovy'] )
+        assert classFiles.every{ it.name.endsWith( '.class'  ) }
+        assert sources.every{    it.name.endsWith( '.groovy' ) }
+        verifyBean.file( classFiles as File[] )
+        verifyBean.file( sources    as File[] )
+        assert classFiles.size() > sources.size()
+
+        shouldFailAssert { fileBean.files( buildDir, ['**/*.ppt'] )}
+        assert fileBean.files( buildDir, ['**/*.ppt'], null, true, false, false ).isEmpty()
+
+        allFiles = fileBean.files( USER_DIR, ['**/*.groovy','**/*.class'], ['**/*Test*.*'] )
+        assert ! allFiles.any { it.name.contains( 'Test' ) }
+        assert allFiles.every { it.name.endsWith( '.groovy' ) || it.name.endsWith( '.class' ) }
+
+        allFiles.findAll{ it.name.endsWith( '.groovy') }.each {
+            File groovyFile ->
+            assert allFiles.findAll { it.name == groovyFile.name.replace( '.groovy', '.class' ) }.size() < 3 //  1 or 2, Compiled by Gradle or IDEA
+        }
+    }
+
 }

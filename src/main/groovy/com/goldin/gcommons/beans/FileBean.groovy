@@ -87,10 +87,12 @@ class FileBean extends BaseBean
 
     /**
      * Retrieves files (and directories, if required) given base directory and inclusion/exclusion patterns.
+     * Symbolic links are not followed.
      *
      * @param baseDirectory      files base directory
      * @param includes           patterns to use for including files, all files are included if null
      * @param excludes           patterns to use for excluding files, no files are excluded if null
+     * @param caseSensitive      whether or not include and exclude patterns are matched in a case sensitive way
      * @param includeDirectories whether directories included should be returned as well
      * @param failIfNotFound     whether execution should fail if no files were found
      *
@@ -99,7 +101,8 @@ class FileBean extends BaseBean
     List<File> files ( File         baseDirectory,
                        List<String> includes           = null,
                        List<String> excludes           = null,
-                       boolean      includeDirectories = true,
+                       boolean      caseSensitive      = true,
+                       boolean      includeDirectories = false,
                        boolean      failIfNotFound     = true )
     {
         verify.directory( baseDirectory )
@@ -110,6 +113,10 @@ class FileBean extends BaseBean
         ds.setBasedir( baseDirectory )
         ds.setIncludes( includes as String[] )
         ds.setExcludes( excludes as String[] )
+        ds.setCaseSensitive( caseSensitive )
+        ds.setErrorOnMissingDir( true )
+        ds.setFollowSymlinks( false )
+        ds.scan()
 
         for ( String filePath in ds.getIncludedFiles())
         {
@@ -135,18 +142,20 @@ class FileBean extends BaseBean
 
 
     /**
-     * Archives directory to archive specified.
+     * Archives directory to archive specified. Empty directories are not archived!
      *  
      * @param sourceDirectory    directory to archive
      * @param destinationArchive archive to pack the directory to
      * @param includes           patterns to use for including files, all files are included if null
      * @param excludes           patterns to use for excluding files, no files are excluded if null
+     * @param caseSensitive      whether or not include and exclude patterns are matched in a case sensitive way
      * @param failIfNotFound     whether execution should fail if no files were found
      */
     void pack ( File         sourceDirectory,
                 File         destinationArchive,
                 List<String> includes       = null,
                 List<String> excludes       = null,
+                boolean      caseSensitive  = true,
                 boolean      failIfNotFound = true )
     {
         verify.directory( sourceDirectory )
@@ -169,7 +178,7 @@ class FileBean extends BaseBean
 
         final long time = System.currentTimeMillis();
 
-        for ( File file in files( sourceDirectory, includes, excludes, false, failIfNotFound ))
+        for ( File file in files( sourceDirectory, includes, excludes, caseSensitive, false, failIfNotFound ))
         {
             String relativePath = verify.notNullOrEmpty( file.canonicalPath.substring( sourceDirectory.canonicalPath.length()))
             assert ( relativePath.startsWith( '/' ) || relativePath.startsWith( '\\' ))

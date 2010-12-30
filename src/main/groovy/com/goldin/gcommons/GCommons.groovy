@@ -5,13 +5,14 @@ import com.goldin.gcommons.beans.GeneralBean
 import com.goldin.gcommons.beans.VerifyBean
 import org.springframework.context.ApplicationContext
 import org.springframework.context.support.ClassPathXmlApplicationContext
+import static com.goldin.gcommons.Constants.*
 
  /**
  * "GCommons" entry points
  */
 class GCommons
 {
-    static ApplicationContext newContext(){ new ClassPathXmlApplicationContext( Constants.CONTEXT_PATH ) }
+    static ApplicationContext newContext(){ new ClassPathXmlApplicationContext( CONTEXT_PATH ) }
     static VerifyBean         getVerify (){ CONTEXT.getBean( VerifyBean.class  ) }
     static GeneralBean        getGeneral(){ CONTEXT.getBean( GeneralBean.class ) }
     static FileBean           getFile   (){ CONTEXT.getBean( FileBean.class    ) }
