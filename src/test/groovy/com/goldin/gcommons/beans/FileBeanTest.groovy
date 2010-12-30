@@ -139,17 +139,82 @@ class FileBeanTest extends BaseTest
     }
 
 
+    /**
+     * Mapping of test archives and their sizes in bytes when unpacked
+     */
+    private static final Map ARCHIVES = [ 'apache-maven-3.0.1' : 3344327,
+                                          'gradle-0.9'         : 56052739 ]
+
     @Test
-    void shouldPackAndUnpack()
+    void shouldUnpack()
     {
-        def zipDir   = new File( 'build/tests/zip'    )
-        def tarGzDir = new File( 'build/tests/tar-gz' )
+        def resourcesDir = new File( 'src/test/resources' )
 
-        fileBean.unpack( new File( 'src/test/resources/apache-maven-3.0.1.zip' ),    zipDir   )
-        fileBean.unpack( new File( 'src/test/resources/apache-maven-3.0.1.tar.gz' ), tarGzDir )
+        for ( archiveName in ARCHIVES.keySet())
+        {
+            def tarDir       = testDir( 'tar'   )
+            def tgzDir       = testDir( 'tgz'   )
+            def zipDir       = testDir( 'zip'   )
+            def tarGzDir     = testDir( 'targz' )
 
-        verifyBean.equal( zipDir, tarGzDir )
-        assert fileBean.directorySize( zipDir )           == 3344327
-        assert fileBean.directorySize( zipDir, tarGzDir ) == 3344327 * 2
+            fileBean.unpack( new File( resourcesDir, "${archiveName}.tar" ),    tarDir   )
+            fileBean.unpack( new File( resourcesDir, "${archiveName}.tgz" ),    tgzDir   )
+            fileBean.unpack( new File( resourcesDir, "${archiveName}.zip" ),    zipDir   )
+            fileBean.unpack( new File( resourcesDir, "${archiveName}.tar.gz" ), tarGzDir )
+
+            verifyBean.equal( tarDir,   tgzDir )
+            verifyBean.equal( tgzDir,   zipDir )
+            verifyBean.equal( zipDir,   tarGzDir )
+            verifyBean.equal( tarGzDir, tarDir )
+
+            assert fileBean.directorySize( tarDir )                          == ARCHIVES[ archiveName ]
+            assert fileBean.directorySize( tgzDir )                          == ARCHIVES[ archiveName ]
+            assert fileBean.directorySize( zipDir )                          == ARCHIVES[ archiveName ]
+            assert fileBean.directorySize( tarGzDir )                        == ARCHIVES[ archiveName ]
+            assert fileBean.directorySize( tarDir,tgzDir, zipDir, tarGzDir ) == ARCHIVES[ archiveName ] * 4
+        }
+    }
+
+
+    @Test
+    void shouldPack()
+    {
+        def resourcesDir = new File( 'src/test/resources' )
+
+        for ( archiveName in ARCHIVES.keySet())
+        {
+            def unpackDir    = testDir( 'unpack' )
+            def packDir      = testDir( 'pack' )
+            def tarDir       = testDir( 'tar'   )
+            def tgzDir       = testDir( 'tgz'   )
+            def zipDir       = testDir( 'zip'   )
+            def tarGzDir     = testDir( 'targz' )
+
+            fileBean.unpack( new File( resourcesDir, "${archiveName}.tar.gz" ), unpackDir )
+
+            fileBean.pack( unpackDir, new File( packDir, "${archiveName}.tar"    ))
+            fileBean.pack( unpackDir, new File( packDir, "${archiveName}.tgz"    ))
+            fileBean.pack( unpackDir, new File( packDir, "${archiveName}.zip"    ))
+            fileBean.pack( unpackDir, new File( packDir, "${archiveName}.tar.gz" ))
+
+            fileBean.unpack( new File( packDir, "${archiveName}.tar" ),    tarDir   )
+            fileBean.unpack( new File( packDir, "${archiveName}.tgz" ),    tgzDir   )
+            fileBean.unpack( new File( packDir, "${archiveName}.zip" ),    zipDir   )
+            fileBean.unpack( new File( packDir, "${archiveName}.tar.gz" ), tarGzDir )
+
+            verifyBean.equal( unpackDir, tarDir )
+            verifyBean.equal( tarDir,    tgzDir )
+            verifyBean.equal( tgzDir,    zipDir )
+            verifyBean.equal( zipDir,    tarGzDir )
+            verifyBean.equal( tarGzDir,  tarDir )
+            verifyBean.equal( tarDir,    unpackDir )
+
+            assert fileBean.directorySize( unpackDir )                                   == ARCHIVES[ archiveName ]
+            assert fileBean.directorySize( tarDir )                                      == ARCHIVES[ archiveName ]
+            assert fileBean.directorySize( tgzDir )                                      == ARCHIVES[ archiveName ]
+            assert fileBean.directorySize( zipDir )                                      == ARCHIVES[ archiveName ]
+            assert fileBean.directorySize( tarGzDir )                                    == ARCHIVES[ archiveName ]
+            assert fileBean.directorySize( unpackDir, tarDir, tgzDir, zipDir, tarGzDir ) == ARCHIVES[ archiveName ] * 5
+        }
     }
 }

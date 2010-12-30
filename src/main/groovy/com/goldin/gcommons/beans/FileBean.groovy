@@ -50,9 +50,12 @@ class FileBean extends BaseBean
     {
         for ( f in files )
         {
-            if ( f.isDirectory() && f.listFiles()) { delete( f.listFiles()) }
-            assert ! f.listFiles()
-            assert ( f.delete()) && ( ! f.exists())
+            if ( f.exists())
+            {
+                if ( f.isDirectory() && f.listFiles()) { delete( f.listFiles()) }
+                assert ! f.listFiles()
+                assert f.delete() && ( ! f.exists())
+            }
         }
 
         first( files )
@@ -181,7 +184,7 @@ class FileBean extends BaseBean
             /**
              * https://truezip.dev.java.net/manual-6.html
              */
-            de.schlichtherle.io.File.cp_p( file, new de.schlichtherle.io.File( destinationArchive + relativePath ))
+            de.schlichtherle.io.File.cp_p( file, new de.schlichtherle.io.File( destinationArchive.canonicalPath + relativePath ))
         }
 
         de.schlichtherle.io.File.umount()

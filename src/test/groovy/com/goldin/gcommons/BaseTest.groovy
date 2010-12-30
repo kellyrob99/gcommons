@@ -6,7 +6,7 @@ import com.goldin.gcommons.beans.VerifyBean
 import java.nio.BufferOverflowException
 import org.junit.Test
 
-/**
+ /**
  * Base class for the tests
  */
 class BaseTest
@@ -35,7 +35,19 @@ class BaseTest
     String shouldFailWith( Class cl, Closure c ) { new MyGroovyTestCase().shouldFail( cl, c ) }
     String shouldFailAssert ( Closure c )        { new MyGroovyTestCase().shouldFail( AssertionError.class, c ) }
 
-    
+
+    /**
+     * Retrieves test dir to be used for temporal output 
+     * @param dirName test directory name
+     * @return test directory to use
+     */
+    File testDir( String dirName = System.currentTimeMillis() as String )
+    {
+        def caller = ( StackTraceElement ) new Throwable().stackTrace.findAll { it.className.startsWith( 'com.goldin' ) }[ 2 ]
+        fileBean.delete( new File( "build/tests/${ this.class.name }/${ caller.methodName }/$dirName" ))
+    }
+
+
     /**
      * Verifies {@link #shouldFailWith} behavior 
      */
