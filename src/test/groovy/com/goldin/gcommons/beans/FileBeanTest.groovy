@@ -151,8 +151,5 @@ class FileBeanTest extends BaseTest
     void shouldUnpackArchives()
     {
         fileBean.unpack( new File( 'src/test/resources/apache-maven-3.0.1.zip'    ), new File( 'build/tests/zip'   ))
-        fileBean.unpack( new File( 'src/test/resources/apache-maven-3.0.1.tar.gz' ), new File( 'build/tests/targz' ))
-        int j = 5
     }
-
 }
