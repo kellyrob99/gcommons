@@ -2,6 +2,7 @@ package com.goldin.gcommons.beans
 
 import org.apache.tools.ant.DirectoryScanner
 import groovy.io.FileType
+import com.goldin.gcommons.SingleFileArchiveDetector
 
 /**
  * File-related helper utilities.
@@ -173,7 +174,10 @@ class FileBean extends BaseBean
         assert ( archiveDir != null ), "Destination archive [$archiveDir] has no parent folder"
         assert ( archiveDir.isDirectory() || archiveDir.mkdirs())
 
-        getLog( this ).info( "Packing [${ sourceDirectory.canonicalPath } ($includes/$excludes)] to [${ destinationArchive.canonicalPath }]" )
+        def patterns = "${ includes ?: '' }/${ excludes ?: '' }"
+        patterns     = (( patterns == '/' ) ? '' : " ($patterns)" )
+
+        getLog( this ).info( "Packing [${ sourceDirectory.canonicalPath }$patterns] to [${ destinationArchive.canonicalPath }]" )
         final long time = System.currentTimeMillis()
 
         for ( File file in files( sourceDirectory, includes, excludes, caseSensitive, false, failIfNotFound ))
@@ -189,7 +193,7 @@ class FileBean extends BaseBean
 
         de.schlichtherle.io.File.umount()
         verify.notEmptyFile( destinationArchive )
-        getLog( this ).info( "[$sourceDirectory ($includes/$excludes)] packed to [${ destinationArchive.canonicalPath }] " +
+        getLog( this ).info( "[$sourceDirectory$patterns] packed to [${ destinationArchive.canonicalPath }] " +
                              "(${( System.currentTimeMillis() - time ).intdiv( 1000 )} sec)" )
 
         destinationArchive
@@ -218,8 +222,8 @@ class FileBean extends BaseBean
         /**
          * https://truezip.dev.java.net/manual-6.html
          */
-        assert new de.schlichtherle.io.File( sourceArchive ).
-               archiveCopyAllTo( destinationDirectory, new de.schlichtherle.io.DefaultArchiveDetector( extension( sourceArchive )))
+        def detector = new SingleFileArchiveDetector( sourceArchive, extension( sourceArchive ))
+        assert new de.schlichtherle.io.File( sourceArchive, detector ).archiveCopyAllTo( destinationDirectory )
         de.schlichtherle.io.File.umount()
 
         verify.directory( destinationDirectory )
