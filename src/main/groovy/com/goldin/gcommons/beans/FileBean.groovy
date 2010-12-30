@@ -207,7 +207,7 @@ class FileBean extends BaseBean
         verify.notEmptyFile( sourceArchive )
         if ( destinationDirectory.exists()) { delete( destinationDirectory ) }
 
-        assert ! destinationDirectory.exists()
+        mkdirs( destinationDirectory )
 
         getLog( this ).info( "Unpacking [${ sourceArchive.canonicalPath }] to [${ destinationDirectory.canonicalPath }]" )
         final long time = System.currentTimeMillis()
