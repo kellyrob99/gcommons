@@ -1,5 +1,6 @@
 apply plugin: 'groovy'
 apply plugin: 'maven'
+apply plugin: 'idea'
 
 defaultTasks 'clean', 'build', 'install'
 
@@ -12,6 +13,7 @@ antVersion          = '1.8.1'
 springVersion       = '3.0.5.RELEASE'
 junitVersion        = '4.8.2'
 
+
 repositories {
     mavenRepo urls: 'http://evgeny-goldin.org/artifactory/repo/'
 }
@@ -20,16 +22,29 @@ dependencies {
     groovy      "org.codehaus.groovy:groovy-all:$groovyVersion"
     compile     "org.codehaus.groovy:groovy-all:$groovyVersion",
                 "org.springframework:spring-context:$springVersion",
+                "de.schlichtherle:truezip:6.8.1",
                 "org.apache.ant:ant:$antVersion",
                 "org.apache.ant:ant-nodeps:$antVersion",
                 "org.apache.ant:ant-commons-net:$antVersion",
                 "org.slf4j:slf4j-api:1.6.1",
-                "ch.qos.logback:logback-classic:0.9.27"
+                "ch.qos.logback:logback-classic:0.9.27"               
     testCompile "org.springframework:spring-test:$springVersion",
                 "junit:junit:$junitVersion"
 }
 
 
+/**
+ * http://gradle.org/0.9/docs/userguide/idea_plugin.html
+ */
+ideaProject.javaVersion    = '1.6.0_23'
+ideaModule.downloadSources = true
+ideaModule.downloadJavadoc = true
+
+
+/**
+ * http://gradle.org/0.9/docs/dsl/org.gradle.api.tasks.testing.Test.html
+ * http://gradle.org/0.9/docs/javadoc/org/gradle/api/tasks/testing/Test.html
+ */
 test.enableTestReport()
 test.testReportDir  = new File(( File ) project.buildDir, 'test/reports' )
 test.testResultsDir = new File(( File ) project.buildDir, 'test/results' )

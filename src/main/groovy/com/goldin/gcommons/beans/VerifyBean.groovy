@@ -10,40 +10,80 @@ class VerifyBean extends BaseBean
      */
     VerifyEqualHelper verifyEqualHelper
 
+    
+    /**
+     * Verifies all objects specified are nulls
+     * @param objects objects to check
+     */
+    void isNull( Object ... objects )
+    {
+        for ( o in objects )
+        {
+            assert ( o == null ), "Object specified [$o] is *not* null"
+        }
+    }
 
     /**
-     * Verifies that file specified exists.
-     * @param f file to check
-     * @return  file checked
+     * Verifies objects specified are not null
+     * @param objects objects to check
+     * @return first object checked
      */
-    File exists ( File f )
+    public <T> T notNull( T ... objects )
     {
-        assert f.exists(), "[$f] doesn't exist"
-        f
+        for ( o in objects )
+        {
+            assert ( o != null ), "Object specified [$o] *is* null"
+        }
+
+        first( objects )
     }
 
 
     /**
-     * Verifies that file specified is existing file.
-     * @param f file to check
-     * @return  file checked
+     * Verifies that files specified exist.
+     * @param files files to check
+     * @return  first file checked
      */
-    File file ( File f )
+    File exists ( File ... files )
     {
-        assert f.isFile(), "[$f] is not a file"
-        f
+        for ( file in files )
+        {
+            assert file.exists(), "File specified [$file] *does not* exist"
+        }
+
+        first( files )
+    }
+
+
+    /**
+     * Verifies that files specified are existing files.
+     * @param files files to check
+     * @return  first file checked
+     */
+    File file ( File ... files )
+    {
+        for ( file in files )
+        {
+            assert file.isFile(), "File specified [$file] is *not* an existing file"
+        }
+
+        first( files )
     }
 
     
     /**
-     * Verifies that file specified is existing directory.
-     * @param f directory to check
-     * @return  directory checked
+     * Verifies that directories specified are existing directories.
+     * @param directories directories to check
+     * @return  first directory checked
      */
-    File directory ( File f )
+    File directory ( File ... directories )
     {
-        assert f.isDirectory(), "[$f] is not a directory"
-        f
+        for ( directory in directories )
+        {
+            assert directory.isDirectory(), "Directory specified [$directory] is *not* an existing directory"
+        }
+
+        first( directories )
     }
 
     
@@ -77,6 +117,11 @@ class VerifyBean extends BaseBean
     }
 
 
+    /**
+     * Verifies that Springs specified are not null or empty.
+     * @param strings strings to check
+     * @return first string checked
+     */
     String notNullOrEmpty( String ... strings )
     {
         assert ( strings != null )
@@ -85,7 +130,7 @@ class VerifyBean extends BaseBean
         {
             assert s?.trim()?.length(), "String specified [$s] *is* null or empty"
         }
-        
-        strings[ 0 ]
+
+        first( strings )
     }
 }
