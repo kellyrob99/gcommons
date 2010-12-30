@@ -164,23 +164,14 @@ class FileBean extends BaseBean
                 boolean      failIfNotFound = true )
     {
         verify.directory( sourceDirectory )
-        verify.notNull( destinationArchive )
+        if ( destinationArchive.exists()){ delete( destinationArchive ) }
 
-        String sourceDirectoryPath    = sourceDirectory.canonicalPath
-        String destinationArchivePath = destinationArchive.canonicalPath
-
-        if ( destinationArchive.isFile())
-        {
-            delete( destinationArchive )
-        }
-
+        assert ! destinationArchive.exists()
         File archiveDir = destinationArchive.getParentFile()
         assert ( archiveDir != null ), "Destination archive [$archiveDir] has no parent folder"
-
         assert ( archiveDir.isDirectory() || archiveDir.mkdirs())
 
-        getLog( this ).info( "Packing [$sourceDirectoryPath ($includes/$excludes)] to [$destinationArchivePath]" )
-
+        getLog( this ).info( "Packing [${ sourceDirectory.canonicalPath } ($includes/$excludes)] to [${ destinationArchive.canonicalPath }]" )
         final long time = System.currentTimeMillis()
 
         for ( File file in files( sourceDirectory, includes, excludes, caseSensitive, false, failIfNotFound ))
@@ -188,22 +179,24 @@ class FileBean extends BaseBean
             String relativePath = verify.notNullOrEmpty( file.canonicalPath.substring( sourceDirectory.canonicalPath.length()))
             assert ( relativePath.startsWith( '/' ) || relativePath.startsWith( '\\' ))
 
-            String destinationPath = ( destinationArchive + relativePath )
-            de.schlichtherle.io.File.cp_p( file, new de.schlichtherle.io.File( destinationPath ))
+            /**
+             * https://truezip.dev.java.net/manual-6.html
+             */
+            de.schlichtherle.io.File.cp_p( file, new de.schlichtherle.io.File( destinationArchive + relativePath ))
         }
 
         de.schlichtherle.io.File.umount()
-        verify.file( destinationArchive )
-
-        int timeInSec = ( System.currentTimeMillis() - time ).intdiv( 1000 )
-        getLog( this ).info( "[$sourceDirectory ($includes/$excludes)] packed to [$destinationArchivePath] ($timeInSec sec)" )
+        verify.notEmptyFile( destinationArchive )
+        getLog( this ).info( "[$sourceDirectory ($includes/$excludes)] packed to [${ destinationArchive.canonicalPath }] " +
+                             "(${( System.currentTimeMillis() - time ).intdiv( 1000 )} sec)" )
 
         destinationArchive
     }
 
 
     /**
-     * Unpacks an archive file to the directory specified
+     * Unpacks an archive file to the directory specified.
+     * Note: target directory is deleted before operation starts!
      *
      * @param sourceArchive        archive file to unpack
      * @param destinationDirectory directory to unpack the file to
@@ -212,49 +205,33 @@ class FileBean extends BaseBean
      */
     File unpack ( File sourceArchive, File destinationDirectory )
     {
-        verify.file( sourceArchive )
-        assert sourceArchive.size() > 0, "Archive [$sourceArchive] is empty"
-        assert ( destinationDirectory.isDirectory() || destinationDirectory.mkdirs())
+        verify.notEmptyFile( sourceArchive )
+        if ( destinationDirectory.exists()) { delete( destinationDirectory ) }
 
-        String sourceArchivePath        = sourceArchive.canonicalPath
-        String destinationDirectoryPath = destinationDirectory.canonicalPath
+        assert ! destinationDirectory.exists()
 
-        getLog( this ).info( "Unpacking [$sourceArchivePath] to [$destinationDirectoryPath]" )
+        getLog( this ).info( "Unpacking [${ sourceArchive.canonicalPath }] to [${ destinationDirectory.canonicalPath }]" )
         final long time = System.currentTimeMillis()
 
-        def dotIndex         = sourceArchivePath.lastIndexOf( '.' )
-        def archiveExtension = ( dotIndex > 0 ) ? sourceArchivePath.substring( dotIndex + 1 ).toLowerCase() : null
-
-        if ( [ 'zip', 'jar', 'war', 'ear' ].contains( archiveExtension ))
+        if ( [ 'zip', 'jar', 'war', 'ear' ].contains( extension( sourceArchive )))
         {
             /**
-             * Using Ant's "unzip" implementation - TrueZip modifies some files when unpacking them :(
+             * We do it ourselves for simple cases, TrueZip modifies some files when unpacking them :(
              * Try packing and unpacking "apache-maven-3.0.1" - you'll get folders of different size, some *.jar
              * files are slightly smaller than their original versions, though they all unpack Ok.
              */
-            ZipFile     zipFile = new ZipFile( sourceArchive )
-            Enumeration entries = zipFile.getEntries()
 
-            while( entries.hasMoreElements())
+            ZipFile zipFile = new ZipFile( sourceArchive )
+            for ( ZipEntry entry in zipFile.entries )
             {
-                ZipEntry entry    = ( ZipEntry ) entries.nextElement()
-                File     destFile = new File( destinationDirectory, entry.getName())
+                def isDirectory = entry.name.endsWith( '/' )
+                def destFile    = new File( destinationDirectory, entry.name )
 
-                if ( entry.getName().endsWith( '/' ))
+                mkdirs( isDirectory ? destFile : destFile.getParentFile())
+
+                if ( ! isDirectory )
                 {
-                    assert ( destFile.isDirectory() || destFile.mkdirs())
-                }
-                else
-                {
-                    assert ( destFile.getParentFile().isDirectory() || destFile.getParentFile().mkdirs())
-
-                    OutputStream os          = new FileOutputStream( destFile )
-                    long         bytesCopied = io.copy( zipFile.getInputStream( entry ), os )
-
-                    io.close( os )
-
-                    assert ( bytesCopied == entry.getSize()), \
-                           "[$sourceArchivePath]/[$entry.name]: size is [$entry.size] but [$bytesCopied] bytes copied"
+                    io.copy( zipFile.getInputStream( entry ), new FileOutputStream( destFile ), entry.size )
                 }
             }
 
@@ -262,14 +239,47 @@ class FileBean extends BaseBean
         }
         else
         {
-            de.schlichtherle.io.File.cp_p( sourceArchive, destinationDirectory )
+            /**
+             * https://truezip.dev.java.net/manual-6.html
+             */
+            assert new de.schlichtherle.io.File( sourceArchive ).archiveCopyAllTo( destinationDirectory )
             de.schlichtherle.io.File.umount()
         }
 
         verify.directory( destinationDirectory )
-        int timeInSec = ( System.currentTimeMillis() - time ).intdiv( 1000 )
-        getLog( this ).info( "[$sourceArchivePath] unpacked to [$destinationDirectoryPath] ($timeInSec sec)" )
-
+        getLog( this ).info( "[${ sourceArchive.canonicalPath }] unpacked to [${ destinationDirectory.canonicalPath }] " +
+                             "(${( System.currentTimeMillis() - time ).intdiv( 1000 )} sec)" )
+        
         destinationDirectory
+    }
+
+
+    /**
+     * {@link File#mkdirs()} wrapper for directories specified.
+     *
+     * @param directories directories to create
+     * @return first directory specified
+     */
+    File mkdirs ( File ... directories )
+    {
+        for ( directory in directories )
+        {
+            assert ( directory.isDirectory() || directory.mkdirs())
+        }
+
+        first( directories )
+    }
+
+
+    /**
+     * Retrieves file's extension.
+     *
+     * @param f file to retrieve its extension
+     * @return file extension or null if it is missing
+     */
+    String extension ( File f )
+    {
+        def dotIndex = f.canonicalPath.lastIndexOf( '.' )
+        ( dotIndex > 0 ) ? f.canonicalPath.substring( dotIndex + 1 ).toLowerCase() : null
     }
 }

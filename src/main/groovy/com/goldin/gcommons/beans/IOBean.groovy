@@ -12,24 +12,35 @@ class IOBean extends BaseBean
     VerifyBean verify
 
 
-    long copy ( InputStream input, OutputStream output )
+    long copy ( InputStream input, OutputStream output, long bytesExpected = -1 )
     {
-        byte[] buffer = new byte[ 1024 ]
-        long   count = 0
-        for ( int n = 0; ( n = input.read( buffer )) != -1; count += n )
+        byte[] buffer         = new byte[ 2 * 1024 ]
+        long   totalBytesRead = 0
+
+        for ( int bytesRead = 0; (( bytesRead = input.read( buffer )) != -1 ); totalBytesRead += bytesRead )
         {
-            output.write( buffer, 0, n )
+            output.write( buffer, 0, bytesRead )
         }
 
-        count
+        close( input, output )
+
+        if ( bytesExpected > -1 )
+        {
+            assert ( totalBytesRead == bytesExpected ), "[$bytesExpected] bytes should be read but [$totalBytesRead] bytes were read"
+        }
+
+        totalBytesRead
     }
 
     
-    Closeable close ( Closeable c )
+    Closeable close ( Closeable ... closeables )
     {
-        try { if ( c!= null ) { c.close() }} 
-        catch ( IOException ignored ) {}
+        for ( c in closeables )
+        {
+            try { if ( c != null ) { c.close() }}
+            catch ( IOException ignored ) {}
+        }
 
-        c
+        first( closeables )
     }
 }

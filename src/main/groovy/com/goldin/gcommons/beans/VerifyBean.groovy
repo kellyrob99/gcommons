@@ -72,6 +72,23 @@ class VerifyBean extends BaseBean
 
     
     /**
+     * Verifies files specified are actual files that are not empty.
+     * @param files file to check
+     * @return first file checked
+     */
+    File notEmptyFile ( File ... files )
+    {
+        for ( file in files )
+        {
+            assert file.isFile(),    "File specified [$file] is *not* an existing file"
+            assert file.size() > 0 , "File specified [$file] *is* empty"
+        }
+
+        first( files )
+    }
+
+    
+    /**
      * Verifies that directories specified are existing directories.
      * @param directories directories to check
      * @return  first directory checked
