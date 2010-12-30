@@ -172,7 +172,9 @@
           <root url="jar://$USER_HOME$/.gradle/cache/org.apache.ant/ant/jars/ant-1.8.1.jar!/" />
         </CLASSES>
         <JAVADOC />
-        <SOURCES />
+        <SOURCES>
+          <root url="file://D:/Winny/java/src/apache-ant-1.8.1" />
+        </SOURCES>
       </library>
     </orderEntry>
     <orderEntry type="module-library" exported="">
