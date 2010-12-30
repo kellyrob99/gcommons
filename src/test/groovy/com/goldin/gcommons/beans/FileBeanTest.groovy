@@ -10,11 +10,6 @@ import static com.goldin.gcommons.Constants.*
  */
 class FileBeanTest extends BaseTest
 {
-    @Test
-    void shouldPack()
-    {
-    }
-
 
     private static File writeFile( File f, String content = null )
     {
@@ -142,6 +137,22 @@ class FileBeanTest extends BaseTest
             File groovyFile ->
             assert allFiles.findAll { it.name == groovyFile.name.replace( '.groovy', '.class' ) }.size() < 3 //  1 or 2, Compiled by Gradle or IDEA
         }
+    }
+
+
+    @Test
+    void shouldPackArchives()
+    {
+
+    }
+
+
+    @Test
+    void shouldUnpackArchives()
+    {
+        fileBean.unpack( new File( 'src/test/resources/apache-maven-3.0.1.zip'    ), new File( 'build/tests/zip'   ))
+        fileBean.unpack( new File( 'src/test/resources/apache-maven-3.0.1.tar.gz' ), new File( 'build/tests/targz' ))
+        int j = 5
     }
 
 }

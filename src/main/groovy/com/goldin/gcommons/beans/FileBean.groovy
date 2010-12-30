@@ -1,16 +1,19 @@
 package com.goldin.gcommons.beans
 
 import org.apache.tools.ant.DirectoryScanner
+import org.apache.tools.zip.ZipEntry
+import org.apache.tools.zip.ZipFile
 
- /**
+/**
  * File-related helper utilities.
  */
 class FileBean extends BaseBean
 {
     /**
-     * Verifier, set by Spring
+     * Set by Spring
      */
     VerifyBean verify
+    IOBean     io
 
     
     /**
@@ -150,8 +153,10 @@ class FileBean extends BaseBean
      * @param excludes           patterns to use for excluding files, no files are excluded if null
      * @param caseSensitive      whether or not include and exclude patterns are matched in a case sensitive way
      * @param failIfNotFound     whether execution should fail if no files were found
+     *
+     * @return archive packed
      */
-    void pack ( File         sourceDirectory,
+    File pack ( File         sourceDirectory,
                 File         destinationArchive,
                 List<String> includes       = null,
                 List<String> excludes       = null,
@@ -169,14 +174,14 @@ class FileBean extends BaseBean
             delete( destinationArchive )
         }
 
-        File archiveDir = destinationArchive.getParentFile();
+        File archiveDir = destinationArchive.getParentFile()
         assert ( archiveDir != null ), "Destination archive [$archiveDir] has no parent folder"
 
         assert ( archiveDir.isDirectory() || archiveDir.mkdirs())
 
         getLog( this ).info( "Packing [$sourceDirectoryPath ($includes/$excludes)] to [$destinationArchivePath]" )
 
-        final long time = System.currentTimeMillis();
+        final long time = System.currentTimeMillis()
 
         for ( File file in files( sourceDirectory, includes, excludes, caseSensitive, false, failIfNotFound ))
         {
@@ -192,5 +197,79 @@ class FileBean extends BaseBean
 
         int timeInSec = ( System.currentTimeMillis() - time ).intdiv( 1000 )
         getLog( this ).info( "[$sourceDirectory ($includes/$excludes)] packed to [$destinationArchivePath] ($timeInSec sec)" )
+
+        destinationArchive
+    }
+
+
+    /**
+     * Unpacks an archive file to the directory specified
+     *
+     * @param sourceArchive        archive file to unpack
+     * @param destinationDirectory directory to unpack the file to
+     *
+     * @return destination directory where archive was unpacked
+     */
+    File unpack ( File sourceArchive, File destinationDirectory )
+    {
+        verify.file( sourceArchive )
+        assert sourceArchive.size() > 0, "Archive [$sourceArchive] is empty"
+        assert ( destinationDirectory.isDirectory() || destinationDirectory.mkdirs())
+
+        String sourceArchivePath        = sourceArchive.canonicalPath
+        String destinationDirectoryPath = destinationDirectory.canonicalPath
+
+        getLog( this ).info( "Unpacking [$sourceArchivePath] to [$destinationDirectoryPath]" )
+        final long time = System.currentTimeMillis()
+
+        def dotIndex         = sourceArchivePath.lastIndexOf( '.' )
+        def archiveExtension = ( dotIndex > 0 ) ? sourceArchivePath.substring( dotIndex + 1 ).toLowerCase() : null
+
+        if ( [ 'zip', 'jar', 'war', 'ear' ].contains( archiveExtension ))
+        {
+            /**
+             * Using Ant's "unzip" implementation - TrueZip modifies some files when unpacking them :(
+             * Try packing and unpacking "apache-maven-3.0.1" - you'll get folders of different size, some *.jar
+             * files are slightly smaller than their original versions, though they all unpack Ok.
+             */
+            ZipFile     zipFile = new ZipFile( sourceArchive )
+            Enumeration entries = zipFile.getEntries()
+
+            while( entries.hasMoreElements())
+            {
+                ZipEntry entry    = ( ZipEntry ) entries.nextElement()
+                File     destFile = new File( destinationDirectory, entry.getName())
+
+                if ( entry.getName().endsWith( '/' ))
+                {
+                    assert ( destFile.isDirectory() || destFile.mkdirs())
+                }
+                else
+                {
+                    assert ( destFile.getParentFile().isDirectory() || destFile.getParentFile().mkdirs())
+
+                    OutputStream os          = new FileOutputStream( destFile )
+                    long         bytesCopied = io.copy( zipFile.getInputStream( entry ), os )
+
+                    io.close( os )
+
+                    assert ( bytesCopied == entry.getSize()), \
+                           "[$sourceArchivePath]/[$entry.name]: size is [$entry.size] but [$bytesCopied] bytes copied"
+                }
+            }
+
+            zipFile.close()
+        }
+        else
+        {
+            de.schlichtherle.io.File.cp_p( sourceArchive, destinationDirectory )
+            de.schlichtherle.io.File.umount()
+        }
+
+        verify.directory( destinationDirectory )
+        int timeInSec = ( System.currentTimeMillis() - time ).intdiv( 1000 )
+        getLog( this ).info( "[$sourceArchivePath] unpacked to [$destinationDirectoryPath] ($timeInSec sec)" )
+
+        destinationDirectory
     }
 }

@@ -38,7 +38,7 @@ dependencies {
  */
 ideaProject.javaVersion    = '1.6.0_23'
 ideaModule.downloadSources = true
-ideaModule.downloadJavadoc = true
+ideaModule.downloadJavadoc = false
 
 
 /**

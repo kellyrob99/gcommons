@@ -21,6 +21,10 @@
 
     <bean name                    = "file"
           class                   = "com.goldin.gcommons.beans.FileBean"
+          p:verify-ref            = "verify"
+          p:io-ref                = "io"/>
+
+    <bean name                    = "io"
+          class                   = "com.goldin.gcommons.beans.IOBean"
           p:verify-ref            = "verify"/>
-    
 </beans>
