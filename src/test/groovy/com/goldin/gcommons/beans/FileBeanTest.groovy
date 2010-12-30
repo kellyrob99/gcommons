@@ -143,7 +143,7 @@ class FileBeanTest extends BaseTest
      * Mapping of test archives and their sizes in bytes when unpacked
      */
     private static final Map ARCHIVES = [ 'apache-maven-3.0.1' : 3344327,
-                                          'gradle-0.9'         : 56052739 ]
+                                          'gradle-0.9'         : 27848286 ]
 
     @Test
     void shouldPack()
