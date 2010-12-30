@@ -50,3 +50,14 @@ test.testReportDir    = new File(( File ) project.buildDir, 'test/reports' )
 test.testResultsDir   = new File(( File ) project.buildDir, 'test/results' )
 test.systemProperties = System.properties.containsKey( 'slowTests' ) ? [ slowTests : 'true' ] : [:]
 test.setDebug( System.properties.containsKey( 'debug' ))
+
+/**
+ * Adding sources artifact
+ * http://gradle.1045684.n5.nabble.com/javadoc-and-source-jars-td3246213.html
+ */
+task sourcesJar( type: Jar, dependsOn: classes ) {
+     classifier = 'sources'
+     from sourceSets.main.allSource
+}
+
+artifacts { archives sourcesJar }
