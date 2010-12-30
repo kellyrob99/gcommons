@@ -23,16 +23,18 @@
       <entry name=".+\.(gif|png|jpeg|jpg)" />
     </resourceExtensions>
     <wildcardResourcePatterns>
-      <entry name="?*.properties" />
-      <entry name="?*.xml" />
-      <entry name="?*.gif" />
-      <entry name="?*.png" />
-      <entry name="?*.jpeg" />
-      <entry name="?*.jpg" />
       <entry name="?*.html" />
+      <entry name="?*.properties" />
+      <entry name="?*.jpeg" />
+      <entry name="?*.gif" />
+      <entry name="!?*.groovy" />
       <entry name="?*.dtd" />
+      <entry name="?*.jpg" />
+      <entry name="?*.png" />
       <entry name="?*.tld" />
+      <entry name="!?*.java" />
       <entry name="?*.ftl" />
+      <entry name="?*.xml" />
     </wildcardResourcePatterns>
     <annotationProcessing enabled="false" useClasspath="true" />
   </component>
@@ -468,15 +470,8 @@
       <JAVADOC />
       <SOURCES>
         <root url="file://D:/Winny/java/groovy-1.8.0/src" />
+        <root url="file://D:/Winny/java/src/apache-ant-1.8.1" />
       </SOURCES>
-    </library>
-    <library name="Logback">
-      <CLASSES>
-        <root url="file://$USER_HOME$/.gradle/cache/ch.qos.logback" />
-      </CLASSES>
-      <JAVADOC />
-      <SOURCES />
-      <jarDirectory url="file://$USER_HOME$/.gradle/cache/ch.qos.logback" recursive="false" />
     </library>
   </component>
 </project>
