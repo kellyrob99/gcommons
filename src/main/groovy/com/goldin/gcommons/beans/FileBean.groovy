@@ -1,8 +1,7 @@
 package com.goldin.gcommons.beans
 
 import org.apache.tools.ant.DirectoryScanner
-import org.apache.tools.zip.ZipEntry
-import org.apache.tools.zip.ZipFile
+import groovy.io.FileType
 
 /**
  * File-related helper utilities.
@@ -213,38 +212,12 @@ class FileBean extends BaseBean
         getLog( this ).info( "Unpacking [${ sourceArchive.canonicalPath }] to [${ destinationDirectory.canonicalPath }]" )
         final long time = System.currentTimeMillis()
 
-        if ( [ 'zip', 'jar', 'war', 'ear' ].contains( extension( sourceArchive )))
-        {
-            /**
-             * We do it ourselves for simple cases, TrueZip modifies some files when unpacking them :(
-             * Try packing and unpacking "apache-maven-3.0.1" - you'll get folders of different size, some *.jar
-             * files are slightly smaller than their original versions, though they all unpack Ok.
-             */
-
-            ZipFile zipFile = new ZipFile( sourceArchive )
-            for ( ZipEntry entry in zipFile.entries )
-            {
-                def isDirectory = entry.name.endsWith( '/' )
-                def destFile    = new File( destinationDirectory, entry.name )
-
-                mkdirs( isDirectory ? destFile : destFile.getParentFile())
-
-                if ( ! isDirectory )
-                {
-                    io.copy( zipFile.getInputStream( entry ), new FileOutputStream( destFile ), entry.size )
-                }
-            }
-
-            zipFile.close()
-        }
-        else
-        {
-            /**
-             * https://truezip.dev.java.net/manual-6.html
-             */
-            assert new de.schlichtherle.io.File( sourceArchive ).archiveCopyAllTo( destinationDirectory )
-            de.schlichtherle.io.File.umount()
-        }
+        /**
+         * https://truezip.dev.java.net/manual-6.html
+         */
+        assert new de.schlichtherle.io.File( sourceArchive ).
+               archiveCopyAllTo( destinationDirectory, new de.schlichtherle.io.DefaultArchiveDetector( extension( sourceArchive )))
+        de.schlichtherle.io.File.umount()
 
         verify.directory( destinationDirectory )
         getLog( this ).info( "[${ sourceArchive.canonicalPath }] unpacked to [${ destinationDirectory.canonicalPath }] " +
@@ -279,7 +252,25 @@ class FileBean extends BaseBean
      */
     String extension ( File f )
     {
-        def dotIndex = f.canonicalPath.lastIndexOf( '.' )
-        ( dotIndex > 0 ) ? f.canonicalPath.substring( dotIndex + 1 ).toLowerCase() : null
+        def name = f.name.toLowerCase()
+
+        if ( name.endsWith( '.tar.gz'  )) { return 'tar.gz'  }
+        if ( name.endsWith( '.tar.bz2' )) { return 'tar.bz2' }
+
+        def dotIndex = name.lastIndexOf( '.' )
+        ( dotIndex > 0 ) ? name.substring( dotIndex + 1 ) : null
+    }
+
+
+    long directorySize( File ... directories )
+    {
+        long size = 0
+
+        for ( directory in directories )
+        {
+            verify.directory( directory ).eachFileRecurse( FileType.FILES ){ size += it.size() }
+        }
+
+        size
     }
 }

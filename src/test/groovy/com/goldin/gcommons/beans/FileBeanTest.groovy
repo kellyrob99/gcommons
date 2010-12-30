@@ -140,16 +140,16 @@ class FileBeanTest extends BaseTest
 
 
     @Test
-    void shouldPackArchives()
+    void shouldPackAndUnpack()
     {
+        def zipDir   = new File( 'build/tests/zip'    )
+        def tarGzDir = new File( 'build/tests/tar-gz' )
 
-    }
+        fileBean.unpack( new File( 'src/test/resources/apache-maven-3.0.1.zip' ),    zipDir   )
+        fileBean.unpack( new File( 'src/test/resources/apache-maven-3.0.1.tar.gz' ), tarGzDir )
 
-
-    @Test
-    void shouldUnpackArchives()
-    {
-        fileBean.unpack( new File( 'src/test/resources/apache-maven-3.0.1.zip' ),    new File( 'build/tests/zip' ))
-        fileBean.unpack( new File( 'src/test/resources/apache-maven-3.0.1.tar.gz' ), new File( 'build/tests/tar-gz' ))
+        verifyBean.equal( zipDir, tarGzDir )
+        assert fileBean.directorySize( zipDir )           == 3344327
+        assert fileBean.directorySize( zipDir, tarGzDir ) == 3344327 * 2
     }
 }
