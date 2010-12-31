@@ -198,6 +198,9 @@ class FileBeanTest extends BaseTest
     void shouldUnpack()
     {
         def resourcesDir = new File( 'src/test/resources' )
+        def imageDir     = testDir( 'image-3-abc' )
+        fileBean.unpack( new File( resourcesDir, 'image-3-abc.zip' ), imageDir )
+        assert new File( imageDir, '1.png' ).size() == 187933
 
         for ( archiveName in TEST_ARCHIVES.keySet())
         {
