@@ -25,7 +25,7 @@ class SingleFileArchiveDetector extends DefaultArchiveDetector
     }
 
     
-    private static String normalizePath( String path ){ path.replaceAll( /\\+/, '/' ) }
+    private static String normalizePath( String path ){ path.replaceAll( /\\+/, '/' ).toLowerCase() }
 
     
     @Override
