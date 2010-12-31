@@ -210,8 +210,7 @@ class FileBean extends BaseBean
     File unpack ( File sourceArchive, File destinationDirectory )
     {
         verify.notEmptyFile( sourceArchive )
-        if ( destinationDirectory.exists()) { delete( destinationDirectory ) }
-
+        if ( destinationDirectory.isFile()) { delete( destinationDirectory ) }
         mkdirs( destinationDirectory )
 
         getLog( this ).info( "Unpacking [${ sourceArchive.canonicalPath }] to [${ destinationDirectory.canonicalPath }]" )
