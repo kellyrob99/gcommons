@@ -198,9 +198,18 @@ class FileBeanTest extends BaseTest
     void shouldUnpack()
     {
         def resourcesDir = new File( 'src/test/resources' )
-        def imageDir     = testDir( 'image-3-abc' )
-        fileBean.unpack( new File( resourcesDir, 'image-3-abc.zip' ), imageDir )
-        assert new File( imageDir, '1.png' ).size() == 187933
+        def imageDirZip  = testDir( 'image-3-abc-zip'  )
+        def imageDirSima = testDir( 'image-3-abc-sima' )
+        fileBean.unpack( new File( resourcesDir, 'image-3-abc.zip'  ),  imageDirZip )
+        fileBean.unpack( new File( resourcesDir, 'image-3-abc.sima' ), imageDirSima )
+        assert new File( imageDirZip, '1.png' ).size() == 187933
+        verifyBean.equal( imageDirZip, imageDirSima )
+
+        def errorMessage = shouldFailWith( IllegalArgumentException.class )
+        {
+            fileBean.unpack( new File( resourcesDir, 'image-3-abc.sima1' ), imageDirSima )
+        }
+        assert errorMessage == '"sima1" (no archive driver installed for these suffixes)'
 
         for ( archiveName in TEST_ARCHIVES.keySet())
         {
