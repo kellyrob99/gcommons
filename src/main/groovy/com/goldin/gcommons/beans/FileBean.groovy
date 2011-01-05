@@ -16,7 +16,7 @@ class FileBean extends BaseBean
     VerifyBean verify
     IOBean     io
 
-    
+
     /**
      * Creates a temp file.
      * @return temp file created.
@@ -26,7 +26,7 @@ class FileBean extends BaseBean
         File.createTempFile( GeneralBean.class.name, '' )
     }
 
-    
+
     /**
      * Creates a temp directory.
      * @return temp directory created.
@@ -42,7 +42,7 @@ class FileBean extends BaseBean
     }
 
 
-    
+
     /**
      * Deletes files or directories specified. Directories are deleted recursively.
      * @param files files or directories to delete
@@ -144,10 +144,15 @@ class FileBean extends BaseBean
         files
     }
 
+    /**
+     * File.setDefaultArchiveDetector(new DefaultArchiveDetector(ArchiveDetector.DEFAULT, "izp", new ZipDriver()));
+     * If you want UTF-8 instead of IBM437 to encode entry names, then you should use the JarDriver instead of the ZipDriver.
+     */
+
 
     /**
      * Archives directory to archive specified. Empty directories are not archived!
-     *  
+     *
      * @param sourceDirectory    directory to archive
      * @param destinationArchive archive to pack the directory to
      * @param includes           patterns to use for including files, all files are included if null
@@ -226,7 +231,7 @@ class FileBean extends BaseBean
         verify.directory( destinationDirectory )
         getLog( this ).info( "[${ sourceArchive.canonicalPath }] unpacked to [${ destinationDirectory.canonicalPath }] " +
                              "(${( System.currentTimeMillis() - time ).intdiv( 1000 )} sec)" )
-        
+
         destinationDirectory
     }
 
