@@ -223,9 +223,10 @@ class FileBean extends BaseBean
 
         /**
          * https://truezip.dev.java.net/manual-6.html
+         * {@link de.schlichtherle.io.File#archiveCopyAllTo(File)}
          */
         def detector = new SingleFileArchiveDetector( sourceArchive, extension( sourceArchive ))
-        assert new de.schlichtherle.io.File( sourceArchive, detector ).archiveCopyAllTo( destinationDirectory )
+        de.schlichtherle.io.Files.cp_r( true, new de.schlichtherle.io.File( sourceArchive, detector ), destinationDirectory, detector, detector );
         de.schlichtherle.io.File.umount()
 
         verify.directory( destinationDirectory )
