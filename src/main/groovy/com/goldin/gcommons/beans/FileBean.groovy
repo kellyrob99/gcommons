@@ -170,36 +170,46 @@ class FileBean extends BaseBean
                 boolean      failIfNotFound = true )
     {
         verify.directory( sourceDirectory )
-        if ( destinationArchive.exists()){ delete( destinationArchive ) }
+        verify.notNull( destinationArchive )
 
-        assert ! destinationArchive.exists()
-        File archiveDir = destinationArchive.getParentFile()
-        assert ( archiveDir != null ), "Destination archive [$archiveDir] has no parent folder"
-        assert ( archiveDir.isDirectory() || archiveDir.mkdirs())
-
-        def patterns = "${ includes ?: '' }/${ excludes ?: '' }"
-        patterns     = (( patterns == '/' ) ? '' : " ($patterns)" )
-
-        getLog( this ).info( "Packing [${ sourceDirectory.canonicalPath }$patterns] to [${ destinationArchive.canonicalPath }]" )
-        final long time = System.currentTimeMillis()
-
-        for ( File file in files( sourceDirectory, includes, excludes, caseSensitive, false, failIfNotFound ))
+        try
         {
-            String relativePath = verify.notNullOrEmpty( file.canonicalPath.substring( sourceDirectory.canonicalPath.length()))
-            assert ( relativePath.startsWith( '/' ) || relativePath.startsWith( '\\' ))
+            if ( destinationArchive.exists()){ delete( destinationArchive ) }
 
-            /**
-             * https://truezip.dev.java.net/manual-6.html
-             */
-            de.schlichtherle.io.File.cp_p( file, new de.schlichtherle.io.File( destinationArchive.canonicalPath + relativePath ))
+            assert ! destinationArchive.exists()
+            File archiveDir = destinationArchive.getParentFile()
+            assert ( archiveDir != null ), "Destination archive [$archiveDir] has no parent folder"
+            assert ( archiveDir.isDirectory() || archiveDir.mkdirs())
+
+            def patterns = "${ includes ?: '' }/${ excludes ?: '' }"
+            patterns     = (( patterns == '/' ) ? '' : " ($patterns)" )
+
+            getLog( this ).info( "Packing [${ sourceDirectory.canonicalPath }$patterns] to [${ destinationArchive.canonicalPath }]" )
+            final long time = System.currentTimeMillis()
+
+            for ( File file in files( sourceDirectory, includes, excludes, caseSensitive, false, failIfNotFound ))
+            {
+                String relativePath = verify.notNullOrEmpty( file.canonicalPath.substring( sourceDirectory.canonicalPath.length()))
+                assert ( relativePath.startsWith( '/' ) || relativePath.startsWith( '\\' ))
+
+                /**
+                 * https://truezip.dev.java.net/manual-6.html
+                 */
+                de.schlichtherle.io.File.cp_p( file, new de.schlichtherle.io.File( destinationArchive.canonicalPath + relativePath ))
+            }
+
+            de.schlichtherle.io.File.umount()
+            verify.notEmptyFile( destinationArchive )
+            getLog( this ).info( "[$sourceDirectory$patterns] packed to [${ destinationArchive.canonicalPath }] " +
+                                 "(${( System.currentTimeMillis() - time ).intdiv( 1000 )} sec)" )
+
+            destinationArchive
         }
-
-        de.schlichtherle.io.File.umount()
-        verify.notEmptyFile( destinationArchive )
-        getLog( this ).info( "[$sourceDirectory$patterns] packed to [${ destinationArchive.canonicalPath }] " +
-                             "(${( System.currentTimeMillis() - time ).intdiv( 1000 )} sec)" )
-
-        destinationArchive
+        catch ( Throwable t )
+        {
+            throw new RuntimeException( "Failed to pack [$sourceDirectory.canonicalPath] to [$destinationArchive.canonicalPath]: $t",
+                                        t )
+        }
     }
 
 
@@ -215,25 +225,35 @@ class FileBean extends BaseBean
     File unpack ( File sourceArchive, File destinationDirectory )
     {
         verify.notEmptyFile( sourceArchive )
-        if ( destinationDirectory.isFile()) { delete( destinationDirectory ) }
-        mkdirs( destinationDirectory )
+        verify.notNull( destinationDirectory )
+        
+        try
+        {
+            if ( destinationDirectory.isFile()) { delete( destinationDirectory ) }
+            mkdirs( destinationDirectory )
 
-        getLog( this ).info( "Unpacking [${ sourceArchive.canonicalPath }] to [${ destinationDirectory.canonicalPath }]" )
-        final long time = System.currentTimeMillis()
+            getLog( this ).info( "Unpacking [${ sourceArchive.canonicalPath }] to [${ destinationDirectory.canonicalPath }]" )
+            final long time = System.currentTimeMillis()
 
-        /**
-         * https://truezip.dev.java.net/manual-6.html
-         * {@link de.schlichtherle.io.File#archiveCopyAllTo(File)}
-         */
-        def detector = new SingleFileArchiveDetector( sourceArchive, extension( sourceArchive ))
-        de.schlichtherle.io.Files.cp_r( true, new de.schlichtherle.io.File( sourceArchive, detector ), destinationDirectory, detector, detector );
-        de.schlichtherle.io.File.umount()
+            /**
+             * https://truezip.dev.java.net/manual-6.html
+             * {@link de.schlichtherle.io.File#archiveCopyAllTo(File)}
+             */
+            def detector = new SingleFileArchiveDetector( sourceArchive, extension( sourceArchive ))
+            de.schlichtherle.io.Files.cp_r( true, new de.schlichtherle.io.File( sourceArchive, detector ), destinationDirectory, detector, detector );
+            de.schlichtherle.io.File.umount()
 
-        verify.directory( destinationDirectory )
-        getLog( this ).info( "[${ sourceArchive.canonicalPath }] unpacked to [${ destinationDirectory.canonicalPath }] " +
-                             "(${( System.currentTimeMillis() - time ).intdiv( 1000 )} sec)" )
+            verify.directory( destinationDirectory )
+            getLog( this ).info( "[${ sourceArchive.canonicalPath }] unpacked to [${ destinationDirectory.canonicalPath }] " +
+                                 "(${( System.currentTimeMillis() - time ).intdiv( 1000 )} sec)" )
 
-        destinationDirectory
+            destinationDirectory
+        }
+        catch ( Throwable t )
+        {
+            throw new RuntimeException( "Failed to unpack [$sourceArchive.canonicalPath] to [$destinationDirectory.canonicalPath]: $t",
+                                        t )
+        }
     }
 
 

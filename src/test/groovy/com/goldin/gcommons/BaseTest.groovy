@@ -30,10 +30,11 @@ class BaseTest
 
 
     /**
-     * {@link GroovyTestCase#shouldFailWithCause(Class, Closure)} wrapper
+     * {@link GroovyTestCase} wrappers
      */
-    String shouldFailWith( Class cl, Closure c ) { new MyGroovyTestCase().shouldFail( cl, c ) }
-    String shouldFailAssert ( Closure c )        { new MyGroovyTestCase().shouldFail( AssertionError.class, c ) }
+    String shouldFailWith     ( Class cl, Closure c ) { new MyGroovyTestCase().shouldFail( cl, c ) }
+    String shouldFailWithCause( Class cl, Closure c ) { new MyGroovyTestCase().shouldFailWithCause( cl, c ) }
+    String shouldFailAssert   ( Closure c )           { new MyGroovyTestCase().shouldFail( AssertionError.class, c ) }
 
 
     /**

@@ -205,7 +205,7 @@ class FileBeanTest extends BaseTest
         assert new File( imageDirZip, '1.png' ).size() == 187933
         verifyBean.equal( imageDirZip, imageDirSima )
 
-        def errorMessage = shouldFailWith( IllegalArgumentException.class )
+        def errorMessage = shouldFailWithCause( IllegalArgumentException.class )
         {
             fileBean.unpack( new File( resourcesDir, 'image-3-abc.sima1' ), imageDirSima )
         }
