@@ -1,7 +1,7 @@
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder
 import ch.qos.logback.core.ConsoleAppender
-import static ch.qos.logback.classic.Level.INFO
 import static ch.qos.logback.classic.Level.WARN
+import static ch.qos.logback.classic.Level.INFO
 
  /**
  * http://logback.qos.ch/manual/groovy.html
@@ -20,6 +20,6 @@ appender( "CONSOLE", ConsoleAppender ) {
     encoder( PatternLayoutEncoder ) { pattern = "[%date][%-5level] [%logger] - [%msg]%n" }
 }
 
-root( WARN, [ "CONSOLE" ] )
+//root( WARN, [ "CONSOLE" ] ) - causes "http://evgeny-goldin.org/youtrack/issue/pl-256"
 logger( "org.springframework", WARN, [ "CONSOLE" ] )
 logger( "com.goldin",          INFO, [ "CONSOLE" ] )
