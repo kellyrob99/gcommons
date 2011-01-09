@@ -4,7 +4,7 @@
     <facet type="Spring" name="Spring">
       <configuration>
         <fileset id="fileset1" name="application-context" removed="false">
-          <file>file://$MODULE_DIR$/src/main/resources/gcommons-application-context.xml</file>
+          <file>file://D:/Projects/gcommons/src/main/resources/gcommons-application-context.xml</file>
         </fileset>
       </configuration>
     </facet>
@@ -307,11 +307,117 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
+          <root url="jar://$USER_HOME$/.gradle/cache/org.apache.ant/ant/jars/ant-1.8.1.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
           <root url="jar://$USER_HOME$/.gradle/cache/org.codehaus.groovy/groovy-all/jars/groovy-all-1.8.0-beta-3.jar!/" />
         </CLASSES>
-        <JAVADOC>
-          <root url="jar://$USER_HOME$/.gradle/cache/org.codehaus.groovy/groovy-all/javadocs/groovy-all-1.8.0-beta-3-javadoc.jar!/" />
-        </JAVADOC>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$USER_HOME$/.gradle/cache/org.codehaus.groovy/groovy-all/sources/groovy-all-1.8.0-beta-3-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$USER_HOME$/.gradle/cache/commons-logging/commons-logging/jars/commons-logging-1.1.1.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$USER_HOME$/.gradle/cache/commons-logging/commons-logging/sources/commons-logging-1.1.1-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$USER_HOME$/.gradle/cache/de.schlichtherle/truezip/jars/truezip-6.8.1.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$USER_HOME$/.gradle/cache/de.schlichtherle/truezip/sources/truezip-6.8.1-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$USER_HOME$/.gradle/cache/org.bouncycastle/bcprov-jdk14/jars/bcprov-jdk14-1.45.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$USER_HOME$/.gradle/cache/org.bouncycastle/bcprov-jdk14/sources/bcprov-jdk14-1.45-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$USER_HOME$/.gradle/cache/commons-net/commons-net/jars/commons-net-1.4.0.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$USER_HOME$/.gradle/cache/commons-net/commons-net/sources/commons-net-1.4.0-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$USER_HOME$/.gradle/cache/org.slf4j/slf4j-api/jars/slf4j-api-1.6.1.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$USER_HOME$/.gradle/cache/org.slf4j/slf4j-api/sources/slf4j-api-1.6.1-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$USER_HOME$/.gradle/cache/ch.qos.logback/logback-classic/jars/logback-classic-0.9.27.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$USER_HOME$/.gradle/cache/ch.qos.logback/logback-classic/sources/logback-classic-0.9.27-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$USER_HOME$/.gradle/cache/ch.qos.logback/logback-core/jars/logback-core-0.9.27.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$USER_HOME$/.gradle/cache/ch.qos.logback/logback-core/sources/logback-core-0.9.27-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" scope="TEST">
+      <library>
+        <CLASSES>
+          <root url="jar://$USER_HOME$/.gradle/cache/junit/junit/jars/junit-4.8.2.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES>
+          <root url="jar://$USER_HOME$/.gradle/cache/junit/junit/sources/junit-4.8.2-sources.jar!/" />
+        </SOURCES>
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library>
+        <CLASSES>
+          <root url="jar://$USER_HOME$/.gradle/cache/org.codehaus.groovy/groovy-all/jars/groovy-all-1.8.0-beta-3.jar!/" />
+        </CLASSES>
+        <JAVADOC />
         <SOURCES>
           <root url="jar://$USER_HOME$/.gradle/cache/org.codehaus.groovy/groovy-all/sources/groovy-all-1.8.0-beta-3-sources.jar!/" />
         </SOURCES>
@@ -377,9 +483,7 @@
         <CLASSES>
           <root url="jar://$USER_HOME$/.gradle/cache/commons-logging/commons-logging/jars/commons-logging-1.1.1.jar!/" />
         </CLASSES>
-        <JAVADOC>
-          <root url="jar://$USER_HOME$/.gradle/cache/commons-logging/commons-logging/javadocs/commons-logging-1.1.1-javadoc.jar!/" />
-        </JAVADOC>
+        <JAVADOC />
         <SOURCES>
           <root url="jar://$USER_HOME$/.gradle/cache/commons-logging/commons-logging/sources/commons-logging-1.1.1-sources.jar!/" />
         </SOURCES>
@@ -412,9 +516,7 @@
         <CLASSES>
           <root url="jar://$USER_HOME$/.gradle/cache/de.schlichtherle/truezip/jars/truezip-6.8.1.jar!/" />
         </CLASSES>
-        <JAVADOC>
-          <root url="jar://$USER_HOME$/.gradle/cache/de.schlichtherle/truezip/javadocs/truezip-6.8.1-javadoc.jar!/" />
-        </JAVADOC>
+        <JAVADOC />
         <SOURCES>
           <root url="jar://$USER_HOME$/.gradle/cache/de.schlichtherle/truezip/sources/truezip-6.8.1-sources.jar!/" />
         </SOURCES>
@@ -443,9 +545,7 @@
         <CLASSES>
           <root url="jar://$USER_HOME$/.gradle/cache/org.bouncycastle/bcprov-jdk14/jars/bcprov-jdk14-1.45.jar!/" />
         </CLASSES>
-        <JAVADOC>
-          <root url="jar://$USER_HOME$/.gradle/cache/org.bouncycastle/bcprov-jdk14/javadocs/bcprov-jdk14-1.45-javadoc.jar!/" />
-        </JAVADOC>
+        <JAVADOC />
         <SOURCES>
           <root url="jar://$USER_HOME$/.gradle/cache/org.bouncycastle/bcprov-jdk14/sources/bcprov-jdk14-1.45-sources.jar!/" />
         </SOURCES>
@@ -472,24 +572,11 @@
     <orderEntry type="module-library" exported="">
       <library>
         <CLASSES>
-          <root url="jar://$USER_HOME$/.gradle/cache/commons-net/commons-net/jars/commons-net-1.4.0.jar!/" />
-        </CLASSES>
-        <JAVADOC>
-          <root url="jar://$USER_HOME$/.gradle/cache/commons-net/commons-net/javadocs/commons-net-1.4.0-javadoc.jar!/" />
-        </JAVADOC>
-        <SOURCES>
-          <root url="jar://$USER_HOME$/.gradle/cache/commons-net/commons-net/sources/commons-net-1.4.0-sources.jar!/" />
-        </SOURCES>
-      </library>
-    </orderEntry>
-    <orderEntry type="module-library" exported="">
-      <library>
-        <CLASSES>
-          <root url="jar://$USER_HOME$/.gradle/cache/oro/oro/jars/oro-2.0.8.jar!/" />
+          <root url="jar://$USER_HOME$/.gradle/cache/commons-net/commons-net/jars/commons-net-2.2.jar!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES>
-          <root url="jar://$USER_HOME$/.gradle/cache/oro/oro/sources/oro-2.0.8-sources.jar!/" />
+          <root url="jar://$USER_HOME$/.gradle/cache/commons-net/commons-net/sources/commons-net-2.2-sources.jar!/" />
         </SOURCES>
       </library>
     </orderEntry>
@@ -498,9 +585,7 @@
         <CLASSES>
           <root url="jar://$USER_HOME$/.gradle/cache/org.slf4j/slf4j-api/jars/slf4j-api-1.6.1.jar!/" />
         </CLASSES>
-        <JAVADOC>
-          <root url="jar://$USER_HOME$/.gradle/cache/org.slf4j/slf4j-api/javadocs/slf4j-api-1.6.1-javadoc.jar!/" />
-        </JAVADOC>
+        <JAVADOC />
         <SOURCES>
           <root url="jar://$USER_HOME$/.gradle/cache/org.slf4j/slf4j-api/sources/slf4j-api-1.6.1-sources.jar!/" />
         </SOURCES>
@@ -511,9 +596,7 @@
         <CLASSES>
           <root url="jar://$USER_HOME$/.gradle/cache/ch.qos.logback/logback-classic/jars/logback-classic-0.9.27.jar!/" />
         </CLASSES>
-        <JAVADOC>
-          <root url="jar://$USER_HOME$/.gradle/cache/ch.qos.logback/logback-classic/javadocs/logback-classic-0.9.27-javadoc.jar!/" />
-        </JAVADOC>
+        <JAVADOC />
         <SOURCES>
           <root url="jar://$USER_HOME$/.gradle/cache/ch.qos.logback/logback-classic/sources/logback-classic-0.9.27-sources.jar!/" />
         </SOURCES>
@@ -524,9 +607,7 @@
         <CLASSES>
           <root url="jar://$USER_HOME$/.gradle/cache/ch.qos.logback/logback-core/jars/logback-core-0.9.27.jar!/" />
         </CLASSES>
-        <JAVADOC>
-          <root url="jar://$USER_HOME$/.gradle/cache/ch.qos.logback/logback-core/javadocs/logback-core-0.9.27-javadoc.jar!/" />
-        </JAVADOC>
+        <JAVADOC />
         <SOURCES>
           <root url="jar://$USER_HOME$/.gradle/cache/ch.qos.logback/logback-core/sources/logback-core-0.9.27-sources.jar!/" />
         </SOURCES>
@@ -548,9 +629,7 @@
         <CLASSES>
           <root url="jar://$USER_HOME$/.gradle/cache/junit/junit/jars/junit-4.8.2.jar!/" />
         </CLASSES>
-        <JAVADOC>
-          <root url="jar://$USER_HOME$/.gradle/cache/junit/junit/javadocs/junit-4.8.2-javadoc.jar!/" />
-        </JAVADOC>
+        <JAVADOC />
         <SOURCES>
           <root url="jar://$USER_HOME$/.gradle/cache/junit/junit/sources/junit-4.8.2-sources.jar!/" />
         </SOURCES>
