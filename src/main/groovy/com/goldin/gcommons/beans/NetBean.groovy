@@ -14,9 +14,10 @@ class NetBean extends BaseBean
 {
 
     /**
-     * Verifier, set by Spring
+     * Other beans, set by Spring
      */
-    VerifyBean verify
+    GeneralBean general
+    VerifyBean  verify
 
 
     private boolean isHttp ( String s ) { s.toLowerCase().startsWith( 'http://' ) }
@@ -84,19 +85,20 @@ class NetBean extends BaseBean
     }
 
 
-    public <T> T ftpClient( String remotePath, Class<T> returnType, Closure c )
+    public <T> T ftpClient( String remotePath, Class<T> resultType, Closure c )
     {
         verify.notNullOrEmpty( remotePath )
-        verify.notNull( c, returnType )
+        verify.notNull( c, resultType )
 
         FTPClient client
 
         try
         {
-            client   = ftpClient( remotePath )
-            Object o = c.call( client )
-            assert returnType.isInstance( o )
-            return (( T ) o )
+            client       = ftpClient( remotePath )
+            Object value = c.call( client )
+            assert ( value != null ),              "Result returned is null, should be of type [$resultType]"
+            assert resultType.isInstance( value ), "Result returned [$value] is of type [${ value.class }], should be of type [$resultType]"
+            return (( T ) value )
         }
         finally
         {
@@ -109,20 +111,33 @@ class NetBean extends BaseBean
     }
 
 
-    List<FTPFile> listFiles( String remotePath, String includePatterns )
+    List<FTPFile> listFiles( String remotePath, String includePatterns, int tries = 5 )
     {
-        ftpClient( remotePath, List.class )
+        List<String> includes = includePatterns.split( /\s*,\s*/ )*.trim().collect { verify.notNullOrEmpty( it ) }
+
+        general.tryIt( tries, List.class,
         {
-            FTPClient client ->
+            ftpClient( remotePath, List.class )
+            {
+                FTPClient client ->
 
-            List<FTPFile> result   = []
-            List<String>  includes = includePatterns.split( /\s*,\s*/ )*.trim().collect { verify.notNullOrEmpty( it ) }
+                List<FTPFile> result = []
 
-            getLog( this ).info( "Listing $includes files .." )
-            includes.each { result << client.listFiles( it ) }
-            getLog( this ).info( "[${ result.size() }] file${( result.size() == 1 ) ? '' : 's' }: $result" )
+                getLog( this ).info( "Listing $includes files .." )
 
-            result
-        }
+                includes.each {
+                    String includePattern ->
+                    FTPFile[] files = client.listFiles( includePattern )
+                    if ( getLog( this ).isDebugEnabled())
+                    {
+                        getLog( this ).debug( "[$includePattern] - ${ files*.name }" )
+                    }
+                    result.addAll( files )
+                }
+
+                getLog( this ).info( "[${ result.size() }] file${ general.s( result.size()) }: ${ result*.name }" )
+                result
+            }
+        })
     }
 }

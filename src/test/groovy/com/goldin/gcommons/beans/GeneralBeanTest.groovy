@@ -71,7 +71,7 @@ class GeneralBeanTest extends BaseTest
         assert ! generalBean.match( 'c:\\path\\dir\\8.xml', '**/8xml'   )
         assert ! generalBean.match( 'c:\\path\\dir\\8.xml', '8xml'      )
         assert ! generalBean.match( 'c:\\path\\dir\\8.xml', '8xml/aaa'  )
-        
+
         assert generalBean.match( 'd:/some/path/dir',        'd:/some/path/dir' )
         assert generalBean.match( 'd:/some/path/dir',        '**\\path\\dir' )
         assert generalBean.match( 'd:/some/path/dir',        '**/path/dir' )
@@ -96,6 +96,4 @@ class GeneralBeanTest extends BaseTest
         assert ! generalBean.match( 'd:/some/path/dir/8.xml',  '8xml'      )
         assert ! generalBean.match( 'd:/some/path/dir/8.xml',  '8xml/aaa'  )
     }
-
-
 }

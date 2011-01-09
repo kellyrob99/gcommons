@@ -30,5 +30,6 @@
 
     <bean name                    = "net"
           class                   = "com.goldin.gcommons.beans.NetBean"
+          p:general-ref           = "general"
           p:verify-ref            = "verify"/>
 </beans>
