@@ -130,7 +130,7 @@ class NetBean extends BaseBean
                     FTPFile[] files = client.listFiles( includePattern )
                     if ( getLog( this ).isDebugEnabled())
                     {
-                        getLog( this ).debug( "[$includePattern] - ${ files*.name }" )
+                        getLog( this ).debug( "[$includePattern] - ${ files*.name.join( '\n' ) }" )
                     }
                     result.addAll( files )
                 }
