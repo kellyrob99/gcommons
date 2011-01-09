@@ -4,9 +4,10 @@ import com.goldin.gcommons.Constants
 import java.util.regex.Matcher
 import org.apache.commons.net.ftp.FTP
 import org.apache.commons.net.ftp.FTPClient
+import org.apache.commons.net.ftp.FTPFile
 import org.apache.commons.net.ftp.FTPReply
 
-/**
+ /**
  * Network-related helper methods.
  */
 class NetBean extends BaseBean
@@ -54,34 +55,74 @@ class NetBean extends BaseBean
     }
 
 
-    List<String> ftpList( String remotePath, String includePattern, String excludePattern )
+    FTPClient ftpClient( String remotePath )
     {
         Map       data   = parseNetworkPath( remotePath )
         FTPClient client = new FTPClient()
 
-        getLog( this ).info( "Connecting to FTP server [$data.host:$data.directory] as [$data.username]" )
+        getLog( this ).info( "Connecting to FTP server [$data.host:$data.directory] as [$data.username] .." )
 
         try
         {
             client.connect( data.host )
-
-            int reply = client.getReplyCode();
+            int reply = client.getReplyCode()
             assert FTPReply.isPositiveCompletion( reply ),          "Failed to connect to FTP server [$data.host], reply code is [$reply]"
             assert client.login( data.username, data.password ),    "Failed to connect to FTP server [$data.host] as [$data.username]"
             assert client.changeWorkingDirectory( data.directory ), "Failed to change FTP server [$data.host] directory to [$data.directory]"
-
             client.setFileType( FTP.BINARY_FILE_TYPE )
             client.enterLocalPassiveMode()
+        }
+        catch ( Throwable t )
+        {
+            client.logout()
+            client.disconnect()
+            throw new RuntimeException( "Failed to connect to FTP server [$remotePath]: $t", t )
+        }
 
-            getLog( this ).info( "Connected to FTP server [$data.host:$data.directory] as [$data.username]. Remote system is [${ client.getSystemName()}]" )
+        getLog( this ).info( "Connected to FTP server [$data.host:$data.directory] as [$data.username]. Remote system is [${ client.getSystemName()}]" )
+        client
+    }
+
+
+    public <T> T ftpClient( String remotePath, Class<T> returnType, Closure c )
+    {
+        verify.notNullOrEmpty( remotePath )
+        verify.notNull( c, returnType )
+
+        FTPClient client
+
+        try
+        {
+            client   = ftpClient( remotePath )
+            Object o = c.call( client )
+            assert returnType.isInstance( o )
+            return (( T ) o )
         }
         finally
         {
-            client.logout();
-            client.disconnect();
+            if ( client )
+            {
+                client.logout()
+                client.disconnect()
+            }
         }
-
-        return null
     }
 
+
+    List<FTPFile> listFiles( String remotePath, String includePatterns )
+    {
+        ftpClient( remotePath, List.class )
+        {
+            FTPClient client ->
+
+            List<FTPFile> result   = []
+            List<String>  includes = includePatterns.split( /\s*,\s*/ )*.trim().collect { verify.notNullOrEmpty( it ) }
+
+            getLog( this ).info( "Listing $includes files .." )
+            includes.each { result << client.listFiles( it ) }
+            getLog( this ).info( "[${ result.size() }] file${( result.size() == 1 ) ? '' : 's' }: $result" )
+
+            result
+        }
+    }
 }
