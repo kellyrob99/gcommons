@@ -14,7 +14,7 @@ class BaseTest
     final VerifyBean  verifyBean  = GCommons.verify()
     final GeneralBean generalBean = GCommons.general()
     final FileBean    fileBean    = GCommons.file()
-    
+
 
     /**
      * Providing a public access to {@link GroovyTestCase#shouldFail(Class, Closure)}
@@ -38,19 +38,19 @@ class BaseTest
 
 
     /**
-     * Retrieves test dir to be used for temporal output 
+     * Retrieves test dir to be used for temporal output
      * @param dirName test directory name
      * @return test directory to use
      */
     File testDir( String dirName = System.currentTimeMillis() as String )
     {
         def caller = ( StackTraceElement ) new Throwable().stackTrace.findAll { it.className.startsWith( 'com.goldin' ) }[ 2 ]
-        fileBean.delete( new File( "build/tests/${ this.class.name }/${ caller.methodName }/$dirName" ))
+        fileBean.delete( new File( "build/test/${ this.class.name }/${ caller.methodName }/$dirName" ))
     }
 
 
     /**
-     * Verifies {@link #shouldFailWith} behavior 
+     * Verifies {@link #shouldFailWith} behavior
      */
     @Test
     void testShouldFail()
@@ -64,7 +64,7 @@ class BaseTest
         shouldFailAssert {
             shouldFailWith( NullPointerException.class ) { throw new RuntimeException() }
         }
-        
+
         shouldFailAssert { throw new AssertionError() }
         shouldFailAssert { shouldFailAssert { throw new IOException() }}
         shouldFailAssert { assert 3 == 5 }
