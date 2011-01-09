@@ -2,33 +2,39 @@ package com.goldin.gcommons
 
 import org.springframework.context.ApplicationContext
 import org.springframework.context.support.ClassPathXmlApplicationContext
-import static com.goldin.gcommons.Constants.*
 import com.goldin.gcommons.beans.*
+import static com.goldin.gcommons.Constants.*
 
 
-/**
+ /**
  * "GCommons" entry points
  */
 class GCommons
 {
-    private static ApplicationContext newContext(){ new ClassPathXmlApplicationContext( CONTEXT_PATH ) }
-    private static VerifyBean         getVerifyBean  (){ CONTEXT.getBean( VerifyBean.class  ) }
-    private static GeneralBean        getGeneralBean (){ CONTEXT.getBean( GeneralBean.class ) }
-    private static FileBean           getFileBean    (){ CONTEXT.getBean( FileBean.class    ) }
-    private static IOBean             getIoBean      (){ CONTEXT.getBean( IOBean.class      ) }
-    private static NetBean            getNetBean     (){ CONTEXT.getBean( NetBean.class     ) }
-
     private static ApplicationContext CONTEXT = newContext()
-    private static VerifyBean         VERIFY  = getVerifyBean()
-    private static GeneralBean        GENERAL = getGeneralBean()
-    private static FileBean           FILE    = getFileBean()
-    private static IOBean             IO      = getIoBean()
-    private static NetBean            NET     = getNetBean()
+    private static ApplicationContext newContext(){ new ClassPathXmlApplicationContext( CONTEXT_PATH ) }
 
-    static ApplicationContext context( boolean refresh = false ) { CONTEXT = ( refresh ? newContext()     : CONTEXT ) }
-    static VerifyBean         verify ( boolean refresh = false ) { VERIFY  = ( refresh ? getVerifyBean()  : VERIFY  ) }
-    static GeneralBean        general( boolean refresh = false ) { GENERAL = ( refresh ? getGeneralBean() : GENERAL ) }
-    static FileBean           file   ( boolean refresh = false ) { FILE    = ( refresh ? getFileBean()    : FILE    ) }
-    static IOBean             io     ( boolean refresh = false ) { IO      = ( refresh ? getIoBean()      : IO      ) }
-    static NetBean            net    ( boolean refresh = false ) { NET     = ( refresh ? getNetBean()     : NET     ) }
+    /**
+     * Mapping of all beans: bean class => bean instance
+     */
+    private static final Map<Class<? extends BaseBean>, ? extends BaseBean> BEANS = [:]
+    private static <T extends BaseBean> T getBean( Class<T> beanClass, boolean refresh )
+    {
+        assert BaseBean.class.isAssignableFrom( beanClass )
+
+        BEANS[ beanClass ] = (( refresh ) || ( ! BEANS.containsKey( beanClass ))) ? CONTEXT.getBean( beanClass ) :
+                                                                                    BEANS[ beanClass ]
+
+        assert ( beanClass.isInstance( BEANS[ beanClass ] )) &&
+               ( BEANS[ beanClass ] instanceof BaseBean )
+        BEANS[ beanClass ]
+    }
+
+
+    static ApplicationContext context( boolean refresh = false ) { CONTEXT = ( refresh ? newContext() : CONTEXT ) }
+    static VerifyBean         verify ( boolean refresh = false ) { getBean( VerifyBean.class,  refresh ) }
+    static GeneralBean        general( boolean refresh = false ) { getBean( GeneralBean.class, refresh ) }
+    static FileBean           file   ( boolean refresh = false ) { getBean( FileBean.class,    refresh ) }
+    static IOBean             io     ( boolean refresh = false ) { getBean( IOBean.class,      refresh ) }
+    static NetBean            net    ( boolean refresh = false ) { getBean( NetBean.class,     refresh ) }
 }

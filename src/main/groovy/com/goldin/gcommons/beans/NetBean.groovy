@@ -4,7 +4,7 @@ package com.goldin.gcommons.beans
 /**
  * Network-related helper methods.
  */
-class NetBean
+class NetBean extends BaseBean
 {
 
     /**
