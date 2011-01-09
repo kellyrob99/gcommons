@@ -11,7 +11,7 @@ class BaseBean
     /**
      * Map of loggers for each bean
      */
-    static final Map<Class< ? extends BaseBean>, Logger> LOGGERS = [:]
+    private static final Map<Class< ? extends BaseBean>, Logger> LOGGERS = [:]
 
 
     /**
@@ -19,7 +19,7 @@ class BaseBean
      * @param o bean class
      * @return logger to use
      *
-     * @see #getLog(BaseBean) 
+     * @see #getLog(BaseBean)
      */
     static Logger getLog( Class<? extends BaseBean> c )
     {
@@ -29,11 +29,11 @@ class BaseBean
 
 
     /**
-     * Retrieves logger for the bean instance specified. 
+     * Retrieves logger for the bean instance specified.
      * @param o bean instance
      * @return logger to use
      *
-     * @see #getLog(Class<? extends com.goldin.gcommons.beans.BaseBean>) 
+     * @see #getLog(Class<? extends com.goldin.gcommons.beans.BaseBean>)
      */
     static Logger getLog( BaseBean o ) { getLog( o.class ) }
 

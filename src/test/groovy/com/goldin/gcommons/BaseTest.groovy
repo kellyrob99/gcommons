@@ -2,11 +2,13 @@ package com.goldin.gcommons
 
 import com.goldin.gcommons.beans.FileBean
 import com.goldin.gcommons.beans.GeneralBean
+import com.goldin.gcommons.beans.NetBean
 import com.goldin.gcommons.beans.VerifyBean
 import java.nio.BufferOverflowException
 import org.junit.Test
 
- /**
+
+/**
  * Base class for the tests
  */
 class BaseTest
@@ -14,6 +16,7 @@ class BaseTest
     final VerifyBean  verifyBean  = GCommons.verify()
     final GeneralBean generalBean = GCommons.general()
     final FileBean    fileBean    = GCommons.file()
+    final NetBean     netBean     = GCommons.net()
 
 
     /**
