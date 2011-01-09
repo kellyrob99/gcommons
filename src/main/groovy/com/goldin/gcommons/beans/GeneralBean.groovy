@@ -2,7 +2,7 @@ package com.goldin.gcommons.beans
 
 import org.springframework.util.AntPathMatcher
 
-/**
+ /**
  * General usage methods
  */
 class GeneralBean extends BaseBean
@@ -45,7 +45,8 @@ class GeneralBean extends BaseBean
      * Attempts to execute a closure specified and return its result.
      *
      * @param nTries     number of time execution will be attempted
-     * @param resultType type of result returned by closure
+     * @param resultType type of result returned by closure,
+     *                   if <code>null</code> - result type check is not performed
      * @param c          closure to invoke
      * @return closure execution result
      * @throws RuntimeException if execution fails nTries times
@@ -53,7 +54,7 @@ class GeneralBean extends BaseBean
     public <T> T tryIt( int nTries, Class<T> resultType, Closure c )
     {
         assert ( nTries > 0 )
-        verify.notNull( resultType, c )
+        verify.notNull( c )
 
         def tries = 0
 
@@ -62,8 +63,10 @@ class GeneralBean extends BaseBean
             try
             {
                 Object value = c()
-                assert ( value != null ),              "Result returned is null, should be of type [$resultType]"
-                assert resultType.isInstance( value ), "Result returned [$value] is of type [${ value.class }], should be of type [$resultType]"
+                assert ( resultType == null ) || ( value != null ), \
+                       "Result returned is null, should be of type [$resultType]"
+                assert ( resultType == null ) || resultType.isInstance( value ), \
+                       "Result returned [$value] is of type [${ value.class }], should be of type [$resultType]"
                 return (( T ) value )
             }
             catch ( Throwable t )
@@ -71,8 +74,7 @@ class GeneralBean extends BaseBean
                 assert tries < nTries
                 if (( ++tries ) == nTries )
                 {
-                    throw new RuntimeException(
-                        "Failed to perform action after [$tries] attempt${( tries == 1 ) ? '' : 's' }: $t", t )
+                    throw new RuntimeException( "Failed to perform action after [$tries] attempt${s( tries )}: $t", t )
                 }
             }
         }

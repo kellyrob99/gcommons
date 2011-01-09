@@ -18,15 +18,23 @@ class GCommons
      * Mapping of all beans: bean class => bean instance
      */
     private static final Map<Class<? extends BaseBean>, ? extends BaseBean> BEANS = [:]
+
+
+    /**
+     * Retrieves bean instance for the class specified.
+     *
+     * @param beanClass bean class, extends {@link BaseBean}
+     * @param refresh whether a new instance should be retrieved from Spring context
+     * @return bean instance for the class specified
+     */
     private static <T extends BaseBean> T getBean( Class<T> beanClass, boolean refresh )
     {
         assert BaseBean.class.isAssignableFrom( beanClass )
 
-        BEANS[ beanClass ] = (( refresh ) || ( ! BEANS.containsKey( beanClass ))) ? CONTEXT.getBean( beanClass ) :
+        BEANS[ beanClass ] = (( refresh ) || ( ! BEANS.containsKey( beanClass ))) ? context().getBean( beanClass ) :
                                                                                     BEANS[ beanClass ]
 
-        assert ( beanClass.isInstance( BEANS[ beanClass ] )) &&
-               ( BEANS[ beanClass ] instanceof BaseBean )
+        assert ( beanClass.isInstance( BEANS[ beanClass ] )) && ( BEANS[ beanClass ] instanceof BaseBean )
         BEANS[ beanClass ]
     }
 

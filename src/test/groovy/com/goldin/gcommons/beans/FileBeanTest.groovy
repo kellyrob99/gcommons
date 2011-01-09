@@ -95,7 +95,7 @@ class FileBeanTest extends BaseTest
         file    = new File( dir, '1.txt' )
 
         shouldFailAssert { fileBean.checksum( dir ) }
-        shouldFailWith( NullPointerException.class ) { fileBean.checksum( null ) }
+        shouldFailWith( NullPointerException ) { fileBean.checksum( null ) }
         
         writeFile( file, '7db54443784f547a36a7adb293bfeca2d2c9d15c\r\n' )
         assert fileBean.checksum( file, 'MD5' ) == '04ce83c072936118922107babdf6d21a'

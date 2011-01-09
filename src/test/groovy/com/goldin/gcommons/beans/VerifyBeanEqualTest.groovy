@@ -15,12 +15,12 @@ class VerifyBeanEqualTest extends BaseTest
     {
         shouldFailAssert { verifyBean.equal( new File( "doesn't exist" ), null ) }
 
-        shouldFailWith( NullPointerException.class ) { verifyBean.equal( null, null ) }
-        shouldFailWith( NullPointerException.class ) { verifyBean.equal( null, new File( "aaa" )) }
-        shouldFailWith( NullPointerException.class ) { verifyBean.equal( null, USER_DIR ) }
-        shouldFailWith( NullPointerException.class ) { verifyBean.equal( null, USER_HOME ) }
-        shouldFailWith( NullPointerException.class ) { verifyBean.equal( USER_DIR,  null ) }
-        shouldFailWith( NullPointerException.class ) { verifyBean.equal( USER_HOME, null ) }
+        shouldFailWith( NullPointerException ) { verifyBean.equal( null, null ) }
+        shouldFailWith( NullPointerException ) { verifyBean.equal( null, new File( "aaa" )) }
+        shouldFailWith( NullPointerException ) { verifyBean.equal( null, USER_DIR ) }
+        shouldFailWith( NullPointerException ) { verifyBean.equal( null, USER_HOME ) }
+        shouldFailWith( NullPointerException ) { verifyBean.equal( USER_DIR,  null ) }
+        shouldFailWith( NullPointerException ) { verifyBean.equal( USER_HOME, null ) }
     }
 
 

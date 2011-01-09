@@ -22,7 +22,7 @@ class VerifyBeanTest extends BaseTest
 
         shouldFailAssert { verifyBean.exists( f ) }
         shouldFailAssert { verifyBean.exists( new File( "Doesn't exist" )) }
-        shouldFailWith( NullPointerException.class ) { verifyBean.exists( new File( System.getProperty( "aaa" ))) }
+        shouldFailWith( NullPointerException ) { verifyBean.exists( new File( System.getProperty( "aaa" ))) }
     }
 
 

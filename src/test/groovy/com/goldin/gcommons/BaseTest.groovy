@@ -58,14 +58,14 @@ class BaseTest
     @Test
     void testShouldFail()
     {
-        shouldFailWith( RuntimeException.class )    { throw new RuntimeException()        }
-        shouldFailWith( RuntimeException.class )    { throw new BufferOverflowException() }
-        shouldFailWith( NullPointerException.class ){ throw new NullPointerException()    }
-        shouldFailWith( IOException.class )         { throw new FileNotFoundException()   }
-        shouldFailWith( IOException.class )         { throw new IOException( new RuntimeException())}
+        shouldFailWith( RuntimeException )    { throw new RuntimeException()        }
+        shouldFailWith( RuntimeException )    { throw new BufferOverflowException() }
+        shouldFailWith( NullPointerException ){ throw new NullPointerException()    }
+        shouldFailWith( IOException )         { throw new FileNotFoundException()   }
+        shouldFailWith( IOException )         { throw new IOException( new RuntimeException())}
 
         shouldFailAssert {
-            shouldFailWith( NullPointerException.class ) { throw new RuntimeException() }
+            shouldFailWith( NullPointerException ) { throw new RuntimeException() }
         }
 
         shouldFailAssert { throw new AssertionError() }
@@ -74,10 +74,13 @@ class BaseTest
         shouldFailAssert { assert false  }
         shouldFailAssert { assert null   }
         shouldFailAssert { assert ''     }
+        shouldFailAssert { assert 'aa' == 'bb' }
+        shouldFailAssert { assert    3 == 4    }
+        shouldFailAssert { assert 'aa'.is( new String( 'aa' )) }
 
         try
         {
-            shouldFailWith( IOException.class ) { throw new Throwable() }
+            shouldFailWith( IOException ) { throw new Throwable() }
             assert false // Shouldn't get here
         }
         catch ( AssertionError expected ){ /* Good */ }
