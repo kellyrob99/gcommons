@@ -45,7 +45,7 @@ class GeneralBean extends BaseBean
      * Attempts to execute a closure specified and return its result.
      *
      * @param nTries     number of time execution will be attempted
-     * @param resultType type of result returned by closure,
+     * @param resultType expected type of result to be returned by closure,
      *                   if <code>null</code> - result type check is not performed
      * @param c          closure to invoke
      * @return closure execution result
@@ -80,6 +80,11 @@ class GeneralBean extends BaseBean
         }
     }
 
-
+    
+    /**
+     * Returns '' if number specified is 1, 's' otherwise. Used for combining plural sentences in log messages.
+     * @param n number to check
+     * @return '' if number specified is 1, 's' otherwise
+     */
     String s( Number n ) { ( n == 1 ) ? '' : 's' }
 }

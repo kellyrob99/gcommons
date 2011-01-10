@@ -40,7 +40,7 @@ class NetBean extends BaseBean
         Matcher matcher = ( path =~ Constants.NETWORK_PATTERN )
 
         assert ( matcher.find() && ( matcher.groupCount() == 5 )), \
-               "Unable to parse [$path] as network path: it should be in format [<protocol>://<user>:<password>@<server>:<path>]. " +
+               "Unable to parse [$path] as network path: it should be in format [<protocol>://<user>:<password>@<host>:<path>]. " +
                "Regex pattern is [${ Constants.NETWORK_PATTERN }]"
 
         def ( String protocol, String username, String password, String host, String directory ) =
@@ -56,6 +56,13 @@ class NetBean extends BaseBean
     }
 
 
+    /**
+     * Initializes and connects an {@link FTPClient} using remote path specified of form:
+     * {@code ftp://<user>:<password>@<host>:<path>}
+     * 
+     * @param remotePath remote path to establish ftp connection to: {@code ftp://<user>:<password>@<host>:<path>}
+     * @return client instance initialized and connected to FTP server specified
+     */
     FTPClient ftpClient( String remotePath )
     {
         Map       data   = parseNetworkPath( remotePath )
@@ -80,25 +87,34 @@ class NetBean extends BaseBean
             throw new RuntimeException( "Failed to connect to FTP server [$remotePath]: $t", t )
         }
 
-        getLog( this ).info( "Connected to FTP server [$data.host:$data.directory] as [$data.username]. Remote system is [${ client.getSystemName()}]" )
+        getLog( this ).info( "Connected to FTP server [$data.host:$data.directory] as [$data.username]. " +
+                             "Remote system is [$client.systemName], status is [$client.status]" )
         client
     }
 
-
+    
+    /**
+     * Initializes and connects an {@link FTPClient} using remote path specified of form:
+     * {@code ftp://<user>:<password>@<host>:<path>}. When connected, invokes the closure specified, passing
+     * it {@link FTPClient} instance connected, and disconnects the client.
+     *
+     * @param remotePath remote path to establish ftp connection to: {@code ftp://<user>:<password>@<host>:<path>}
+     * @param resultType closure expected result type,
+     *                   if <code>null</code> - result type check is not performed
+     * @param c closure to invoke and pass {@link FTPClient} instance
+     * @return closure invocation result
+     */
     public <T> T ftpClient( String remotePath, Class<T> resultType, Closure c )
     {
         verify.notNullOrEmpty( remotePath )
         verify.notNull( c, resultType )
 
-        FTPClient client
+        FTPClient client = null
 
         try
         {
-            client       = ftpClient( remotePath )
-            Object value = c.call( client )
-            assert ( value != null ),              "Result returned is null, should be of type [$resultType]"
-            assert resultType.isInstance( value ), "Result returned [$value] is of type [${ value.class }], should be of type [$resultType]"
-            return (( T ) value )
+            client = ftpClient( remotePath )
+            return general.tryIt( 1, resultType ){ c( client ) }
         }
         finally
         {
@@ -110,32 +126,51 @@ class NetBean extends BaseBean
         }
     }
 
-
-    List<FTPFile> listFiles( String remotePath, String includePatterns, int tries = 5 )
+    
+    /**
+     * Lists files on the FTP server specified.
+     *  
+     * @param remotePath remote path to establish ftp connection to: {@code ftp://<user>:<password>@<host>:<path>}
+     * @param globPatterns glob patterns of files to list: {@code "*.*"} or {@code "*.zip"}
+     * @param tries number of attempts 
+     * @return FTP files listed by remote FTP server using glob patterns specified
+     */
+    List<FTPFile> listFiles( String remotePath, String globPatterns, int tries = 5 )
     {
-        List<String> includes = includePatterns.split( /\s*,\s*/ )*.trim().collect { verify.notNullOrEmpty( it ) }
+        verify.notNullOrEmpty( remotePath )
+        List<String> globs = verify.notNullOrEmpty( globPatterns ).split( /\s*,\s*/ )*.trim().collect { verify.notNullOrEmpty( it ) }
+        assert tries > 0
 
+        /**
+         * Trying "tries" times to list files
+         */
         general.tryIt( tries, List.class,
         {
+            /**
+             * Getting a list of files for remote path
+             */
             ftpClient( remotePath, List.class )
             {
                 FTPClient client ->
 
                 List<FTPFile> result = []
 
-                getLog( this ).info( "Listing $includes files .." )
+                getLog( this ).info( "Listing $globs files .." )
 
-                includes.each {
-                    String includePattern ->
-                    FTPFile[] files = client.listFiles( includePattern )
+                globs.each {
+                    String globPattern ->
+
+                    FTPFile[] files = client.listFiles( globPattern )
+
                     if ( getLog( this ).isDebugEnabled())
                     {
-                        getLog( this ).debug( "[$includePattern] - ${ files*.name.join( '\n' ) }" )
+                        getLog( this ).debug( "[$globPattern]:\n${ files*.name.join( '\n' ) }" )
                     }
+                    
                     result.addAll( files )
                 }
 
-                getLog( this ).info( "[${ result.size() }] file${ general.s( result.size()) }: ${ result*.name }" )
+                getLog( this ).info( "[${ result.size() }] file${ general.s( result.size()) }" )
                 result
             }
         })
