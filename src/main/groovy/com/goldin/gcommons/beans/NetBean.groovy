@@ -134,18 +134,16 @@ class NetBean extends BaseBean
      * @param tries number of attempts
      * @return FTP files listed by remote FTP server using glob patterns specified
      */
-    List<FTPFile> listFiles( String remotePath, String globPatterns, int tries = 5 )
+    List<FTPFile> listFiles( String remotePath, List<String> globPatterns = ['*'], int tries = 5 )
     {
         verify.notNullOrEmpty( remotePath )
-        List<String> globs = verify.notNullOrEmpty( globPatterns ).split( /\s*,\s*/ )*.trim().collect { verify.notNullOrEmpty( it ) }
         assert tries > 0
 
         /**
          * Trying "tries" times to list files
          */
         general.tryIt( tries, List.class,
-        {
-            /**
+        {   /**
              * Getting a list of files for remote path
              */
             ftpClient( remotePath, List.class )
@@ -154,11 +152,10 @@ class NetBean extends BaseBean
 
                 List<FTPFile> result = []
 
-                getLog( this ).info( "Listing $globs files .." )
+                getLog( this ).info( "Listing $globPatterns files .." )
 
-                globs.each {
-                    String globPattern ->
-
+                for ( String globPattern in globPatterns*.trim().collect{ verify.notNullOrEmpty( it ) } )
+                {
                     FTPFile[] files = client.listFiles( globPattern )
 
                     if ( getLog( this ).isDebugEnabled())

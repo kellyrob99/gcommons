@@ -61,10 +61,10 @@ class NetBeanTest extends BaseTest
     @Test
     void shouldListFtpFiles()
     {
-        def htmlFiles = netBean.listFiles( ZYMIC_FTP, '*.html' )
-        def indexFile = netBean.listFiles( ZYMIC_FTP, 'index.html' )
-        def jarFiles  = netBean.listFiles( ZYMIC_FTP, 'apache-maven-3.0.1/lib/*.jar' )
-        def txtFiles  = netBean.listFiles( ZYMIC_FTP, 'apache-maven-3.0.1/*.txt' )
+        def htmlFiles = netBean.listFiles( ZYMIC_FTP, ['*.html'] )
+        def indexFile = netBean.listFiles( ZYMIC_FTP, ['index.html'] )
+        def jarFiles  = netBean.listFiles( ZYMIC_FTP, ['apache-maven-3.0.1/lib/*.jar'] )
+        def txtFiles  = netBean.listFiles( ZYMIC_FTP, ['apache-maven-3.0.1/*.txt'] )
 
         assert 1 == htmlFiles.size()
         assert 1 == indexFile.size()
