@@ -55,9 +55,10 @@ class FileBean extends BaseBean
             if ( f.exists())
             {
                 if ( f.isDirectory() && f.listFiles()) { delete( f.listFiles()) }
-                assert ! f.listFiles()
-                assert f.delete() && ( ! f.exists())
+                assert (( ! f.listFiles()) && f.delete()), "Failed to delete [$f.canonicalPath]"
             }
+
+            assert ( ! f.exists())
         }
 
         first( files )
@@ -226,7 +227,7 @@ class FileBean extends BaseBean
     {
         verify.notEmptyFile( sourceArchive )
         verify.notNull( destinationDirectory )
-        
+
         try
         {
             if ( destinationDirectory.isFile()) { delete( destinationDirectory ) }
