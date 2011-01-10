@@ -1,13 +1,57 @@
 package com.goldin.gcommons.beans
 
 import com.goldin.gcommons.BaseTest
+import java.nio.BufferOverflowException
 import org.junit.Test
 
- /**
+/**
  * {@link com.goldin.gcommons.beans.GeneralBean} tests
  */
 class GeneralBeanTest extends BaseTest
 {
+
+    /**
+     * Verifies {@link #shouldFailWith} behavior
+     */
+    @Test
+    void testShouldFail()
+    {
+        shouldFailWith( RuntimeException )        { throw new RuntimeException()        }
+        shouldFailWith( RuntimeException )        { throw new BufferOverflowException() }
+        shouldFailWith( BufferOverflowException ) { throw new BufferOverflowException() }
+        shouldFailWith( NullPointerException )    { throw new NullPointerException()    }
+        shouldFailWith( IOException )             { throw new FileNotFoundException()   }
+        shouldFailWith( IOException )             { throw new IOException( new RuntimeException())}
+
+        shouldFailAssert {
+            shouldFailWith( NullPointerException ) { throw new RuntimeException() }
+        }
+
+        shouldFailAssert { throw new AssertionError() }
+        shouldFailAssert { shouldFailAssert { throw new IOException() }}
+        shouldFailAssert { assert 3 == 5 }
+        shouldFailAssert { assert false  }
+        shouldFailAssert { assert null   }
+        shouldFailAssert { assert ''     }
+        shouldFailAssert { assert 'aa' == 'bb' }
+        shouldFailAssert { assert    3 == 4    }
+        shouldFailAssert { assert 'aa'.is( new String( 'aa' )) }
+
+        try
+        {
+            shouldFailWith( IOException ) { throw new Throwable() }
+            assert false // Shouldn't get here
+        }
+        catch ( AssertionError expected ){ /* Good */ }
+
+        try
+        {
+            shouldFailAssert { shouldFailAssert { shouldFailAssert { throw new IOException() }}}
+            assert false // Shouldn't get here
+        }
+        catch ( AssertionError expected ){ /* Good */ }
+    }
+
 
     @Test
     void matchShouldFailOnBadInput ()

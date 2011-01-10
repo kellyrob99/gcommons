@@ -4,11 +4,9 @@ import com.goldin.gcommons.beans.FileBean
 import com.goldin.gcommons.beans.GeneralBean
 import com.goldin.gcommons.beans.NetBean
 import com.goldin.gcommons.beans.VerifyBean
-import java.nio.BufferOverflowException
 import org.junit.Test
 
-
-/**
+ /**
  * Base class for the tests
  */
 class BaseTest
@@ -49,47 +47,5 @@ class BaseTest
     {
         def caller = ( StackTraceElement ) new Throwable().stackTrace.findAll { it.className.startsWith( 'com.goldin' ) }[ 2 ]
         fileBean.delete( new File( "build/test/${ this.class.name }/${ caller.methodName }/$dirName" ))
-    }
-
-
-    /**
-     * Verifies {@link #shouldFailWith} behavior
-     */
-    @Test
-    void testShouldFail()
-    {
-        shouldFailWith( RuntimeException )    { throw new RuntimeException()        }
-        shouldFailWith( RuntimeException )    { throw new BufferOverflowException() }
-        shouldFailWith( NullPointerException ){ throw new NullPointerException()    }
-        shouldFailWith( IOException )         { throw new FileNotFoundException()   }
-        shouldFailWith( IOException )         { throw new IOException( new RuntimeException())}
-
-        shouldFailAssert {
-            shouldFailWith( NullPointerException ) { throw new RuntimeException() }
-        }
-
-        shouldFailAssert { throw new AssertionError() }
-        shouldFailAssert { shouldFailAssert { throw new IOException() }}
-        shouldFailAssert { assert 3 == 5 }
-        shouldFailAssert { assert false  }
-        shouldFailAssert { assert null   }
-        shouldFailAssert { assert ''     }
-        shouldFailAssert { assert 'aa' == 'bb' }
-        shouldFailAssert { assert    3 == 4    }
-        shouldFailAssert { assert 'aa'.is( new String( 'aa' )) }
-
-        try
-        {
-            shouldFailWith( IOException ) { throw new Throwable() }
-            assert false // Shouldn't get here
-        }
-        catch ( AssertionError expected ){ /* Good */ }
-
-        try
-        {
-            shouldFailAssert { shouldFailAssert { shouldFailAssert { throw new IOException() }}}
-            assert false // Shouldn't get here
-        }
-        catch ( AssertionError expected ){ /* Good */ }
     }
 }

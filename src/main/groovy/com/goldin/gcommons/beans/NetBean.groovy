@@ -20,21 +20,20 @@ class NetBean extends BaseBean
     VerifyBean  verify
 
 
-    private boolean isHttp ( String s ) { s.toLowerCase().startsWith( 'http://' ) }
-    private boolean isScp  ( String s ) { s.toLowerCase().startsWith( 'scp://'  ) }
-    private boolean isFtp  ( String s ) { s.toLowerCase().startsWith( 'ftp://'  ) }
-    private boolean isNet  ( String s ) { isHttp( s ) || isScp( s ) || isFtp( s ) }
+    boolean isHttp ( String s ) { s.toLowerCase().startsWith( 'http://' ) }
+    boolean isScp  ( String s ) { s.toLowerCase().startsWith( 'scp://'  ) }
+    boolean isFtp  ( String s ) { s.toLowerCase().startsWith( 'ftp://'  ) }
+    boolean isNet  ( String s ) { isHttp( s ) || isScp( s ) || isFtp( s ) }
 
 
     /**
      * Parses network path in the following format:
-     * "(http|scp|ftp)://user:password@server:/path/to/file"
-     *
+     * {@code "(http|scp|ftp)://user:password@server:/path/to/file"}
      *
      * @param path network path to parse
      * @return map with following entries: "protocol", "username", "password", "host", "directory"
      */
-    private Map<String, String> parseNetworkPath( String path )
+    Map<String, String> parseNetworkPath( String path )
     {
         assert isNet( verify.notNullOrEmpty( path ))
         Matcher matcher = ( path =~ Constants.NETWORK_PATTERN )
@@ -59,7 +58,7 @@ class NetBean extends BaseBean
     /**
      * Initializes and connects an {@link FTPClient} using remote path specified of form:
      * {@code ftp://<user>:<password>@<host>:<path>}
-     * 
+     *
      * @param remotePath remote path to establish ftp connection to: {@code ftp://<user>:<password>@<host>:<path>}
      * @return client instance initialized and connected to FTP server specified
      */
@@ -92,7 +91,7 @@ class NetBean extends BaseBean
         client
     }
 
-    
+
     /**
      * Initializes and connects an {@link FTPClient} using remote path specified of form:
      * {@code ftp://<user>:<password>@<host>:<path>}. When connected, invokes the closure specified, passing
@@ -126,13 +125,13 @@ class NetBean extends BaseBean
         }
     }
 
-    
+
     /**
      * Lists files on the FTP server specified.
-     *  
+     *
      * @param remotePath remote path to establish ftp connection to: {@code ftp://<user>:<password>@<host>:<path>}
      * @param globPatterns glob patterns of files to list: {@code "*.*"} or {@code "*.zip"}
-     * @param tries number of attempts 
+     * @param tries number of attempts
      * @return FTP files listed by remote FTP server using glob patterns specified
      */
     List<FTPFile> listFiles( String remotePath, String globPatterns, int tries = 5 )
@@ -166,7 +165,7 @@ class NetBean extends BaseBean
                     {
                         getLog( this ).debug( "[$globPattern]:\n${ files*.name.join( '\n' ) }" )
                     }
-                    
+
                     result.addAll( files )
                 }
 

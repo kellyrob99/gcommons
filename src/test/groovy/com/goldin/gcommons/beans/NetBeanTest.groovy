@@ -12,7 +12,40 @@ class NetBeanTest extends BaseTest
 {
 
     @Test
-    void testNetworkPattern()
+    void shouldParseNetworkPath()
+    {
+        def map = netBean.parseNetworkPath( 'ftp://someUser:somePassword@someServer:/somePath' )
+        assert [ 'ftp', 'someUser', 'somePassword', 'someServer', '/somePath' ] ==
+               [ map.protocol, map.username, map.password, map.host, map.directory ]
+
+        map = netBean.parseNetworkPath( 'scp://another.user:strange@passw@rd@aaa.server.com:/' )
+        assert [ 'scp', 'another.user', 'strange@passw@rd', 'aaa.server.com', '/' ] ==
+               [ map.protocol, map.username, map.password, map.host, map.directory ]
+
+        map = netBean.parseNetworkPath( 'http://another.-weir.d.user:even-more.!strange@passw@rd@address.server.com:path' )
+        assert [ 'http', 'another.-weir.d.user', 'even-more.!strange@passw@rd', 'address.server.com', 'path' ] ==
+               [ map.protocol, map.username, map.password, map.host, map.directory ]
+    }
+
+
+    @Test
+    void shouldRecognizeNetworkPath()
+    {
+        assert   netBean.isFtp( 'ftp://user' )
+        assert   netBean.isFtp( 'ftp://user:password@host:path' )
+        assert ! netBean.isFtp( 'stp://user:password@host:path' )
+        assert ! netBean.isFtp( 'scp://user:password@host:path' )
+        assert   netBean.isScp( 'scp://user' )
+        assert   netBean.isScp( 'scp://user:password@host:path' )
+        assert ! netBean.isScp( 'ftp://user:password@host:path' )
+        assert   netBean.isHttp( 'http://user' )
+        assert   netBean.isHttp( 'http://user:password@host:path' )
+        assert ! netBean.isHttp( 'htp://user:password@host:path' )
+    }
+
+
+    @Test
+    void shouldMatchNetworkPattern()
     {
         assert ZYMIC_FTP ==~ NETWORK_PATTERN
         assert ZYMIC_FTP  =~ NETWORK_PATTERN
@@ -23,7 +56,7 @@ class NetBeanTest extends BaseTest
         assert "scp://user:password@server.com:/path"  ==~ NETWORK_PATTERN
         assert "scp://user:password@server.com:/path"   =~ NETWORK_PATTERN
     }
-    
+
 
     @Test
     void shouldListFtpFiles()
