@@ -12,7 +12,7 @@ import static com.goldin.gcommons.Constants.*
 class GCommons
 {
     private static ApplicationContext CONTEXT = newContext()
-    private static ApplicationContext newContext(){ new ClassPathXmlApplicationContext( CONTEXT_PATH ) }
+    private static ApplicationContext newContext(){ new ClassPathXmlApplicationContext( CONTEXT_PATH, GCommons.class ) }
 
     /**
      * Mapping of all beans: bean class => bean instance
