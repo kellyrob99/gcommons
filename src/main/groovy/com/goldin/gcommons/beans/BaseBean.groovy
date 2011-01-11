@@ -13,6 +13,11 @@ class BaseBean
      */
     private static final Map<Class< ? extends BaseBean>, Logger> LOGGERS = [:]
 
+    /**
+     * Injected by Spring
+     */
+    ConstantsBean constants
+
 
     /**
      * Retrieves logger for the bean class specified.

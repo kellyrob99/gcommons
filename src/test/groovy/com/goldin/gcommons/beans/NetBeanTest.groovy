@@ -1,15 +1,16 @@
 package com.goldin.gcommons.beans
 
+
+
 import com.goldin.gcommons.BaseTest
 import org.junit.Test
-import static com.goldin.gcommons.Constants.*
-
 
  /**
  * {@link NetBean} tests
  */
 class NetBeanTest extends BaseTest
 {
+    private static final String  ZYMIC_FTP = 'ftp://evgenyg_zxq:sdaed432e23@evgenyg.zxq.net:/'
 
     @Test
     void shouldParseNetworkPath()
@@ -47,14 +48,14 @@ class NetBeanTest extends BaseTest
     @Test
     void shouldMatchNetworkPattern()
     {
-        assert ZYMIC_FTP ==~ NETWORK_PATTERN
-        assert ZYMIC_FTP  =~ NETWORK_PATTERN
-        assert "ftp://user:password@server.com:/pa"    ==~ NETWORK_PATTERN
-        assert "ftp://user:password@server.com:/"       =~ NETWORK_PATTERN
-        assert "http://user:password@server.com:/pat"  ==~ NETWORK_PATTERN
-        assert "http://user:password@server.com:/path"  =~ NETWORK_PATTERN
-        assert "scp://user:password@server.com:/path"  ==~ NETWORK_PATTERN
-        assert "scp://user:password@server.com:/path"   =~ NETWORK_PATTERN
+        assert ZYMIC_FTP ==~ constantsBean.NETWORK_PATTERN
+        assert ZYMIC_FTP  =~ constantsBean.NETWORK_PATTERN
+        assert "ftp://user:password@server.com:/pa"    ==~ constantsBean.NETWORK_PATTERN
+        assert "ftp://user:password@server.com:/"       =~ constantsBean.NETWORK_PATTERN
+        assert "http://user:password@server.com:/pat"  ==~ constantsBean.NETWORK_PATTERN
+        assert "http://user:password@server.com:/path"  =~ constantsBean.NETWORK_PATTERN
+        assert "scp://user:password@server.com:/path"  ==~ constantsBean.NETWORK_PATTERN
+        assert "scp://user:password@server.com:/path"   =~ constantsBean.NETWORK_PATTERN
     }
 
 

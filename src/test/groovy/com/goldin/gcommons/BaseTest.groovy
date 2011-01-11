@@ -1,20 +1,27 @@
 package com.goldin.gcommons
 
-import com.goldin.gcommons.beans.FileBean
-import com.goldin.gcommons.beans.GeneralBean
-import com.goldin.gcommons.beans.NetBean
-import com.goldin.gcommons.beans.VerifyBean
 import org.junit.Test
+import org.junit.runner.RunWith
+import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.test.context.ContextConfiguration
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
+import com.goldin.gcommons.beans.*
 
- /**
+/**
  * Base class for the tests
  */
+@RunWith(SpringJUnit4ClassRunner.class)
+@ContextConfiguration( '/gcommons-application-context.xml' )
 class BaseTest
 {
-    final VerifyBean  verifyBean  = GCommons.verify()
-    final GeneralBean generalBean = GCommons.general()
-    final FileBean    fileBean    = GCommons.file()
-    final NetBean     netBean     = GCommons.net()
+    /**
+     * Injected by Spring
+     */
+    @Autowired final ConstantsBean  constantsBean
+    @Autowired final VerifyBean     verifyBean
+    @Autowired final GeneralBean    generalBean
+    @Autowired final FileBean       fileBean
+    @Autowired final NetBean        netBean
 
 
     /**
@@ -48,4 +55,8 @@ class BaseTest
         def caller = ( StackTraceElement ) new Throwable().stackTrace.findAll { it.className.startsWith( 'com.goldin' ) }[ 2 ]
         fileBean.delete( new File( "build/test/${ this.class.name }/${ caller.methodName }/$dirName" ))
     }
+
+
+    @Test
+    void testEmpty() { /* To prevent "java.lang.Exception: No runnable methods" */ }
 }

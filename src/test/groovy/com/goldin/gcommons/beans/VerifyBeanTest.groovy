@@ -2,7 +2,7 @@ package com.goldin.gcommons.beans
 
 import com.goldin.gcommons.BaseTest
 import org.junit.Test
-import static com.goldin.gcommons.Constants.*
+
 
 
  /**
@@ -13,8 +13,8 @@ class VerifyBeanTest extends BaseTest
     @Test
     void shouldVerifyExists()
     {
-        verifyBean.exists( USER_DIR_FILE  )
-        verifyBean.exists( USER_HOME_FILE )
+        verifyBean.exists( constantsBean.USER_DIR_FILE  )
+        verifyBean.exists( constantsBean.USER_HOME_FILE )
 
         def f = fileBean.tempFile()
         verifyBean.exists( f )
@@ -43,8 +43,8 @@ class VerifyBeanTest extends BaseTest
     @Test
     void shouldVerifyDirectory()
     {
-        verifyBean.directory( USER_DIR_FILE  )
-        verifyBean.directory( USER_HOME_FILE )
+        verifyBean.directory( constantsBean.USER_DIR_FILE  )
+        verifyBean.directory( constantsBean.USER_HOME_FILE )
 
         def f = fileBean.tempFile()
         verifyBean.file( f )

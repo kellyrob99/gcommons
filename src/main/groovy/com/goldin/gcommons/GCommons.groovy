@@ -1,10 +1,9 @@
 package com.goldin.gcommons
 
+
 import org.springframework.context.ApplicationContext
 import org.springframework.context.support.ClassPathXmlApplicationContext
 import com.goldin.gcommons.beans.*
-import static com.goldin.gcommons.Constants.*
-
 
  /**
  * "GCommons" entry points
@@ -12,7 +11,9 @@ import static com.goldin.gcommons.Constants.*
 class GCommons
 {
     private static ApplicationContext CONTEXT = newContext()
-    private static ApplicationContext newContext(){ new ClassPathXmlApplicationContext( CONTEXT_PATH, GCommons.class ) }
+    private static ApplicationContext newContext(){
+        new ClassPathXmlApplicationContext( '/gcommons-application-context.xml', GCommons.class )
+    }
 
     /**
      * Mapping of all beans: bean class => bean instance
@@ -39,10 +40,11 @@ class GCommons
     }
 
 
-    static ApplicationContext context( boolean refresh = false ) { CONTEXT = ( refresh ? newContext() : CONTEXT ) }
-    static VerifyBean         verify ( boolean refresh = false ) { getBean( VerifyBean.class,  refresh ) }
-    static GeneralBean        general( boolean refresh = false ) { getBean( GeneralBean.class, refresh ) }
-    static FileBean           file   ( boolean refresh = false ) { getBean( FileBean.class,    refresh ) }
-    static IOBean             io     ( boolean refresh = false ) { getBean( IOBean.class,      refresh ) }
-    static NetBean            net    ( boolean refresh = false ) { getBean( NetBean.class,     refresh ) }
+    static ApplicationContext context   ( boolean refresh = false ) { CONTEXT = ( refresh ? newContext() : CONTEXT ) }
+    static ConstantsBean      constants ( boolean refresh = false ) { getBean( ConstantsBean.class, refresh ) }
+    static VerifyBean         verify    ( boolean refresh = false ) { getBean( VerifyBean.class,    refresh ) }
+    static GeneralBean        general   ( boolean refresh = false ) { getBean( GeneralBean.class,   refresh ) }
+    static FileBean           file      ( boolean refresh = false ) { getBean( FileBean.class,      refresh ) }
+    static IOBean             io        ( boolean refresh = false ) { getBean( IOBean.class,        refresh ) }
+    static NetBean            net       ( boolean refresh = false ) { getBean( NetBean.class,       refresh ) }
 }

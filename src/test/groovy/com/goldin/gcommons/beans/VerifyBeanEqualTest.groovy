@@ -2,7 +2,7 @@ package com.goldin.gcommons.beans
 
 import com.goldin.gcommons.BaseTest
 import org.junit.Test
-import static com.goldin.gcommons.Constants.*
+
 
 
  /**
@@ -17,10 +17,10 @@ class VerifyBeanEqualTest extends BaseTest
 
         shouldFailWith( NullPointerException ) { verifyBean.equal( null, null ) }
         shouldFailWith( NullPointerException ) { verifyBean.equal( null, new File( "aaa" )) }
-        shouldFailWith( NullPointerException ) { verifyBean.equal( null, USER_DIR_FILE  ) }
-        shouldFailWith( NullPointerException ) { verifyBean.equal( null, USER_HOME_FILE ) }
-        shouldFailWith( NullPointerException ) { verifyBean.equal( USER_DIR_FILE,  null ) }
-        shouldFailWith( NullPointerException ) { verifyBean.equal( USER_HOME_FILE, null ) }
+        shouldFailWith( NullPointerException ) { verifyBean.equal( null, constantsBean.USER_DIR_FILE  ) }
+        shouldFailWith( NullPointerException ) { verifyBean.equal( null, constantsBean.USER_HOME_FILE ) }
+        shouldFailWith( NullPointerException ) { verifyBean.equal( constantsBean.USER_DIR_FILE,  null ) }
+        shouldFailWith( NullPointerException ) { verifyBean.equal( constantsBean.USER_HOME_FILE, null ) }
     }
 
 
@@ -30,22 +30,22 @@ class VerifyBeanEqualTest extends BaseTest
         shouldFailAssert { verifyBean.equal( new File( "doesn't exist" ),
                                              new File( "doesn't exist" ) ) }
 
-        shouldFailAssert { verifyBean.equal( new File( USER_DIR_FILE, '1.txt' ),
-                                             new File( USER_DIR_FILE, '1.txt' )) }
+        shouldFailAssert { verifyBean.equal( new File( constantsBean.USER_DIR_FILE, '1.txt' ),
+                                             new File( constantsBean.USER_DIR_FILE, '1.txt' )) }
 
-        shouldFailAssert { verifyBean.equal( new File( USER_DIR_FILE, '1.txt' ),
-                                             USER_DIR_FILE) }
+        shouldFailAssert { verifyBean.equal( new File( constantsBean.USER_DIR_FILE, '1.txt' ),
+                                             constantsBean.USER_DIR_FILE) }
 
-        def file = new File( USER_HOME_FILE, 'a.txt' )
+        def file = new File( constantsBean.USER_HOME_FILE, 'a.txt' )
 
-        shouldFailAssert { verifyBean.equal( USER_HOME_FILE, file ) } // Directory + missing file
+        shouldFailAssert { verifyBean.equal( constantsBean.USER_HOME_FILE, file ) } // Directory + missing file
 
         file.write( 'anything' )
 
-        shouldFailAssert { verifyBean.equal( USER_HOME_FILE, file ) } // Directory + existing file
-        shouldFailAssert { verifyBean.equal( USER_DIR_FILE,  file ) }
-        shouldFailAssert { verifyBean.equal( file,  USER_HOME_FILE) }
-        shouldFailAssert { verifyBean.equal( file,  USER_DIR_FILE) }
+        shouldFailAssert { verifyBean.equal( constantsBean.USER_HOME_FILE, file ) } // Directory + existing file
+        shouldFailAssert { verifyBean.equal( constantsBean.USER_DIR_FILE,  file ) }
+        shouldFailAssert { verifyBean.equal( file,  constantsBean.USER_HOME_FILE) }
+        shouldFailAssert { verifyBean.equal( file,  constantsBean.USER_DIR_FILE) }
 
         fileBean.delete( file )
         shouldFailAssert { verifyBean.equal( file, file ) }
@@ -110,10 +110,10 @@ class VerifyBeanEqualTest extends BaseTest
         shouldFailAssert { verifyBean.equal( d1, d2 ) }
 
         shouldFailAssert {
-            shouldFailAssert { verifyBean.equal( USER_DIR_FILE,  USER_DIR_FILE, false )}
+            shouldFailAssert { verifyBean.equal( constantsBean.USER_DIR_FILE,  constantsBean.USER_DIR_FILE, false )}
         }
 
-        shouldFailAssert { verifyBean.equal( USER_DIR_FILE,  USER_HOME_FILE, false )}
+        shouldFailAssert { verifyBean.equal( constantsBean.USER_DIR_FILE,  constantsBean.USER_HOME_FILE, false )}
 
         fileBean.delete( d1, d2 )
         shouldFailAssert { verifyBean.equal( d1, d2 ) }
@@ -123,8 +123,8 @@ class VerifyBeanEqualTest extends BaseTest
     @Test
     void shouldVerifyEqualDirectoriesWithPattern()
     {
-        def buildDir = new File( USER_DIR_FILE, 'build/classes' )
-        def srcDir   = new File( USER_DIR_FILE, 'src/main'      )
+        def buildDir = new File( constantsBean.USER_DIR_FILE, 'build/classes' )
+        def srcDir   = new File( constantsBean.USER_DIR_FILE, 'src/main'      )
 
         verifyBean.equal( buildDir, buildDir, false )
         verifyBean.equal( buildDir, buildDir, false, '**/*.class' )

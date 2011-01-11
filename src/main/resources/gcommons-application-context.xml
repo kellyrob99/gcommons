@@ -6,30 +6,39 @@
        xsi:schemaLocation = "http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
 
 
+    <bean name                    = "constants"
+          class                   = "com.goldin.gcommons.beans.ConstantsBean"/>
+
     <bean name                    = "verify"
           class                   = "com.goldin.gcommons.beans.VerifyBean"
+          p:constants-ref         = "constants"
           p:verifyEqualHelper-ref = "verifyEqualHelper"/>
 
     <bean name                    = "verifyEqualHelper"
           class                   = "com.goldin.gcommons.beans.VerifyEqualHelper"
+          p:constants-ref         = "constants"
           p:general-ref           = "general"
           p:file-ref              = "file"/>
 
     <bean name                    = "general"
           class                   = "com.goldin.gcommons.beans.GeneralBean"
+          p:constants-ref         = "constants"
           p:verify-ref            = "verify"/>
 
     <bean name                    = "file"
           class                   = "com.goldin.gcommons.beans.FileBean"
+          p:constants-ref         = "constants"
           p:verify-ref            = "verify"
           p:io-ref                = "io"/>
 
     <bean name                    = "io"
           class                   = "com.goldin.gcommons.beans.IOBean"
+          p:constants-ref         = "constants"
           p:verify-ref            = "verify"/>
 
     <bean name                    = "net"
           class                   = "com.goldin.gcommons.beans.NetBean"
+          p:constants-ref         = "constants"
           p:general-ref           = "general"
           p:verify-ref            = "verify"/>
 </beans>

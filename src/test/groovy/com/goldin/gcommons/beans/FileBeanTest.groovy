@@ -2,7 +2,7 @@ package com.goldin.gcommons.beans
 
 import com.goldin.gcommons.BaseTest
 import org.junit.Test
-import static com.goldin.gcommons.Constants.*
+
 
 
  /**
@@ -110,15 +110,15 @@ class FileBeanTest extends BaseTest
     @Test
     void testFiles()
     {
-        def    allFiles = fileBean.files( USER_DIR_FILE )
+        def    allFiles = fileBean.files( constantsBean.USER_DIR_FILE )
         assert allFiles
         assert allFiles.each{ verifyBean.exists( it ) }
-        assert allFiles == fileBean.files( USER_DIR_FILE, null, null, true, false )
-        assert allFiles != fileBean.files( USER_DIR_FILE, null, null, true, true  )
+        assert allFiles == fileBean.files( constantsBean.USER_DIR_FILE, null, null, true, false )
+        assert allFiles != fileBean.files( constantsBean.USER_DIR_FILE, null, null, true, true  )
 
-        def buildDir   = new File( USER_DIR_FILE, 'build' )
+        def buildDir   = new File( constantsBean.USER_DIR_FILE, 'build' )
         def classFiles = fileBean.files( buildDir, ['**/*.class'] )
-        def sources    = fileBean.files( USER_DIR_FILE, ['**/*.groovy'] )
+        def sources    = fileBean.files( constantsBean.USER_DIR_FILE, ['**/*.groovy'] )
         assert classFiles.every{ it.name.endsWith( '.class'  ) }
         assert sources.every{    it.name.endsWith( '.groovy' ) }
         verifyBean.file( classFiles as File[] )
@@ -128,7 +128,7 @@ class FileBeanTest extends BaseTest
         shouldFailAssert { fileBean.files( buildDir, ['**/*.ppt'] )}
         assert fileBean.files( buildDir, ['**/*.ppt'], null, true, false, false ).isEmpty()
 
-        allFiles = fileBean.files( USER_DIR_FILE, ['**/*.groovy','**/*.class'], ['**/*Test*.*'] )
+        allFiles = fileBean.files( constantsBean.USER_DIR_FILE, ['**/*.groovy','**/*.class'], ['**/*Test*.*'] )
         assert ! allFiles.any { it.name.contains( 'Test' ) }
         assert allFiles.every { it.name.endsWith( '.groovy' ) || it.name.endsWith( '.class' ) }
 
