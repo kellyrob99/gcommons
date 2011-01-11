@@ -82,7 +82,7 @@ class FileBeanTest extends BaseTest
         assert ! dir.isFile()
     }
 
-    
+
     @Test
     void shouldCalculateChecksum()
     {
@@ -96,7 +96,7 @@ class FileBeanTest extends BaseTest
 
         shouldFailAssert { fileBean.checksum( dir ) }
         shouldFailWith( NullPointerException ) { fileBean.checksum( null ) }
-        
+
         writeFile( file, '7db54443784f547a36a7adb293bfeca2d2c9d15c\r\n' )
         assert fileBean.checksum( file, 'MD5' ) == '04ce83c072936118922107babdf6d21a'
         assert fileBean.checksum( file )        == 'fcd551a840d37d3c885db298e893ec77468a81cd'
@@ -110,15 +110,15 @@ class FileBeanTest extends BaseTest
     @Test
     void testFiles()
     {
-        def    allFiles = fileBean.files( USER_DIR )
+        def    allFiles = fileBean.files( USER_DIR_FILE )
         assert allFiles
         assert allFiles.each{ verifyBean.exists( it ) }
-        assert allFiles == fileBean.files( USER_DIR, null, null, true, false )
-        assert allFiles != fileBean.files( USER_DIR, null, null, true, true  )
+        assert allFiles == fileBean.files( USER_DIR_FILE, null, null, true, false )
+        assert allFiles != fileBean.files( USER_DIR_FILE, null, null, true, true  )
 
-        def buildDir   = new File( USER_DIR, 'build' )
+        def buildDir   = new File( USER_DIR_FILE, 'build' )
         def classFiles = fileBean.files( buildDir, ['**/*.class'] )
-        def sources    = fileBean.files( USER_DIR, ['**/*.groovy'] )
+        def sources    = fileBean.files( USER_DIR_FILE, ['**/*.groovy'] )
         assert classFiles.every{ it.name.endsWith( '.class'  ) }
         assert sources.every{    it.name.endsWith( '.groovy' ) }
         verifyBean.file( classFiles as File[] )
@@ -128,7 +128,7 @@ class FileBeanTest extends BaseTest
         shouldFailAssert { fileBean.files( buildDir, ['**/*.ppt'] )}
         assert fileBean.files( buildDir, ['**/*.ppt'], null, true, false, false ).isEmpty()
 
-        allFiles = fileBean.files( USER_DIR, ['**/*.groovy','**/*.class'], ['**/*Test*.*'] )
+        allFiles = fileBean.files( USER_DIR_FILE, ['**/*.groovy','**/*.class'], ['**/*Test*.*'] )
         assert ! allFiles.any { it.name.contains( 'Test' ) }
         assert allFiles.every { it.name.endsWith( '.groovy' ) || it.name.endsWith( '.class' ) }
 

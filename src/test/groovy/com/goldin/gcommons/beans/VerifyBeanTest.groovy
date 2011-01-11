@@ -13,8 +13,8 @@ class VerifyBeanTest extends BaseTest
     @Test
     void shouldVerifyExists()
     {
-        verifyBean.exists( USER_DIR  )
-        verifyBean.exists( USER_HOME )
+        verifyBean.exists( USER_DIR_FILE  )
+        verifyBean.exists( USER_HOME_FILE )
 
         def f = fileBean.tempFile()
         verifyBean.exists( f )
@@ -43,8 +43,8 @@ class VerifyBeanTest extends BaseTest
     @Test
     void shouldVerifyDirectory()
     {
-        verifyBean.directory( USER_DIR  )
-        verifyBean.directory( USER_HOME )
+        verifyBean.directory( USER_DIR_FILE  )
+        verifyBean.directory( USER_HOME_FILE )
 
         def f = fileBean.tempFile()
         verifyBean.file( f )
@@ -54,7 +54,7 @@ class VerifyBeanTest extends BaseTest
         fileBean.delete( f )
 
         shouldFailAssert { verifyBean.file( f ) }
-        
+
         verifyBean.directory( f.getParentFile())
         verifyBean.directory( f.getParentFile().getParentFile())
     }

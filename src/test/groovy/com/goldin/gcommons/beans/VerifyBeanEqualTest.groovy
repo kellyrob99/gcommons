@@ -17,10 +17,10 @@ class VerifyBeanEqualTest extends BaseTest
 
         shouldFailWith( NullPointerException ) { verifyBean.equal( null, null ) }
         shouldFailWith( NullPointerException ) { verifyBean.equal( null, new File( "aaa" )) }
-        shouldFailWith( NullPointerException ) { verifyBean.equal( null, USER_DIR ) }
-        shouldFailWith( NullPointerException ) { verifyBean.equal( null, USER_HOME ) }
-        shouldFailWith( NullPointerException ) { verifyBean.equal( USER_DIR,  null ) }
-        shouldFailWith( NullPointerException ) { verifyBean.equal( USER_HOME, null ) }
+        shouldFailWith( NullPointerException ) { verifyBean.equal( null, USER_DIR_FILE  ) }
+        shouldFailWith( NullPointerException ) { verifyBean.equal( null, USER_HOME_FILE ) }
+        shouldFailWith( NullPointerException ) { verifyBean.equal( USER_DIR_FILE,  null ) }
+        shouldFailWith( NullPointerException ) { verifyBean.equal( USER_HOME_FILE, null ) }
     }
 
 
@@ -28,30 +28,30 @@ class VerifyBeanEqualTest extends BaseTest
     void shouldFailOnMissingFiles()
     {
         shouldFailAssert { verifyBean.equal( new File( "doesn't exist" ),
-                                         new File( "doesn't exist" ) ) }
+                                             new File( "doesn't exist" ) ) }
 
-        shouldFailAssert { verifyBean.equal( new File( USER_DIR, '1.txt' ),
-                                         new File( USER_DIR, '1.txt' )) }
-        
-        shouldFailAssert { verifyBean.equal( new File( USER_DIR, '1.txt' ),
-                                         USER_DIR ) }
+        shouldFailAssert { verifyBean.equal( new File( USER_DIR_FILE, '1.txt' ),
+                                             new File( USER_DIR_FILE, '1.txt' )) }
 
-        def file = new File( USER_HOME, 'a.txt' )
+        shouldFailAssert { verifyBean.equal( new File( USER_DIR_FILE, '1.txt' ),
+                                             USER_DIR_FILE) }
 
-        shouldFailAssert { verifyBean.equal( USER_HOME, file ) } // Directory + missing file
+        def file = new File( USER_HOME_FILE, 'a.txt' )
+
+        shouldFailAssert { verifyBean.equal( USER_HOME_FILE, file ) } // Directory + missing file
 
         file.write( 'anything' )
 
-        shouldFailAssert { verifyBean.equal( USER_HOME, file ) } // Directory + existing file
-        shouldFailAssert { verifyBean.equal( USER_DIR,  file ) }
-        shouldFailAssert { verifyBean.equal( file, USER_HOME ) }
-        shouldFailAssert { verifyBean.equal( file, USER_DIR  ) }
+        shouldFailAssert { verifyBean.equal( USER_HOME_FILE, file ) } // Directory + existing file
+        shouldFailAssert { verifyBean.equal( USER_DIR_FILE,  file ) }
+        shouldFailAssert { verifyBean.equal( file,  USER_HOME_FILE) }
+        shouldFailAssert { verifyBean.equal( file,  USER_DIR_FILE) }
 
         fileBean.delete( file )
         shouldFailAssert { verifyBean.equal( file, file ) }
     }
 
-    
+
     @Test
     void shouldVerifyEqualFiles()
     {
@@ -92,7 +92,7 @@ class VerifyBeanEqualTest extends BaseTest
 
         new File( d1, 'a.txt' ).write( 'aa' )
         new File( d2, 'a.txt' ).write( 'aa' )
-        
+
         verifyBean.equal( d1, d2 )
 
         new File( d1, 'aa.txt' ).write( 'aa' )
@@ -103,18 +103,18 @@ class VerifyBeanEqualTest extends BaseTest
         new File( d2, 'aa.txt' ).write( 'aa' )
 
         verifyBean.equal( d1, d2 )
-        
+
         new File( d1, 'aa.txt' ).write( 'aa' )
         new File( d2, 'aa.xml' ).write( 'aa' )
 
         shouldFailAssert { verifyBean.equal( d1, d2 ) }
 
         shouldFailAssert {
-            shouldFailAssert { verifyBean.equal( USER_DIR,  USER_DIR, false )}
+            shouldFailAssert { verifyBean.equal( USER_DIR_FILE,  USER_DIR_FILE, false )}
         }
 
-        shouldFailAssert { verifyBean.equal( USER_DIR, USER_HOME, false )}
-        
+        shouldFailAssert { verifyBean.equal( USER_DIR_FILE,  USER_HOME_FILE, false )}
+
         fileBean.delete( d1, d2 )
         shouldFailAssert { verifyBean.equal( d1, d2 ) }
     }
@@ -123,8 +123,8 @@ class VerifyBeanEqualTest extends BaseTest
     @Test
     void shouldVerifyEqualDirectoriesWithPattern()
     {
-        def buildDir = new File( USER_DIR, 'build/classes' )
-        def srcDir   = new File( USER_DIR, 'src/main'      )
+        def buildDir = new File( USER_DIR_FILE, 'build/classes' )
+        def srcDir   = new File( USER_DIR_FILE, 'src/main'      )
 
         verifyBean.equal( buildDir, buildDir, false )
         verifyBean.equal( buildDir, buildDir, false, '**/*.class' )
