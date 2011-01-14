@@ -14,18 +14,6 @@ class GroovyBean extends BaseBean
     GeneralBean general
 
 
-    class GroovyConfig
-    {
-        String   classpath
-        String[] classpaths
-        String[] classpaths () { general.array( this.classpaths, this.classpath, String ) }
-
-        boolean verbose        = false
-        boolean verboseBinding = false
-        Binding binding
-    }
-
-    
     /**
      * Evaluates Groovy expression provided and casts it to the class specified.
      *
