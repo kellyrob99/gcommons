@@ -106,9 +106,10 @@ class GroovyBean extends BaseBean
      *
      * @return {@link groovy.lang.Binding} instance created
      */
-    Binding binding( Object ... bindingObjects )
+    Binding binding( Map map = [:], Object ... bindingObjects )
     {
-        Map<String, Object> binding = [:]
+        verify.notNull( map )
+        def bindingMap = new HashMap( map )
 
         if ( bindingObjects )
         {
@@ -117,40 +118,37 @@ class GroovyBean extends BaseBean
 
             for ( def j = 0; j < bindingObjects.size(); j += 2 )
             {
-                binding[ bindingObjects[ j ]] = bindingObjects[ j + 1 ]
+                bindingMap[ bindingObjects[ j ]] = bindingObjects[ j + 1 ]
             }
         }
 
-        new Binding( fixNames( binding ))
+        new Binding( fixNames( bindingMap ))
     }
 
 
     /**
-     * {@link #binding(Object[])} helper - fixes names in a Map specified
-     * by creating a new Map with all previous keys being Groovy-normalized
+     * {@link #binding(Map, Object[])} helper - fixes names in a Map specified
+     * by creating a new Map with all previous keys being Groovy-normalized.
      *
-     *
-     * @param properties properties to read
+     * @param map properties to read
      */
-    private Map<String, Object> fixNames( Map<String, Object> properties )
+    private Map<String, Object> fixNames( Map<String, Object> map )
     {
-        verify.notNull( properties )
+        verify.notNull( map )
 
         Map<String, Object> result      = [:]
         def                 isForbidden = { ( it == '.' ) || ( it == '-' ) }
 
-        properties.each {
+        map.each {
 
             String propertyName, Object propertyValue ->
 
-            char[] chars = propertyName.toCharArray()
-
-            if ( chars.any( isForbidden ))
+            if ( propertyName.toCharArray().any( isForbidden ))
             {
                 StringBuilder fixedPropertyName = new StringBuilder()
                 boolean       capitalize        = false
 
-                for ( ch in chars )
+                for ( ch in propertyName.toCharArray())
                 {
                     if ( isForbidden( ch ))
                     {
