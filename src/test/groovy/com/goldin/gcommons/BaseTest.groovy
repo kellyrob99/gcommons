@@ -2,6 +2,8 @@ package com.goldin.gcommons
 
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.test.context.ContextConfiguration
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
@@ -57,7 +59,22 @@ class BaseTest
         fileBean.delete( new File( "build/test/${ this.class.name }/${ caller.methodName }/$dirName" ))
     }
 
+    /**
+     * Map of loggers for each bean
+     */
+    private static final Map<Class<? extends BaseTest>, Logger> LOGGERS = [:]
 
+    /**
+     * Retrieves logger for the bean class specified.
+     * @param o bean class
+     * @return logger to use
+     */
+    static Logger getLog( BaseTest test)
+    {
+        LOGGERS[ test.class ] = LOGGERS[ test.class ] ?: LoggerFactory.getLogger( test.class )
+    }
+
+    
     @Test
     void testEmpty() { /* To prevent "java.lang.Exception: No runnable methods" */ }
 }

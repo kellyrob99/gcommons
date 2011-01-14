@@ -58,4 +58,42 @@ class GroovyBeanTest extends BaseTest
 
     }
 
+
+    @Test
+    void shouldFixNames()
+    {
+        def check = {
+            Map expected, Map input ->
+            assert ( expected == groovyBean.fixNames( input ))
+            getLog( this ).info( "$input => $expected" )
+        }
+
+        check( [:], [:] )
+
+        check( [ property : 'value' ],
+               [ property : 'value' ] )
+
+        check( [ someProperty           : 'value1',
+                 someOtherProperty      : 'value2',
+                 yetAnotherProperty     : 'value3' ],
+               [ 'some-property'        : 'value1',
+                 'some.other-property'  : 'value2',
+                 'yet-another.property' : 'value3' ] )
+
+        check( [ aBC         : 'value1',
+                 aBCD        : 'value2' ],
+               [ 'a...b---c' : 'value1',
+                 'a.b.c.d'   : 'value2' ] )
+
+        check( [ aaBbCc         : 'value1',
+                 aaBbCcDd       : 'value2' ],
+               [ 'aa...bb---cc' : 'value1',
+                 'aa.bb.cc.dd'  : 'value2' ] )
+
+        check( [ aBC                      : 'value1',
+                 dBfCgDh                  : 'value2' ],
+               [ '...a...b---c---'        : 'value1',
+                 '-.-.d.bf.cg.dh..---...' : 'value2' ] )
+    }
+
 }
