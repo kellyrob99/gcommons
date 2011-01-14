@@ -68,7 +68,7 @@ class GeneralBeanTest extends BaseTest
     }
 
     @Test
-    void testMatch()
+    void shouldMatch ()
     {
         assert generalBean.match( '/a/b/c/d', '/a/b/c/d' )
         assert generalBean.match( '/a/b/c/d', '**/b/c/d' )
@@ -141,6 +141,57 @@ class GeneralBeanTest extends BaseTest
         assert ! generalBean.match( 'd:/some/path/dir/8.xml',  '8xml/aaa'  )
     }
 
+
+    @Test
+    void shouldMatchAgain()
+    {
+        def check = { String path, String pattern, boolean positiveCheck = true ->
+            def result = generalBean.match( path, pattern )
+            if ( positiveCheck ) { assert result;       getLog( this ).info( "[$path] matches [$pattern]" ) }
+            else                 { assert ( ! result ); getLog( this ).info( "[$path] doesn't match [$pattern]" ) }
+        }
+
+        check( 'M1.xml',                                        '**/*' )
+        check( 'M2.xml',                                        '**/*.xml' )
+        check( 'M3.xml',                                        '*.xml' )
+        check( 'M4.xml',                                        'M4.xml' )
+        check( '.hudson/hudson.scm.CVSSCM.xml',                 '**/*' )
+        check( '.hudson/hudson.scm.CVSSCM.xml',                 '**/*.xml' )
+        check( '.hudson/aaa/bbb/someDir/hudson.scm.CVSSCM.xml', '**/someDir/*.xml' )
+        check( '.hudson/aaa/bbb/someDir/hudson.scm.CVSSCM.xml', '**/aaa/bbb/someDir/*.xml' )
+        check( '.hudson/aaa/bbb/someDir/hudson.scm.CVSSCM.xml', '**/aaa/**/someDir/*.xml' )
+        check( '.hudson/aaa/bbb/someDir/hudson.scm.CVSSCM.xml', '**/aaa/**' )
+        check( '.hudson/aaa/bbb/someDir/hudson.scm.CVSSCM.xml', '**/bbb/**' )
+        check( '.hudson/aaa/bbb/someDir/hudson.scm.CVSSCM.xml', '**/someDir/**' )
+        check( '.hudson/aaa/bbb/someDir/hudson.scm.CVSSCM.xml', '**/bbb/**/*.xml' )
+        check( 'src/test/resources/configs/google-guice',       '**' )
+        check( 'src/test/resources/configs/google-guice',        '**/google-guice' )
+        check( 'src/test/resources/configs/google-guice',        '**/google-guice/**' )
+        check( 'src/test/resources/configs/google-guice/1.txt',  '**/*.txt' )
+        check( 'src/test/resources/configs/google-guice',        'src/test/resources/configs/google-guice' )
+        check( 'src/test/resources/configs/google-guice/1.txt',  'src/test/resources/configs/google-guice/1.txt' )
+        check( 'src/test/resources/configs/google-guice/1.txt',  'src/**/resources/**/google-guice/1.txt' )
+        check( 'src/test/resources/configs/google-guice/1.txt',  'src/**/resources/**/**/1.txt' )
+        check( 'src/test/resources/configs/google-guice/1.txt',  'src/**/resources/**/1.txt' )
+        check( 'src/test/resources/configs/google-guice/1.txt',  'src/**/1.txt' )
+        check( 'src/test/resources/configs/google-guice/1.txt',  '**/1.txt' )
+
+        check( '/home/evgenyg_admin/java/agent/work/265f468bcb78a703/maven-hudson-plugin/full/src/test/resources/configs/gitorious-wsarena3-version1/config.xml',
+               '**/*.xml' )
+        check( '/home/evgenyg_admin/java/agent/work/265f468bcb78a703/maven-hudson-plugin/full/src/test/resources/configs/gitorious-wsarena3-version1/config.xml',
+               '/**/*.xml' )
+        check( '/home/evgenyg_admin/java/agent/work/265f468bcb78a703/maven-hudson-plugin/full/src/test/resources/configs/gitorious-wsarena3-version1/config.xml',
+               '**' )
+        check( '/home/evgenyg_admin/java/agent/work/265f468bcb78a703/maven-hudson-plugin/full/src/test/resources/configs/gitorious-wsarena3-version1/config.xml',
+               '/**/' )
+
+        check( 'src/test/resources/configs/google-guice',       '**/*.xml', false )
+        check( 'src/test/resources/configs/google-guice',       'src/test/resources/configs/google-guice/a', false )
+        check( 'src/test/resources/configs/google-guice',       'a/src/test/resources/configs/google-guice/a', false )
+        check( 'src/test/resources/configs/google-guice',       'a/src/test/resources/configs/google-guice', false )
+        check( 'src/test/resources/configs/google-guice/a.xml', '**/*.txt', false )
+        check( 'src/test/resources/configs/google-guice/a.xml', '**/aaaaa/*.xml', false )
+    }
 
 
     @Test
