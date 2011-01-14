@@ -47,4 +47,5 @@ class GCommons
     static FileBean           file      ( boolean refresh = false ) { getBean( FileBean.class,      refresh ) }
     static IOBean             io        ( boolean refresh = false ) { getBean( IOBean.class,        refresh ) }
     static NetBean            net       ( boolean refresh = false ) { getBean( NetBean.class,       refresh ) }
+    static GroovyBean         groovy    ( boolean refresh = false ) { getBean( GroovyBean.class,    refresh ) }
 }

@@ -13,8 +13,7 @@ class FileBean extends BaseBean
     /**
      * Set by Spring
      */
-    VerifyBean verify
-    IOBean     io
+    IOBean io
 
 
     /**

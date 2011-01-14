@@ -22,6 +22,7 @@ class BaseTest
     @Autowired final GeneralBean    generalBean
     @Autowired final FileBean       fileBean
     @Autowired final NetBean        netBean
+    @Autowired final GroovyBean     groovyBean
 
 
     /**

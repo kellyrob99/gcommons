@@ -192,4 +192,16 @@ class GeneralBeanTest extends BaseTest
         assert 'many chances' == "many chance${ generalBean.s( 1000 ) }"
         assert 'one chance'   == "one chance${ generalBean.s( 1 ) }"
     }
+
+
+    @Test
+    void testArray()
+    {
+        assert [1, 2] as Integer[] == generalBean.array( [1, 2] as Integer[], 3,    Integer )
+        assert [1, 2] as Integer[] == generalBean.array( [1, 2] as Integer[], null, Integer )
+        assert [3]    as Integer[] == generalBean.array( null,                3,    Integer )
+        assert [77]   as Integer[] == generalBean.array( null,                77,   Integer )
+        assert []     as Integer[] == generalBean.array( [] as Integer[],     5,    Integer )
+        assert []     as Integer[] == generalBean.array( null,                null, Integer )
+    }
 }

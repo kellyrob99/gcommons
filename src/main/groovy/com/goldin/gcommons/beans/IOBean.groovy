@@ -6,12 +6,6 @@ package com.goldin.gcommons.beans
  */
 class IOBean extends BaseBean
 {
-    /**
-     * Verifier, set by Spring
-     */
-    VerifyBean verify
-
-
     long copy ( InputStream input, OutputStream output, long bytesExpected = -1 )
     {
         byte[] buffer         = new byte[ 2 * 1024 ]

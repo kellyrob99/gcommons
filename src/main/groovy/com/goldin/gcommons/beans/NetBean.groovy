@@ -11,12 +11,10 @@ import org.apache.commons.net.ftp.FTPReply
  */
 class NetBean extends BaseBean
 {
-
     /**
-     * Other beans, set by Spring
+     * Set by Spring
      */
     GeneralBean general
-    VerifyBean  verify
 
 
     boolean isHttp ( String s ) { s.toLowerCase().startsWith( 'http://' ) }

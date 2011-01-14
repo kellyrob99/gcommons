@@ -1,20 +1,13 @@
 package com.goldin.gcommons.beans
 
+import java.lang.reflect.Array
 import org.springframework.util.AntPathMatcher
 
- /**
+/**
  * General usage methods
  */
 class GeneralBean extends BaseBean
 {
-
-    /**
-     * Verifier, set by Spring
-     */
-    VerifyBean verify
-
-
-
     /**
      * {@link org.springframework.util.PathMatcher#match(String, String)} wrapper
      * @param path    path to match
@@ -87,4 +80,39 @@ class GeneralBean extends BaseBean
      * @return '' if number specified is 1, 's' otherwise
      */
     String s( Number n ) { ( n == 1 ) ? '' : 's' }
+
+    
+
+    /**
+     * Retrieves an array combined from values provided:
+     * <ul>
+     * <li> If first parameter specified is not <code>null</code> - it is returned as is
+     * <li> If second parameter specified is not <code>null</code> - it is returned as a single-element array
+     * <li> Otherwise, empty array is returned
+     * </ul>
+     *
+     * @param array    first option to check
+     * @param instance single instance to return as a single-element array if <code>array</code> is <code>null</code>
+     * @param type     element's type (required for creating an array)
+     * @param <T>      element's type
+     *
+     * @return         see above
+     */
+    public <T> T[] array( T[] array, T instance, Class<T> type )
+    {
+        if ( array != null )
+        {
+            array
+        }
+        else if ( instance != null )
+        {
+            T[] newArray = (( T[] ) Array.newInstance( type, 1 ))
+            newArray[ 0 ] = instance
+            newArray
+        }
+        else
+        {
+            (( T[] ) Array.newInstance( type, 0 ))
+        }
+    }
 }

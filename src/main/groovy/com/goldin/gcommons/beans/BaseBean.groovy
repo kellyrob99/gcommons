@@ -17,6 +17,8 @@ class BaseBean
      * Injected by Spring
      */
     ConstantsBean constants
+    VerifyBean    verify
+
 
 
     /**

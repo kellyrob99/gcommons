@@ -39,6 +39,12 @@
     <bean name                    = "net"
           class                   = "com.goldin.gcommons.beans.NetBean"
           p:constants-ref         = "constants"
-          p:general-ref           = "general"
-          p:verify-ref            = "verify"/>
+          p:verify-ref            = "verify"
+          p:general-ref           = "general"/>
+
+    <bean name                    = "groovy"
+          class                   = "com.goldin.gcommons.beans.GroovyBean"
+          p:constants-ref         = "constants"
+          p:verify-ref            = "verify"
+          p:general-ref           = "general"/>
 </beans>
