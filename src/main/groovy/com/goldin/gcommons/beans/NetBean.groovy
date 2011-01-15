@@ -139,11 +139,11 @@ class NetBean extends BaseBean
         /**
          * Trying "tries" times to list files
          */
-        general.tryIt( tries, List.class,
+        general.tryIt( tries, List,
         {   /**
              * Getting a list of files for remote path
              */
-            ftpClient( remotePath, List.class )
+            ftpClient( remotePath, List )
             {
                 FTPClient client ->
 

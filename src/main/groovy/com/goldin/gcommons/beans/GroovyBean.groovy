@@ -71,7 +71,7 @@ class GroovyBean extends BaseBean
 
         Class valueType = (( value != null ) ? value.getClass() : null )
 
-        if ( String.class == resultType )
+        if ( String == resultType )
         {
             value = String.valueOf( value )
         }

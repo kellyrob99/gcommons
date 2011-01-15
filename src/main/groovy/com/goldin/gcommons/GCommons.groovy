@@ -12,7 +12,7 @@ class GCommons
 {
     private static ApplicationContext CONTEXT = newContext()
     private static ApplicationContext newContext(){
-        new ClassPathXmlApplicationContext( '/gcommons-application-context.xml', GCommons.class )
+        new ClassPathXmlApplicationContext( '/gcommons-application-context.xml', GCommons )
     }
 
     /**
@@ -41,11 +41,11 @@ class GCommons
 
 
     static ApplicationContext context   ( boolean refresh = false ) { CONTEXT = ( refresh ? newContext() : CONTEXT ) }
-    static ConstantsBean      constants ( boolean refresh = false ) { getBean( ConstantsBean.class, refresh ) }
-    static VerifyBean         verify    ( boolean refresh = false ) { getBean( VerifyBean.class,    refresh ) }
-    static GeneralBean        general   ( boolean refresh = false ) { getBean( GeneralBean.class,   refresh ) }
-    static FileBean           file      ( boolean refresh = false ) { getBean( FileBean.class,      refresh ) }
-    static IOBean             io        ( boolean refresh = false ) { getBean( IOBean.class,        refresh ) }
-    static NetBean            net       ( boolean refresh = false ) { getBean( NetBean.class,       refresh ) }
-    static GroovyBean         groovy    ( boolean refresh = false ) { getBean( GroovyBean.class,    refresh ) }
+    static ConstantsBean      constants ( boolean refresh = false ) { getBean( ConstantsBean, refresh ) }
+    static VerifyBean         verify    ( boolean refresh = false ) { getBean( VerifyBean,    refresh ) }
+    static GeneralBean        general   ( boolean refresh = false ) { getBean( GeneralBean,   refresh ) }
+    static FileBean           file      ( boolean refresh = false ) { getBean( FileBean,      refresh ) }
+    static IOBean             io        ( boolean refresh = false ) { getBean( IOBean,        refresh ) }
+    static NetBean            net       ( boolean refresh = false ) { getBean( NetBean,       refresh ) }
+    static GroovyBean         groovy    ( boolean refresh = false ) { getBean( GroovyBean,    refresh ) }
 }

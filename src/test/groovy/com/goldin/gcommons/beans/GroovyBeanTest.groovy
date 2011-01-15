@@ -12,15 +12,15 @@ class GroovyBeanTest extends BaseTest
     @Test
     void shouldEval()
     {
-        assert null    == groovyBean.eval( null,            Object.class )
-        assert null    == groovyBean.eval( '',              Object.class )
-        assert null    == groovyBean.eval( ' ',             Object.class )
-        assert null    == groovyBean.eval( ' ' * 100,       Object.class )
-        assert null    == groovyBean.eval( '\r\n\t',        Object.class )
-        assert 12345   == groovyBean.eval( '12345',         Integer.class )
-        assert '12345' == groovyBean.eval( '12345',         String.class )
-        assert 46      == groovyBean.eval( '12 + 34',       Integer.class )
-        assert 46      == groovyBean.eval( '{{ 12 + 34 }}', Integer.class )
+        assert null    == groovyBean.eval( null,            Object  )
+        assert null    == groovyBean.eval( '',              Object  )
+        assert null    == groovyBean.eval( ' ',             Object  )
+        assert null    == groovyBean.eval( ' ' * 100,       Object  )
+        assert null    == groovyBean.eval( '\r\n\t',        Object  )
+        assert 12345   == groovyBean.eval( '12345',         Integer )
+        assert '12345' == groovyBean.eval( '12345',         String  )
+        assert 46      == groovyBean.eval( '12 + 34',       Integer )
+        assert 46      == groovyBean.eval( '{{ 12 + 34 }}', Integer )
 
         def check =
         {

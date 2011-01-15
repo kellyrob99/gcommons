@@ -12,7 +12,7 @@ import com.goldin.gcommons.beans.*
 /**
  * Base class for the tests
  */
-@RunWith(SpringJUnit4ClassRunner.class)
+@RunWith( SpringJUnit4ClassRunner.class )
 @ContextConfiguration( '/gcommons-application-context.xml' )
 class BaseTest
 {
@@ -45,7 +45,7 @@ class BaseTest
      */
     String shouldFailWith     ( Class cl, Closure c ) { new MyGroovyTestCase().shouldFail( cl, c ) }
     String shouldFailWithCause( Class cl, Closure c ) { new MyGroovyTestCase().shouldFailWithCause( cl, c ) }
-    String shouldFailAssert   ( Closure c )           { new MyGroovyTestCase().shouldFail( AssertionError.class, c ) }
+    String shouldFailAssert   ( Closure c )           { new MyGroovyTestCase().shouldFail( AssertionError, c ) }
 
 
     /**

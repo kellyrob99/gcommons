@@ -198,20 +198,20 @@ class GeneralBeanTest extends BaseTest
     void testTryIt()
     {
         generalBean.tryIt( 1, null, {} )
-        shouldFailWith( RuntimeException )  { generalBean.tryIt( 1, String.class, {} ) }
-        shouldFailWith( RuntimeException )  { generalBean.tryIt( 1, String.class, { 1 } ) }
-        shouldFailAssert { shouldFailAssert { generalBean.tryIt( 1, String.class, { "aaaaa" } ) } }
-        shouldFailAssert { shouldFailAssert { generalBean.tryIt( 1, Number.class, { 33 + 44 } ) } }
+        shouldFailWith( RuntimeException )  { generalBean.tryIt( 1, String, {} ) }
+        shouldFailWith( RuntimeException )  { generalBean.tryIt( 1, String, { 1 } ) }
+        shouldFailAssert { shouldFailAssert { generalBean.tryIt( 1, String, { "aaaaa" } ) } }
+        shouldFailAssert { shouldFailAssert { generalBean.tryIt( 1, Number, { 33 + 44 } ) } }
 
-        assert '12345' == generalBean.tryIt( 1, String.class, { "12345" } )
-        assert 12345   == generalBean.tryIt( 1, Number.class, {  12345  } )
-        assert 12345   == generalBean.tryIt( 1, Number.class, { 12345 -5 + 5 } )
+        assert '12345' == generalBean.tryIt( 1, String, { "12345" } )
+        assert 12345   == generalBean.tryIt( 1, Number, {  12345  } )
+        assert 12345   == generalBean.tryIt( 1, Number, { 12345 -5 + 5 } )
 
         def c =
         {
             int n, int max, String s ->
             def counter = 0
-            generalBean.tryIt( max, String.class )
+            generalBean.tryIt( max, String )
             {
                 if (( ++counter ) == n ) { s }
                 else                     { assert false, counter }
