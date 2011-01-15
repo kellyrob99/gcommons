@@ -34,10 +34,9 @@ class FileBean extends BaseBean
     {
         def file      = tempFile()
         def directory = new File( file.absolutePath )
-        assert ! delete( file ).exists()
-        assert directory.mkdirs()
-
-        directory
+        
+        delete( file )
+        mkdirs( directory )
     }
 
 
