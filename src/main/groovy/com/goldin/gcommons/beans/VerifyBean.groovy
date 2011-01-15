@@ -17,6 +17,8 @@ class VerifyBean extends BaseBean
      */
     void isNull( Object ... objects )
     {
+        assert objects != null
+        
         for ( o in objects )
         {
             assert ( o == null ), "Object specified [$o] is *not* null"
@@ -30,6 +32,8 @@ class VerifyBean extends BaseBean
      */
     public <T> T notNull( T ... objects )
     {
+        assert objects != null
+
         for ( o in objects )
         {
             assert ( o != null ), "Object specified [$o] *is* null"
@@ -46,6 +50,8 @@ class VerifyBean extends BaseBean
      */
     File exists ( File ... files )
     {
+        assert files != null
+
         for ( file in files )
         {
             assert file.exists(), "File specified [$file] *does not* exist"
@@ -62,6 +68,8 @@ class VerifyBean extends BaseBean
      */
     File file ( File ... files )
     {
+        assert files != null
+
         for ( file in files )
         {
             assert file.isFile(), "File specified [$file] is *not* an existing file"
@@ -78,6 +86,8 @@ class VerifyBean extends BaseBean
      */
     File notEmptyFile ( File ... files )
     {
+        assert files != null
+
         for ( file in files )
         {
             assert file.isFile(),    "File specified [$file] is *not* an existing file"
@@ -95,6 +105,8 @@ class VerifyBean extends BaseBean
      */
     File directory ( File ... directories )
     {
+        assert directories != null
+
         for ( directory in directories )
         {
             assert directory.isDirectory(), "Directory specified [$directory] is *not* an existing directory"
@@ -141,7 +153,7 @@ class VerifyBean extends BaseBean
      */
     String notNullOrEmpty( String ... strings )
     {
-        assert ( strings != null )
+        assert strings != null
         
         for ( s in strings )
         {
@@ -159,7 +171,7 @@ class VerifyBean extends BaseBean
      */
     public <T> Collection<T> notNullOrEmpty( Collection<T> ... collections )
     {
-        assert ( collections != null )
+        assert collections != null
 
         for ( c in collections )
         {
