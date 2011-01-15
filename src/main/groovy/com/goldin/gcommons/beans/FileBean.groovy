@@ -65,6 +65,24 @@ class FileBean extends BaseBean
 
 
     /**
+     * {@link File#mkdirs()} wrapper for directories specified.
+     *
+     * @param directories directories to create
+     * @return first directory specified
+     */
+    File mkdirs ( File ... directories )
+    {
+        for ( directory in directories )
+        {
+            assert (( directory.isDirectory() || directory.mkdirs()) && ( directory.isDirectory())), \
+                   "Failed to create directory [$directory.canonicalPath]"
+        }
+
+        first( directories )
+    }
+
+
+    /**
      * Generates a checksum for the file specified.
      *
      * @param file file to generate a checksum for
@@ -254,23 +272,6 @@ class FileBean extends BaseBean
             throw new RuntimeException( "Failed to unpack [$sourceArchive.canonicalPath] to [$destinationDirectory.canonicalPath]: $t",
                                         t )
         }
-    }
-
-
-    /**
-     * {@link File#mkdirs()} wrapper for directories specified.
-     *
-     * @param directories directories to create
-     * @return first directory specified
-     */
-    File mkdirs ( File ... directories )
-    {
-        for ( directory in directories )
-        {
-            assert (( directory.isDirectory() || directory.mkdirs()) && ( directory.isDirectory()))
-        }
-
-        first( directories )
     }
 
 

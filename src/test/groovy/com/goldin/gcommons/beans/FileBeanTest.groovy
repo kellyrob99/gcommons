@@ -3,8 +3,6 @@ package com.goldin.gcommons.beans
 import com.goldin.gcommons.BaseTest
 import org.junit.Test
 
-
-
  /**
  * {@link com.goldin.gcommons.beans.FileBean} tests
  */
@@ -54,6 +52,39 @@ class FileBeanTest extends BaseTest
         assert ! file.isFile()
 
         fileBean.delete( dir )
+    }
+
+
+    @Test
+    void shouldMkdir()
+    {
+        def f = { String name -> new File( constantsBean.USER_HOME_FILE, name ) }
+
+        fileBean.mkdirs( f( 'aa' ), f( 'aa/bb' ), f( 'aa/bb/dd' ), f( 'ee/bb/dd' ), f( 'ff/bb/dd/kk' ))
+        verifyBean.directory( f( 'aa' ), f( 'aa/bb' ), f( 'aa/bb/dd' ),
+                              f( 'ee' ), f( 'ee/bb' ), f( 'ee/bb/dd' ),
+                              f( 'ff' ), f( 'ff/bb' ), f( 'ff/bb/dd' ),f( 'ff/bb/dd/kk' ))
+
+        shouldFailAssert { verifyBean.directory( f( 'aa' ), f( 'aa/bb' ), f( 'aa/bb/dd1' )) }
+
+        f( 'aa/1.txt' ).write( System.currentTimeMillis() as String )
+        f( 'aa/bb/2.txt' ).write( System.currentTimeMillis() as String )
+        f( 'aa/bb/dd/3.txt' ).write( System.currentTimeMillis() as String )
+        
+        f( 'ee/1.txt' ).write( System.currentTimeMillis() as String )
+        f( 'ee/bb/2.txt' ).write( System.currentTimeMillis() as String )
+        f( 'ee/bb/dd/3.txt' ).write( System.currentTimeMillis() as String )
+
+        f( 'ff/1.txt' ).write( System.currentTimeMillis() as String )
+        f( 'ff/bb/2.txt' ).write( System.currentTimeMillis() as String )
+        f( 'ff/bb/dd/3.txt' ).write( System.currentTimeMillis() as String )
+        f( 'ff/bb/dd/kk/4.txt' ).write( System.currentTimeMillis() as String )
+
+        fileBean.delete( f( 'aa' ), f( 'ee' ), f( 'ff' ))
+
+        shouldFailAssert { verifyBean.directory( f( 'aa' )) }
+        shouldFailAssert { verifyBean.directory( f( 'ee' )) }
+        shouldFailAssert { verifyBean.directory( f( 'ff' )) }
     }
 
 
