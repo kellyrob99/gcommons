@@ -11,6 +11,6 @@ class GroovyConfig
     String[] classpaths
     String[] classpaths () { GCommons.general().array( this.classpaths, this.classpath, String ) }
 
-    boolean verbose        = false
+    boolean verbose        = true
     boolean verboseBinding = false
 }

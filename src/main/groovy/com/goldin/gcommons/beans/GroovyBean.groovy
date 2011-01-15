@@ -23,7 +23,7 @@ class GroovyBean extends BaseBean
      *                     value is allowed to be returned from eval()-ing the expression
      * @param binding      binding to use,
      *                     if <code>null</code> - no binding is specified when creating {@link groovy.lang.GroovyShell}
-     * @param groovyConfig {@link GroovyConfig} object to use, allowed to be <code>null</code>
+     * @param config {@link GroovyConfig} object to use, allowed to be <code>null</code>
      *
      * @param <T>        result's type
      * @return           expression evaluated and casted to the type specified
@@ -31,9 +31,8 @@ class GroovyBean extends BaseBean
      */
     public <T> T eval ( String       expression,
                         Class<T>     resultType   = null,
-                        Binding      binding      = binding(),
-                        GroovyConfig groovyConfig = null,
-                        boolean      verbose      = true )
+                        Binding      binding      = null,
+                        GroovyConfig config       = null )
     {
         if (( ! expression ) || ( expression.trim().length() < 1 ))
         {
@@ -49,12 +48,17 @@ class GroovyBean extends BaseBean
 
         CompilerConfiguration cc = new CompilerConfiguration()
 
-        if ( groovyConfig != null )
+        if ( config )
         {
-            cc.setClasspathList( groovyConfig.classpaths().toList())
+            cc.setClasspathList( config.classpaths().toList())
         }
 
-        GroovyShell shell = (( binding != null ) ? new GroovyShell( binding, cc ) : new GroovyShell( cc ))
+        if ( config?.verboseBinding )
+        {
+            getLog( this ).debug( "Groovy: evaluating [$expression] with ${ binding ? """following binding: ${binding.variables}""" : 'empty binding' }" )
+        }
+
+        GroovyShell shell = ( binding ? new GroovyShell( binding, cc ) : new GroovyShell( cc ))
         Object      value = shell.evaluate( expression )
 
         assert (( resultType == null ) || ( value != null )), "Result of Groovy expression [$expression] is null"
@@ -76,7 +80,7 @@ class GroovyBean extends BaseBean
                    "Result of Groovy expression [$expression] is [$value] - an instanceof [$valueType] instead of [$resultType]"
         }
 
-        if ( verbose )
+        if ( config?.verbose )
         {
             getLog( this ).info( "Groovy: [$expression] => [$value] (type: [${( value != null ) ? value.class.name : null }])" )
         }
@@ -87,7 +91,7 @@ class GroovyBean extends BaseBean
 
     /**
      * Creates a Groovy {@link groovy.lang.Binding} instance (to be used for
-     * {@link #eval(String, Class<T>, Binding, GroovyConfig, boolean) } call) using pairs of bindings provided.
+     * {@link #eval(String, Class<T>, Binding, GroovyConfig) } call) using pairs of bindings provided.
      *
      * @param bindingObjects pairs of object to copy to result binding:
      *        {@code "propertyName", propertyValue, "anotherPropertyName", anotherValue, ... }
