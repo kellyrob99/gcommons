@@ -49,7 +49,7 @@
     <entry_points version="2.0" />
   </component>
   <component name="GradleSettings">
-    <option name="SDK_HOME" value="D:/Winny/java/gradle" />
+    <option name="SDK_HOME" value="d:/Winny/java/gradle-0.9.1" />
   </component>
   <component name="GradleUISettings">
     <setting name="root" />
