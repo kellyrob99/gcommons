@@ -1,8 +1,8 @@
-package com.goldin.gcommons
+package com.goldin.gcommons.util
 
 import de.schlichtherle.io.DefaultArchiveDetector
 import de.schlichtherle.io.archive.spi.ArchiveDriver
-
+import com.goldin.gcommons.GCommons
 
 /**
  * {@link DefaultArchiveDetector} extension detecting only the original archive.

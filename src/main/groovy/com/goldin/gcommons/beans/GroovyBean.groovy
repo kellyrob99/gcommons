@@ -1,8 +1,9 @@
 package com.goldin.gcommons.beans
 
 import org.codehaus.groovy.control.CompilerConfiguration
+import com.goldin.gcommons.util.GroovyConfig
 
- /**
+/**
  * Groovy-related helper methods.
  */
 class GroovyBean extends BaseBean
@@ -23,7 +24,7 @@ class GroovyBean extends BaseBean
      *                     value is allowed to be returned from eval()-ing the expression
      * @param binding      binding to use,
      *                     if <code>null</code> - no binding is specified when creating {@link groovy.lang.GroovyShell}
-     * @param config {@link GroovyConfig} object to use, allowed to be <code>null</code>
+     * @param config       {@link GroovyConfig} object to use, allowed to be <code>null</code>
      *
      * @param <T>        result's type
      * @return           expression evaluated and casted to the type specified
@@ -91,7 +92,7 @@ class GroovyBean extends BaseBean
 
     /**
      * Creates a Groovy {@link groovy.lang.Binding} instance (to be used for
-     * {@link #eval(String, Class<T>, Binding, GroovyConfig) } call) using pairs of bindings provided.
+     * {@link #eval(String, Class<T>, Binding, GroovyConfig)} call) using pairs of bindings provided.
      *
      * @param bindingObjects pairs of object to copy to result binding:
      *        {@code "propertyName", propertyValue, "anotherPropertyName", anotherValue, ... }

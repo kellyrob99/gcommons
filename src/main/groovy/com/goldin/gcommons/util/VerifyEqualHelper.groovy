@@ -1,7 +1,11 @@
-package com.goldin.gcommons.beans
+package com.goldin.gcommons.util
+
+import com.goldin.gcommons.beans.BaseBean
+import com.goldin.gcommons.beans.FileBean
+import com.goldin.gcommons.beans.GeneralBean
 
 /**
- * {@link VerifyBean#equal(File, File, boolean, String)} helper class
+ * {@link com.goldin.gcommons.beans.VerifyBean#equal(File, File, boolean, String)} helper class
  */
 class VerifyEqualHelper extends BaseBean
 {

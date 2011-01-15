@@ -1,5 +1,7 @@
 package com.goldin.gcommons.beans
 
+import com.goldin.gcommons.util.VerifyEqualHelper
+
 /**
  * Verification methods
  */

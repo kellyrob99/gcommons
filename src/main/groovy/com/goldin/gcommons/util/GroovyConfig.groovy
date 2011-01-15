@@ -1,9 +1,9 @@
-package com.goldin.gcommons.beans
+package com.goldin.gcommons.util
 
 import com.goldin.gcommons.GCommons
 
 /**
- * {@link GroovyBean#eval} configuration
+ * {@link com.goldin.gcommons.beans.GroovyBean#eval} configuration
  */
 class GroovyConfig
 {

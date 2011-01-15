@@ -1,6 +1,6 @@
 package com.goldin.gcommons.beans
 
-import com.goldin.gcommons.SingleFileArchiveDetector
+import com.goldin.gcommons.util.SingleFileArchiveDetector
 import groovy.io.FileType
 import java.security.MessageDigest
 import org.apache.tools.ant.DirectoryScanner
