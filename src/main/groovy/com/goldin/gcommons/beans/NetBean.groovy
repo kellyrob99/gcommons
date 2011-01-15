@@ -17,9 +17,9 @@ class NetBean extends BaseBean
     GeneralBean general
 
 
-    boolean isHttp ( String s ) { s.toLowerCase().startsWith( 'http://' ) }
-    boolean isScp  ( String s ) { s.toLowerCase().startsWith( 'scp://'  ) }
-    boolean isFtp  ( String s ) { s.toLowerCase().startsWith( 'ftp://'  ) }
+    boolean isHttp ( String s ) { s && s.toLowerCase().startsWith( 'http://' ) }
+    boolean isScp  ( String s ) { s && s.toLowerCase().startsWith( 'scp://'  ) }
+    boolean isFtp  ( String s ) { s && s.toLowerCase().startsWith( 'ftp://'  ) }
     boolean isNet  ( String s ) { isHttp( s ) || isScp( s ) || isFtp( s ) }
 
 
