@@ -55,7 +55,7 @@ class GroovyBean extends BaseBean
 
         if ( config?.verboseBinding )
         {
-            getLog( this ).debug( "Groovy: evaluating [$expression] with ${ binding ? """following binding: ${binding.variables}""" : 'empty binding' }" )
+            getLog( this ).info( "Groovy: evaluating [$expression] with ${ binding ? """following binding: ${binding.variables}""" : 'empty binding' }" )
         }
 
         GroovyShell shell = ( binding ? new GroovyShell( binding, cc ) : new GroovyShell( cc ))
