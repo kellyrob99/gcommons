@@ -267,7 +267,7 @@ class FileBean extends BaseBean
     {
         for ( directory in directories )
         {
-            assert ( directory.isDirectory() || directory.mkdirs())
+            assert (( directory.isDirectory() || directory.mkdirs()) && ( directory.isDirectory()))
         }
 
         first( directories )
