@@ -11,6 +11,40 @@ import org.junit.Test
 class VerifyBeanTest extends BaseTest
 {
     @Test
+    void shouldVerifyEmptyStrings()
+    {
+        verifyBean.notNullOrEmpty( 'aa' )
+        verifyBean.notNullOrEmpty( 'aa', 'bb' )
+
+        shouldFailAssert { verifyBean.notNullOrEmpty( 'aa', 'bb', null ) }
+        shouldFailAssert { verifyBean.notNullOrEmpty( 'aa', 'bb', ''   ) }
+        shouldFailAssert { verifyBean.notNullOrEmpty( 'aa', 'bb', ' '  ) }
+        shouldFailAssert { verifyBean.notNullOrEmpty( '', 'bb', ' '  ) }
+        shouldFailAssert { verifyBean.notNullOrEmpty( ' ', 'bb', ' '  ) }
+        shouldFailAssert { shouldFailAssert { verifyBean.notNullOrEmpty( ' c', 'bb', ' d'  ) }}
+    }
+
+    
+    @Test
+    void shouldVerifyEmptyCollections()
+    {
+        verifyBean.notNullOrEmpty( ['aa'] )
+        verifyBean.notNullOrEmpty( ['aa'], ['bb'] )
+        verifyBean.notNullOrEmpty( ['aa'], ['bb'], ['zzz'] )
+
+        shouldFailAssert { verifyBean.notNullOrEmpty( ['aa'], ['bb'], null ) }
+        shouldFailAssert { verifyBean.notNullOrEmpty( ['aa'], ['bb'], []   ) }
+        shouldFailAssert { verifyBean.notNullOrEmpty( ['aa', 'bb'], []  ) }
+        shouldFailAssert { verifyBean.notNullOrEmpty( null, ['aa', 'bb'], []  ) }
+        shouldFailAssert { verifyBean.notNullOrEmpty( [], null, ['aa', 'bb'], []  ) }
+
+        shouldFailAssert { shouldFailAssert { verifyBean.notNullOrEmpty( [''], ['bb'], [' ']  ) }}
+        shouldFailAssert { shouldFailAssert { verifyBean.notNullOrEmpty( [' '], ['bb', ' ']  ) }}
+        shouldFailAssert { shouldFailAssert { verifyBean.notNullOrEmpty( [' c'], ['bb'], [' d']  ) }}
+    }
+
+
+    @Test
     void shouldVerifyExists()
     {
         verifyBean.exists( constantsBean.USER_DIR_FILE  )

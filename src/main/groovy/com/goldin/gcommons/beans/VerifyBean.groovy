@@ -150,4 +150,22 @@ class VerifyBean extends BaseBean
 
         first( strings )
     }
+
+
+    /**
+     * Verifies that Collections specified are not null or empty.
+     * @param collections collections to check
+     * @return first collection checked
+     */
+    public <T> Collection<T> notNullOrEmpty( Collection<T> ... collections )
+    {
+        assert ( collections != null )
+
+        for ( c in collections )
+        {
+            assert c?.size(), "Collection specified $c *is* null or empty"
+        }
+
+        first( collections )
+    }
 }
