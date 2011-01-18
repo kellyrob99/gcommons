@@ -1,11 +1,13 @@
 package com.goldin.gcommons.beans
 
 import com.goldin.gcommons.util.SingleFileArchiveDetector
+import de.schlichtherle.io.GlobalArchiveDriverRegistry
+import de.schlichtherle.io.archive.zip.ZipDriver
 import groovy.io.FileType
 import java.security.MessageDigest
 import org.apache.tools.ant.DirectoryScanner
 
-/**
+ /**
  * File-related helper utilities.
  */
 class FileBean extends BaseBean
@@ -16,6 +18,15 @@ class FileBean extends BaseBean
     IOBean io
 
 
+    /**
+     * Archive extensions supported by ZIP driver
+     */
+    final Set<String> ZIP_EXTENSIONS = GlobalArchiveDriverRegistry.INSTANCE.findAll {
+        (  it.value instanceof ZipDriver ) ||
+        (( it.value instanceof String ) && ( ZipDriver.isAssignableFrom( Class.forName( it.value ))))
+    }.keySet()*.toLowerCase()
+
+    
     /**
      * Creates a temp file.
      * @return temp file created.
@@ -189,6 +200,9 @@ class FileBean extends BaseBean
         verify.directory( sourceDirectory )
         verify.notNull( destinationArchive )
 
+        String sourceDirectoryPath    = sourceDirectory.canonicalPath
+        String destinationArchivePath = destinationArchive.canonicalPath
+
         try
         {
             if ( destinationArchive.exists()){ delete( destinationArchive ) }
@@ -201,30 +215,41 @@ class FileBean extends BaseBean
             def patterns = "${ includes ?: '' }/${ excludes ?: '' }"
             patterns     = (( patterns == '/' ) ? '' : " ($patterns)" )
 
-            getLog( this ).info( "Packing [${ sourceDirectory.canonicalPath }$patterns] to [${ destinationArchive.canonicalPath }]" )
-            final long time = System.currentTimeMillis()
+            getLog( this ).info( "Packing [$sourceDirectoryPath$patterns] to [$destinationArchivePath]" )
+            long time = System.currentTimeMillis()
 
-            for ( File file in files( sourceDirectory, includes, excludes, caseSensitive, false, failIfNotFound ))
+            if ( ZIP_EXTENSIONS.contains( extension( destinationArchive )))
+            {   // http://evgeny-goldin.org/youtrack/issue/pl-273
+                new AntBuilder().zip( destfile  : destinationArchivePath,
+                                      basedir   : sourceDirectoryPath,
+                                      includes  : ( includes ?: [] ).join( ',' ),
+                                      excludes  : ( excludes ?: [] ).join( ',' ),
+                                      whenempty : failIfNotFound ? 'fail' : 'skip' )
+            }
+            else
             {
-                String relativePath = verify.notNullOrEmpty( file.canonicalPath.substring( sourceDirectory.canonicalPath.length()))
-                assert ( relativePath.startsWith( '/' ) || relativePath.startsWith( '\\' ))
+                for ( File file in files( sourceDirectory, includes, excludes, caseSensitive, false, failIfNotFound ))
+                {   /**
+                     * https://truezip.dev.java.net/manual-6.html
+                     * http://evgeny-goldin.org/javadoc/truezip/
+                     */
+                    def relativePath = verify.notNullOrEmpty( file.canonicalPath.substring( sourceDirectoryPath.length()))
+                    de.schlichtherle.io.File.cp_p( file, new de.schlichtherle.io.File( destinationArchive, relativePath ))
+                }
 
-                /**
-                 * https://truezip.dev.java.net/manual-6.html
-                 */
-                de.schlichtherle.io.File.cp_p( file, new de.schlichtherle.io.File( destinationArchive.canonicalPath + relativePath ))
+                de.schlichtherle.io.File.umount()
             }
 
-            de.schlichtherle.io.File.umount()
             verify.notEmptyFile( destinationArchive )
-            getLog( this ).info( "[$sourceDirectory$patterns] packed to [${ destinationArchive.canonicalPath }] " +
+
+            getLog( this ).info( "[$sourceDirectory$patterns] packed to [$destinationArchivePath] " +
                                  "(${( System.currentTimeMillis() - time ).intdiv( 1000 )} sec)" )
 
             destinationArchive
         }
         catch ( Throwable t )
         {
-            throw new RuntimeException( "Failed to pack [$sourceDirectory.canonicalPath] to [$destinationArchive.canonicalPath]: $t",
+            throw new RuntimeException( "Failed to pack [$sourceDirectoryPath] to [$destinationArchivePath]: $t",
                                         t )
         }
     }
@@ -244,31 +269,42 @@ class FileBean extends BaseBean
         verify.notEmptyFile( sourceArchive )
         verify.notNull( destinationDirectory )
 
+        def sourceArchivePath        = sourceArchive.canonicalPath
+        def destinationDirectoryPath = destinationDirectory.canonicalPath
+
         try
         {
             if ( destinationDirectory.isFile()) { delete( destinationDirectory ) }
             mkdirs( destinationDirectory )
 
-            getLog( this ).info( "Unpacking [${ sourceArchive.canonicalPath }] to [${ destinationDirectory.canonicalPath }]" )
+            getLog( this ).info( "Unpacking [$sourceArchivePath] to [$destinationDirectoryPath]" )
             final long time = System.currentTimeMillis()
 
-            /**
-             * https://truezip.dev.java.net/manual-6.html
-             * {@link de.schlichtherle.io.File#archiveCopyAllTo(File)}
-             */
-            def detector = new SingleFileArchiveDetector( sourceArchive, extension( sourceArchive ))
-            de.schlichtherle.io.Files.cp_r( true, new de.schlichtherle.io.File( sourceArchive, detector ), destinationDirectory, detector, detector );
-            de.schlichtherle.io.File.umount()
+            if ( ZIP_EXTENSIONS.contains( extension( sourceArchive )))
+            {   // http://evgeny-goldin.org/youtrack/issue/pl-273
+                new AntBuilder().unzip( src : sourceArchivePath, dest : destinationDirectoryPath )
+            }
+            else
+            {
+                /**
+                 * https://truezip.dev.java.net/manual-6.html
+                 * http://evgeny-goldin.org/javadoc/truezip/
+                 * {@link de.schlichtherle.io.File#archiveCopyAllTo(File)}
+                 */
+                def detector = new SingleFileArchiveDetector( sourceArchive, extension( sourceArchive ))
+                de.schlichtherle.io.Files.cp_r( true, new de.schlichtherle.io.File( sourceArchive, detector ), destinationDirectory, detector, detector );
+                de.schlichtherle.io.File.umount()
+            }
 
             verify.directory( destinationDirectory )
-            getLog( this ).info( "[${ sourceArchive.canonicalPath }] unpacked to [${ destinationDirectory.canonicalPath }] " +
+            getLog( this ).info( "[$sourceArchivePath] unpacked to [$destinationDirectoryPath] " +
                                  "(${( System.currentTimeMillis() - time ).intdiv( 1000 )} sec)" )
 
             destinationDirectory
         }
         catch ( Throwable t )
         {
-            throw new RuntimeException( "Failed to unpack [$sourceArchive.canonicalPath] to [$destinationDirectory.canonicalPath]: $t",
+            throw new RuntimeException( "Failed to unpack [$sourceArchivePath] to [$destinationDirectoryPath]: $t",
                                         t )
         }
     }
