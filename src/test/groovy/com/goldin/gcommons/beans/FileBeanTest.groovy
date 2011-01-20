@@ -278,9 +278,11 @@ class FileBeanTest extends BaseTest
         def resourcesDir = new File( 'src/test/resources' )
         def mavenZip     = new File( resourcesDir, 'apache-maven-3.0.1.zip' )
         def mavenJar     = new File( resourcesDir, 'apache-maven-3.0.1.jar' )
+        def mavenTar     = new File( resourcesDir, 'apache-maven-3.0.1.tar' )
+        def mavenTgz     = new File( resourcesDir, 'apache-maven-3.0.1.tgz' )
+        def mavenTarGz   = new File( resourcesDir, 'apache-maven-3.0.1.tar.gz' )
         def plexusJar    = new File( resourcesDir, 'plexus-component-annotations-1.5.5.jar' )
         def testArchives = TEST_ARCHIVES.keySet().collect { it + '.zip' }
-
         def mavenDir1    = testDir( 'apache-maven-1'  )
         def mavenDir2    = testDir( 'apache-maven-2'  )
         def mavenDir3    = testDir( 'apache-maven-3'  )
@@ -370,37 +372,19 @@ class FileBeanTest extends BaseTest
                          new File( mavenDir3, 'apache-maven-3.0.1/lib/nekohtml-1.9.6.2.jar' ),
                          new File( mavenDir3, 'apache-maven-3.0.1/NOTICE.txt' ))
 
-        shouldFailWith( RuntimeException ) { fileBean.unpack( new File( resourcesDir, 'apache-maven-3.0.1.tar' ),
-                                                              mavenDir1, entries )}
-        shouldFailWith( RuntimeException ) { fileBean.unpack( plexusJar,
-                                                              mavenDir7, entries, true )}
-        shouldFailWith( RuntimeException ) { fileBean.unpack( plexusJar,
-                                                              mavenDir7, [ 'org/codehaus/plexus/component' ], true )}
-        shouldFailWith( RuntimeException ) { fileBean.unpack( plexusJar,
-                                                              mavenDir7, [ 'META-INF' ], true )}
-
-        shouldFailAssert {
-            shouldFailWith( RuntimeException ) {
-                fileBean.unpack( plexusJar,
-                                 mavenDir7, entries2, true )
-            }
-        }
-
-        shouldFailWith( RuntimeException ) { fileBean.unpack( new File( resourcesDir, 'apache-maven-3.0.1.tgz' ),
-                                                              mavenDir1, entries )}
-        shouldFailWith( RuntimeException ) { fileBean.unpack( new File( resourcesDir, 'apache-maven-3.0.1.tar.gz' ),
-                                                              mavenDir1, entries )}
-        shouldFailAssert{ fileBean.unpack( new File( resourcesDir, 'doesnt-exist.file'      ),
-                                           mavenDir1, entries )}
-        shouldFailWith( RuntimeException ) { fileBean.unpack( mavenZip,
-                                                              mavenDir1, [ 'doesnt-exist/entry' ] )}
-        shouldFailWith( RuntimeException ) { fileBean.unpack( mavenZip,
-                                                              mavenDir1, [ 'doesnt-exist/entry' ] )}
-        shouldFailWith( RuntimeException ) { fileBean.unpack( mavenZip,
-                                                              mavenDir1, [ '' ] )}
-        shouldFailWith( RuntimeException ) { fileBean.unpack( mavenZip,
-                                                              mavenDir1, [ null ] )}
-        shouldFailWith( RuntimeException ) { fileBean.unpack( mavenZip,
-                                                              mavenDir1, [ ' ', '',  '  ', null ] )}
+        shouldFailWith( RuntimeException ) { fileBean.unpack( mavenTar,  mavenDir1, entries )}
+        shouldFailWith( RuntimeException ) { fileBean.unpack( plexusJar, mavenDir7, entries, true )}
+        shouldFailWith( RuntimeException ) { fileBean.unpack( plexusJar, mavenDir7, [ 'org/codehaus/plexus/component' ], true )}
+        shouldFailWith( RuntimeException ) { fileBean.unpack( plexusJar, mavenDir7, [ 'META-INF' ], true )}
+        shouldFailWith( RuntimeException ) { fileBean.unpack( mavenZip, mavenDir1, [ 'doesnt-exist/entry' ] )}
+        shouldFailWith( RuntimeException ) { fileBean.unpack( mavenZip, mavenDir1, [ 'doesnt-exist/entry' ] )}
+        shouldFailWith( RuntimeException ) { fileBean.unpack( mavenZip, mavenDir1, [ '' ] )}
+        shouldFailWith( RuntimeException ) { fileBean.unpack( mavenZip, mavenDir1, [ null ] )}
+        shouldFailWith( RuntimeException ) { fileBean.unpack( mavenZip, mavenDir1, [ ' ', '',  '  ', null ] )}
+        shouldFailWith( RuntimeException ) { fileBean.unpack( mavenTgz, mavenDir1, entries )}
+        shouldFailWith( RuntimeException ) { fileBean.unpack( mavenTarGz, mavenDir1, entries )}
+        
+        shouldFailAssert { shouldFailWith( RuntimeException ) { fileBean.unpack( plexusJar, mavenDir7, entries2, true ) }}
+        shouldFailAssert{ fileBean.unpack( new File( resourcesDir, 'doesnt-exist.file' ), mavenDir1, entries )}
     }
 }
