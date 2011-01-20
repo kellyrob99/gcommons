@@ -70,7 +70,7 @@ class FileBeanTest extends BaseTest
         f( 'aa/1.txt' ).write( System.currentTimeMillis() as String )
         f( 'aa/bb/2.txt' ).write( System.currentTimeMillis() as String )
         f( 'aa/bb/dd/3.txt' ).write( System.currentTimeMillis() as String )
-        
+
         f( 'ee/1.txt' ).write( System.currentTimeMillis() as String )
         f( 'ee/bb/2.txt' ).write( System.currentTimeMillis() as String )
         f( 'ee/bb/dd/3.txt' ).write( System.currentTimeMillis() as String )
@@ -269,5 +269,81 @@ class FileBeanTest extends BaseTest
             assert fileBean.directorySize( tarGzDir ) == TEST_ARCHIVES[ archiveName ]
             assert fileBean.directorySize( jarDir, tarDir, tgzDir, zipDir, tarGzDir ) == TEST_ARCHIVES[ archiveName ] * 5
         }
+    }
+
+
+    @Test
+    void shouldUnpackZipEntries()
+    {
+        def resourcesDir = new File( 'src/test/resources' )
+        def mavenDir1    = testDir( 'apache-maven-1'  )
+        def mavenDir2    = testDir( 'apache-maven-2'  )
+        def mavenDir3    = testDir( 'apache-maven-3'  )
+        def mavenDir4    = testDir( 'apache-maven-4'  )
+        def mavenDir5    = testDir( 'apache-maven-5'  )
+
+        def entries      = [ 'apache-maven-3.0.1\\lib\\aether-api-1.8.jar',
+                             'apache-maven-3.0.1/lib/commons-cli-1.2.jar',
+                             '/apache-maven-3.0.1\\bin\\m2.conf',
+                             '/apache-maven-3.0.1/bin/mvn',
+                             'apache-maven-3.0.1\\lib\\nekohtml-1.9.6.2.jar',
+                             'apache-maven-3.0.1/NOTICE.txt',
+                             '/apache-maven-3.0.1/NOTICE.txt',
+                             'apache-maven-3.0.1\\NOTICE.txt' ]
+
+        fileBean.unpack( new File( resourcesDir, 'apache-maven-3.0.1.zip' ), mavenDir1, entries )
+        fileBean.unpack( new File( resourcesDir, 'apache-maven-3.0.1.zip' ), mavenDir2, entries, false )
+        fileBean.unpack( new File( resourcesDir, 'apache-maven-3.0.1.zip' ), mavenDir3, entries, true )
+        fileBean.unpack( new File( resourcesDir, 'apache-maven-3.0.1.jar' ), mavenDir4, entries )
+        fileBean.unpack( new File( resourcesDir, 'apache-maven-3.0.1.jar' ), mavenDir5, entries, true )
+
+        assert mavenDir1.list().size() == 6
+        assert mavenDir2.list().size() == 6
+        assert mavenDir4.list().size() == 6
+
+        assert mavenDir3.list().size() == 1
+        assert mavenDir5.list().size() == 1
+
+        verifyBean.equal( mavenDir1, mavenDir2 )
+        verifyBean.equal( mavenDir2, mavenDir4 )
+        verifyBean.equal( mavenDir4, mavenDir1 )
+        verifyBean.equal( mavenDir3, mavenDir5 )
+
+        assert fileBean.directorySize( mavenDir1 ) == 235902
+        assert fileBean.directorySize( mavenDir2 ) == 235902
+        assert fileBean.directorySize( mavenDir3 ) == 235902
+        assert fileBean.directorySize( mavenDir4 ) == 235902
+        assert fileBean.directorySize( mavenDir5 ) == 235902
+
+        verifyBean.file( new File( mavenDir1, 'aether-api-1.8.jar' ),
+                         new File( mavenDir1, 'commons-cli-1.2.jar' ),
+                         new File( mavenDir1, 'm2.conf' ),
+                         new File( mavenDir1, 'mvn' ),
+                         new File( mavenDir1, 'nekohtml-1.9.6.2.jar' ),
+                         new File( mavenDir1, 'NOTICE.txt' ))
+
+        verifyBean.file( new File( mavenDir2, 'aether-api-1.8.jar' ),
+                         new File( mavenDir2, 'commons-cli-1.2.jar' ),
+                         new File( mavenDir2, 'm2.conf' ),
+                         new File( mavenDir2, 'mvn' ),
+                         new File( mavenDir2, 'nekohtml-1.9.6.2.jar' ),
+                         new File( mavenDir2, 'NOTICE.txt' ))
+
+        verifyBean.file( new File( mavenDir3, 'apache-maven-3.0.1/lib/aether-api-1.8.jar' ),
+                         new File( mavenDir3, 'apache-maven-3.0.1/lib/commons-cli-1.2.jar' ),
+                         new File( mavenDir3, 'apache-maven-3.0.1/bin/m2.conf' ),
+                         new File( mavenDir3, 'apache-maven-3.0.1/bin/mvn' ),
+                         new File( mavenDir3, 'apache-maven-3.0.1/lib/nekohtml-1.9.6.2.jar' ),
+                         new File( mavenDir3, 'apache-maven-3.0.1/NOTICE.txt' ))
+
+        shouldFailWith( RuntimeException ) { fileBean.unpack( new File( resourcesDir, 'apache-maven-3.0.1.tar' ), mavenDir1, entries )}
+        shouldFailWith( RuntimeException ) { fileBean.unpack( new File( resourcesDir, 'apache-maven-3.0.1.tgz' ), mavenDir1, entries )}
+        shouldFailWith( RuntimeException ) { fileBean.unpack( new File( resourcesDir, 'apache-maven-3.0.1.tar.gz' ), mavenDir1, entries )}
+        shouldFailAssert{ fileBean.unpack( new File( resourcesDir, 'doesnt-exist.file'      ), mavenDir1, entries )}
+        shouldFailWith( RuntimeException ) { fileBean.unpack( new File( resourcesDir, 'apache-maven-3.0.1.zip' ), mavenDir1, [ 'dont-exists/entry' ] )}
+        shouldFailWith( RuntimeException ) { fileBean.unpack( new File( resourcesDir, 'apache-maven-3.0.1.zip' ), mavenDir1, [ 'dont-exists/entry' ] )}
+        shouldFailWith( RuntimeException ) { fileBean.unpack( new File( resourcesDir, 'apache-maven-3.0.1.zip' ), mavenDir1, [ '' ] )}
+        shouldFailWith( RuntimeException ) { fileBean.unpack( new File( resourcesDir, 'apache-maven-3.0.1.zip' ), mavenDir1, [ null ] )}
+        shouldFailWith( RuntimeException ) { fileBean.unpack( new File( resourcesDir, 'apache-maven-3.0.1.zip' ), mavenDir1, [ ' ', '',  '  ', null ] )}
     }
 }

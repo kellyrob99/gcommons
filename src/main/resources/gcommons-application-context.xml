@@ -29,12 +29,14 @@
           class                   = "com.goldin.gcommons.beans.FileBean"
           p:constants-ref         = "constants"
           p:verify-ref            = "verify"
+          p:general-ref           = "general"
           p:io-ref                = "io"/>
 
     <bean name                    = "io"
           class                   = "com.goldin.gcommons.beans.IOBean"
           p:constants-ref         = "constants"
-          p:verify-ref            = "verify"/>
+          p:verify-ref            = "verify"
+          p:general-ref           = "general"/>
 
     <bean name                    = "net"
           class                   = "com.goldin.gcommons.beans.NetBean"

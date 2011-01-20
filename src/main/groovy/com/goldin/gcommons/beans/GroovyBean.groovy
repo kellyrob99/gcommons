@@ -8,13 +8,6 @@ import com.goldin.gcommons.util.GroovyConfig
  */
 class GroovyBean extends BaseBean
 {
-
-    /**
-     * Set by Spring
-     */
-    GeneralBean general
-
-
     /**
      * Evaluates Groovy expression provided and casts it to the class specified.
      *

@@ -11,12 +11,6 @@ import org.apache.commons.net.ftp.FTPReply
  */
 class NetBean extends BaseBean
 {
-    /**
-     * Set by Spring
-     */
-    GeneralBean general
-
-
     boolean isHttp ( String s ) { s && s.toLowerCase().startsWith( 'http://' ) }
     boolean isScp  ( String s ) { s && s.toLowerCase().startsWith( 'scp://'  ) }
     boolean isFtp  ( String s ) { s && s.toLowerCase().startsWith( 'ftp://'  ) }

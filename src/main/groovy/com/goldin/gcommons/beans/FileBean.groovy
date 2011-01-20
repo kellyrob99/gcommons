@@ -3,11 +3,13 @@ package com.goldin.gcommons.beans
 import com.goldin.gcommons.util.SingleFileArchiveDetector
 import de.schlichtherle.io.GlobalArchiveDriverRegistry
 import de.schlichtherle.io.archive.spi.ArchiveDriver
-import de.schlichtherle.io.archive.zip.ZipDriver
 import de.schlichtherle.io.archive.tar.TarDriver
+import de.schlichtherle.io.archive.zip.ZipDriver
 import groovy.io.FileType
 import java.security.MessageDigest
+import java.util.zip.ZipEntry
 import org.apache.tools.ant.DirectoryScanner
+import org.apache.tools.zip.ZipFile
 import org.springframework.beans.factory.InitializingBean
 
  /**
@@ -317,7 +319,11 @@ class FileBean extends BaseBean implements InitializingBean
      *
      * @return destination directory where archive was unpacked
      */
-    File unpack ( File sourceArchive, File destinationDirectory )
+    File unpack ( File         sourceArchive,
+                  File         destinationDirectory,
+                  List<String> zipEntries             = [],
+                  boolean      zipEntriesPreservePath = false,
+                  boolean      zipEntriesVerbose      = true )
     {
         verify.notEmptyFile( sourceArchive )
         verify.notNull( destinationDirectory )
@@ -335,10 +341,21 @@ class FileBean extends BaseBean implements InitializingBean
             def time             = System.currentTimeMillis()
             def archiveExtension = extension( sourceArchive )
 
+            assert (( ! zipEntries ) || ( ZIP_EXTENSIONS.contains( archiveExtension ))), \
+                   "Extension [$archiveExtension] is not recognized as ZIP file, zip entries $zipEntries cannot be used"
+
             if ( ZIP_EXTENSIONS.contains( archiveExtension ))
-            {   // http://evgeny-goldin.org/javadoc/ant/CoreTasks/unzip.html
-                new AntBuilder().unzip( src  : sourceArchivePath,
-                                        dest : destinationDirectoryPath )
+            {
+                if ( zipEntries )
+                {
+                    unpackZipEntries( sourceArchive, destinationDirectory, zipEntries, zipEntriesPreservePath, zipEntriesVerbose )
+                }
+                else
+                {
+                    // http://evgeny-goldin.org/javadoc/ant/CoreTasks/unzip.html
+                    new AntBuilder().unzip( src  : sourceArchivePath,
+                                            dest : destinationDirectoryPath )
+                }
             }
             else if ( TAR_EXTENSIONS.contains( archiveExtension ))
             {   // http://evgeny-goldin.org/javadoc/ant/CoreTasks/unzip.html
@@ -373,6 +390,82 @@ class FileBean extends BaseBean implements InitializingBean
         }
     }
 
+    /**
+     * Unpack ZIP entries specified to the directory provided.
+     *
+     * @param sourceArchive          ZIP file to unpack
+     * @param destinationDirectory   directory to unpack the file to
+     * @param zipEntries             ZIP entries to unpack, should contain non-empty entries
+     * @param preservePath whether entry path should be preserved, when unpacking
+     * @return
+     */
+    File unpackZipEntries ( File         sourceArchive,
+                            File         destinationDirectory,
+                            List<String> zipEntries   = [],
+                            boolean      preservePath = false,
+                            boolean      verbose      = true)
+    {
+        verify.notEmptyFile( sourceArchive )
+        verify.notNull( destinationDirectory )
+
+        def sourceArchivePath        = sourceArchive.canonicalPath
+        def destinationDirectoryPath = destinationDirectory.canonicalPath
+        def entries                  = new HashSet<String>( /* Cleanup and normalize */
+            zipEntries.findAll{ it }*.trim().findAll{ it }*.replace( '\\', '/' )*.replaceAll( /^\//, '' ))
+
+        assert entries, "Zip entries list is empty: $zipEntries => $entries"
+
+        try
+        {
+            if ( destinationDirectory.isFile()) { delete( destinationDirectory ) }
+            mkdirs( destinationDirectory )
+
+            getLog( this ).info( "Unpacking [$sourceArchivePath] entries $entries to [$destinationDirectoryPath]" )
+            def time             = System.currentTimeMillis()
+
+            def zipFile = new ZipFile( sourceArchive )
+            for ( entry in entries )
+            {
+                assert   entry
+                ZipEntry zipEntry = zipFile.getEntry( entry )
+                assert   zipEntry, "Zip entry [$entry] doesn't exist in [$sourceArchivePath]"
+                assert   zipEntry.name == entry
+
+                def    is = zipFile.getInputStream( zipEntry )
+                assert is, "Failed to read entry [$entry] from [$sourceArchivePath]"
+
+                def targetFile = delete( new File( destinationDirectory,
+                                                   ( preservePath ? zipEntry.name : zipEntry.name.replaceAll( /^.*\//, '' ))))
+                mkdirs( targetFile.parentFile )
+
+                def os           = new BufferedOutputStream( new FileOutputStream( targetFile ))
+                def bytesWritten = 0
+
+                os.withStream { is.eachByte( 10240 ) {
+                    byte[] buffer, int length ->
+                    bytesWritten += length
+                    os.write( buffer, 0, length ) }
+                }
+
+                verify.file( targetFile )
+                assert bytesWritten == zipEntry.size, "Zip entry [$entry]: [$zipEntry.size] size but [$bytesWritten] bytes written"
+                if ( verbose ) { getLog( this ).info( "[$sourceArchivePath]/[$entry] is written to [$targetFile.canonicalPath] "+
+                                                      "([$bytesWritten] byte${ general.s( bytesWritten ) })" )}
+            }
+
+            verify.directory( destinationDirectory )
+            getLog( this ).info( "[$sourceArchivePath] entries $entries unpacked to [$destinationDirectoryPath] " +
+                                 "(${( System.currentTimeMillis() - time ).intdiv( 1000 )} sec)" )
+
+            destinationDirectory
+        }
+        catch ( Throwable t )
+        {
+            throw new RuntimeException( "Failed to unpack [$sourceArchivePath] to [$destinationDirectoryPath]: $t",
+                                        t )
+        }
+    }
+
 
     /**
      * Retrieves file's extension.
@@ -392,6 +485,13 @@ class FileBean extends BaseBean implements InitializingBean
     }
 
 
+    /**
+     * Calculates total size of directories specified.
+     *
+     * @param directories directories to read
+     * @return total size of all files, iterated with
+     *         {@link org.codehaus.groovy.runtime.DefaultGroovyMethods#eachFileRecurse(File, Closure)}
+     */
     long directorySize( File ... directories )
     {
         long size = 0

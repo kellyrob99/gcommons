@@ -14,12 +14,13 @@ class BaseBean
      */
     private static final Map<Class<? extends BaseBean>, Logger> LOGGERS = [:]
 
-    
+
     /**
      * Injected by Spring
      */
     ConstantsBean constants
     VerifyBean    verify
+    GeneralBean   general
 
 
     /**
