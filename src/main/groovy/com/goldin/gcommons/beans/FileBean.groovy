@@ -108,8 +108,11 @@ class FileBean extends BaseBean implements InitializingBean
     {
         for ( directory in directories )
         {
+            def directoryPath = directory.canonicalPath
+            assert ( ! directory.isFile()), \
+                   "Failed to create directory [$directoryPath] - it is an existing file"
             assert (( directory.isDirectory() || directory.mkdirs()) && ( directory.isDirectory())), \
-                   "Failed to create directory [$directory.canonicalPath]"
+                   "Failed to create directory [$directoryPath]"
         }
 
         first( directories )
@@ -431,6 +434,12 @@ class FileBean extends BaseBean implements InitializingBean
                 assert   zipEntry, "Zip entry [$entry] doesn't exist in [$sourceArchivePath]"
                 assert   zipEntry.name == entry
 
+                if ( zipEntry.name.endsWith( '/' ))
+                {   // Directory entry
+                    assert zipEntry.size == 0
+                    continue
+                }
+
                 def    is = zipFile.getInputStream( zipEntry )
                 assert is, "Failed to read entry [$entry] from [$sourceArchivePath]"
 
@@ -461,7 +470,7 @@ class FileBean extends BaseBean implements InitializingBean
         }
         catch ( Throwable t )
         {
-            throw new RuntimeException( "Failed to unpack [$sourceArchivePath] to [$destinationDirectoryPath]: $t",
+            throw new RuntimeException( "Failed to unpack [$sourceArchivePath] entries $entries to [$destinationDirectoryPath]: $t",
                                         t )
         }
     }

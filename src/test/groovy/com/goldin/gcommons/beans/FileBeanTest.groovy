@@ -1,9 +1,10 @@
 package com.goldin.gcommons.beans
 
 import com.goldin.gcommons.BaseTest
+import org.apache.tools.zip.ZipFile
 import org.junit.Test
 
- /**
+/**
  * {@link com.goldin.gcommons.beans.FileBean} tests
  */
 class FileBeanTest extends BaseTest
@@ -175,8 +176,7 @@ class FileBeanTest extends BaseTest
      */
     private static final Map SMALL_ARCHIVES = [ 'apache-maven-3.0.1' : 3344327  ]
     private static final Map LARGE_ARCHIVES = [ 'gradle-0.9'         : 27848286 ]
-    private static final Map TEST_ARCHIVES  = SMALL_ARCHIVES +
-                                              ( System.properties[ 'slowTests' ] ? LARGE_ARCHIVES : [:] )
+    private static final Map TEST_ARCHIVES  = SMALL_ARCHIVES + ( System.properties[ 'slowTests' ] ? LARGE_ARCHIVES : [:] )
 
     @Test
     void shouldPack()
@@ -276,6 +276,11 @@ class FileBeanTest extends BaseTest
     void shouldUnpackZipEntries()
     {
         def resourcesDir = new File( 'src/test/resources' )
+        def mavenZip     = new File( resourcesDir, 'apache-maven-3.0.1.zip' )
+        def mavenJar     = new File( resourcesDir, 'apache-maven-3.0.1.jar' )
+        def plexusJar    = new File( resourcesDir, 'plexus-component-annotations-1.5.5.jar' )
+        def testArchives = TEST_ARCHIVES.keySet().collect { it + '.zip' }
+
         def mavenDir1    = testDir( 'apache-maven-1'  )
         def mavenDir2    = testDir( 'apache-maven-2'  )
         def mavenDir3    = testDir( 'apache-maven-3'  )
@@ -283,6 +288,8 @@ class FileBeanTest extends BaseTest
         def mavenDir5    = testDir( 'apache-maven-5'  )
         def mavenDir6    = testDir( 'apache-maven-6'  )
         def mavenDir7    = testDir( 'apache-maven-7'  )
+        def mavenDir8    = testDir( 'apache-maven-8'  )
+        def mavenDir9    = testDir( 'apache-maven-9'  )
 
         def entries      = [ 'apache-maven-3.0.1\\lib\\aether-api-1.8.jar',
                              'apache-maven-3.0.1/lib/commons-cli-1.2.jar',
@@ -300,13 +307,19 @@ class FileBeanTest extends BaseTest
                              'META-INF/maven/org.codehaus.plexus/plexus-component-annotations/pom.xml',
                              'org/codehaus/plexus/component/annotations/Requirement.class' ]
 
-        fileBean.unpack( new File( resourcesDir, 'apache-maven-3.0.1.zip' ), mavenDir1, entries )
-        fileBean.unpack( new File( resourcesDir, 'apache-maven-3.0.1.zip' ), mavenDir2, entries, false )
-        fileBean.unpack( new File( resourcesDir, 'apache-maven-3.0.1.zip' ), mavenDir3, entries, true )
-        fileBean.unpack( new File( resourcesDir, 'apache-maven-3.0.1.jar' ), mavenDir4, entries )
-        fileBean.unpack( new File( resourcesDir, 'apache-maven-3.0.1.jar' ), mavenDir5, entries, true )
-        fileBean.unpack( new File( resourcesDir, 'plexus-component-annotations-1.5.5.jar' ), mavenDir6 )
-        fileBean.unpack( new File( resourcesDir, 'plexus-component-annotations-1.5.5.jar' ), mavenDir7, entries2, true )
+        fileBean.unpack( mavenZip,  mavenDir1, entries )
+        fileBean.unpack( mavenZip,  mavenDir2, entries, false )
+        fileBean.unpack( mavenZip,  mavenDir3, entries, true )
+        fileBean.unpack( mavenJar,  mavenDir4, entries )
+        fileBean.unpack( mavenJar,  mavenDir5, entries, true )
+        fileBean.unpack( plexusJar, mavenDir6 )
+        fileBean.unpack( plexusJar, mavenDir7, entries2, true )
+
+        testArchives.each {
+            def testArchiveFile = new File( resourcesDir, it )
+            fileBean.unpack( testArchiveFile,  mavenDir8 )
+            fileBean.unpack( testArchiveFile,  mavenDir9, new ZipFile( testArchiveFile ).getEntries()*.name, true )
+        }
 
         assert mavenDir1.list().size() == 6
         assert mavenDir2.list().size() == 6
@@ -323,6 +336,8 @@ class FileBeanTest extends BaseTest
         verifyBean.equal( mavenDir4, mavenDir1 )
         verifyBean.equal( mavenDir3, mavenDir5 )
         verifyBean.equal( mavenDir6, mavenDir7 )
+        verifyBean.equal( mavenDir6, mavenDir7 )
+        verifyBean.equal( mavenDir8, mavenDir9 )
 
         assert fileBean.directorySize( mavenDir1 ) == 235902
         assert fileBean.directorySize( mavenDir2 ) == 235902
@@ -331,6 +346,8 @@ class FileBeanTest extends BaseTest
         assert fileBean.directorySize( mavenDir5 ) == 235902
         assert fileBean.directorySize( mavenDir6 ) == 3420
         assert fileBean.directorySize( mavenDir7 ) == 3420
+        assert fileBean.directorySize( mavenDir8 ) == TEST_ARCHIVES.values().sum()
+        assert fileBean.directorySize( mavenDir9 ) == TEST_ARCHIVES.values().sum()
 
         verifyBean.file( new File( mavenDir1, 'aether-api-1.8.jar' ),
                          new File( mavenDir1, 'commons-cli-1.2.jar' ),
@@ -355,16 +372,16 @@ class FileBeanTest extends BaseTest
 
         shouldFailWith( RuntimeException ) { fileBean.unpack( new File( resourcesDir, 'apache-maven-3.0.1.tar' ),
                                                               mavenDir1, entries )}
-        shouldFailWith( RuntimeException ) { fileBean.unpack( new File( resourcesDir, 'plexus-component-annotations-1.5.5.jar' ),
+        shouldFailWith( RuntimeException ) { fileBean.unpack( plexusJar,
                                                               mavenDir7, entries, true )}
-        shouldFailWith( RuntimeException ) { fileBean.unpack( new File( resourcesDir, 'plexus-component-annotations-1.5.5.jar' ),
+        shouldFailWith( RuntimeException ) { fileBean.unpack( plexusJar,
                                                               mavenDir7, [ 'org/codehaus/plexus/component' ], true )}
-        shouldFailWith( RuntimeException ) { fileBean.unpack( new File( resourcesDir, 'plexus-component-annotations-1.5.5.jar' ),
+        shouldFailWith( RuntimeException ) { fileBean.unpack( plexusJar,
                                                               mavenDir7, [ 'META-INF' ], true )}
 
         shouldFailAssert {
             shouldFailWith( RuntimeException ) {
-                fileBean.unpack( new File( resourcesDir, 'plexus-component-annotations-1.5.5.jar' ),
+                fileBean.unpack( plexusJar,
                                  mavenDir7, entries2, true )
             }
         }
@@ -375,15 +392,15 @@ class FileBeanTest extends BaseTest
                                                               mavenDir1, entries )}
         shouldFailAssert{ fileBean.unpack( new File( resourcesDir, 'doesnt-exist.file'      ),
                                            mavenDir1, entries )}
-        shouldFailWith( RuntimeException ) { fileBean.unpack( new File( resourcesDir, 'apache-maven-3.0.1.zip' ),
+        shouldFailWith( RuntimeException ) { fileBean.unpack( mavenZip,
                                                               mavenDir1, [ 'doesnt-exist/entry' ] )}
-        shouldFailWith( RuntimeException ) { fileBean.unpack( new File( resourcesDir, 'apache-maven-3.0.1.zip' ),
+        shouldFailWith( RuntimeException ) { fileBean.unpack( mavenZip,
                                                               mavenDir1, [ 'doesnt-exist/entry' ] )}
-        shouldFailWith( RuntimeException ) { fileBean.unpack( new File( resourcesDir, 'apache-maven-3.0.1.zip' ),
+        shouldFailWith( RuntimeException ) { fileBean.unpack( mavenZip,
                                                               mavenDir1, [ '' ] )}
-        shouldFailWith( RuntimeException ) { fileBean.unpack( new File( resourcesDir, 'apache-maven-3.0.1.zip' ),
+        shouldFailWith( RuntimeException ) { fileBean.unpack( mavenZip,
                                                               mavenDir1, [ null ] )}
-        shouldFailWith( RuntimeException ) { fileBean.unpack( new File( resourcesDir, 'apache-maven-3.0.1.zip' ),
+        shouldFailWith( RuntimeException ) { fileBean.unpack( mavenZip,
                                                               mavenDir1, [ ' ', '',  '  ', null ] )}
     }
 }
