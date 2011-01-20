@@ -276,6 +276,7 @@ class FileBean extends BaseBean implements InitializingBean
                                       basedir     : sourceDirectoryPath,
                                       includes    : ( includes ?: [] ).join( ',' ),
                                       excludes    : ( excludes ?: [] ).join( ',' ),
+                                      longfile    : 'gnu',
                                       compression : tarCompression( archiveExtension ))
             }
             else
