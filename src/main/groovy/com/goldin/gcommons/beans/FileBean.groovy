@@ -2,31 +2,53 @@ package com.goldin.gcommons.beans
 
 import com.goldin.gcommons.util.SingleFileArchiveDetector
 import de.schlichtherle.io.GlobalArchiveDriverRegistry
+import de.schlichtherle.io.archive.spi.ArchiveDriver
 import de.schlichtherle.io.archive.zip.ZipDriver
+import de.schlichtherle.io.archive.tar.TarDriver
 import groovy.io.FileType
 import java.security.MessageDigest
 import org.apache.tools.ant.DirectoryScanner
+import org.springframework.beans.factory.InitializingBean
 
  /**
  * File-related helper utilities.
  */
-class FileBean extends BaseBean
+class FileBean extends BaseBean implements InitializingBean
 {
     /**
      * Set by Spring
      */
     IOBean io
 
-
     /**
-     * Archive extensions supported by ZIP driver
+     * Archive extensions supported by ZIP and TAR drivers
      */
-    final Set<String> ZIP_EXTENSIONS = GlobalArchiveDriverRegistry.INSTANCE.findAll {
-        (  it.value instanceof ZipDriver ) ||
-        (( it.value instanceof String ) && ( ZipDriver.isAssignableFrom( Class.forName( it.value ))))
-    }.keySet()*.toLowerCase()
+    Set<String> ZIP_EXTENSIONS
+    Set<String> TAR_EXTENSIONS
 
-    
+    @Override
+    void afterPropertiesSet ()
+    {
+        def c =
+        {
+            def requiredDriverClass ->
+
+            (( Map<String,?> ) GlobalArchiveDriverRegistry.INSTANCE ).findAll
+            {
+                def extension, driver -> // String => Driver instance or String
+                def driverClass = (( driver instanceof ArchiveDriver ) ? driver.class            :
+                                   ( driver instanceof String        ) ? Class.forName( driver ) :
+                                                                        null )
+                driverClass && requiredDriverClass.isAssignableFrom( driverClass )
+            }.
+            keySet()*.toLowerCase()
+        }
+
+        ZIP_EXTENSIONS = c( ZipDriver )
+        TAR_EXTENSIONS = c( TarDriver )
+    }
+
+
     /**
      * Creates a temp file.
      * @return temp file created.
@@ -45,7 +67,7 @@ class FileBean extends BaseBean
     {
         def file      = tempFile()
         def directory = new File( file.absolutePath )
-        
+
         delete( file )
         mkdirs( directory )
     }
@@ -172,10 +194,30 @@ class FileBean extends BaseBean
         files
     }
 
+
     /**
-     * File.setDefaultArchiveDetector(new DefaultArchiveDetector(ArchiveDetector.DEFAULT, "izp", new ZipDriver()));
-     * If you want UTF-8 instead of IBM437 to encode entry names, then you should use the JarDriver instead of the ZipDriver.
+     * Retrieves a "compression" value for Ant's tar/untar tasks.
+     *
+     * @param archiveExtension archive extension
+     * @return archive compression according to
+     *         http://evgeny-goldin.org/javadoc/ant/CoreTasks/tar.html
+     *         http://evgeny-goldin.org/javadoc/ant/CoreTasks/untar.html
      */
+    private String tarCompression( String archiveExtension )
+    {
+        switch ( verify.notNullOrEmpty( archiveExtension ))
+        {
+            case 'tar'     : return 'none'
+
+            case 'tgz'     :
+            case 'tar.gz'  : return 'gzip'
+
+            case 'tbz2'    :
+            case 'tar.bz2' : return 'bzip2'
+        }
+
+        throw new RuntimeException( "Unknown tar extension [$archiveExtension]" )
+    }
 
 
     /**
@@ -216,15 +258,25 @@ class FileBean extends BaseBean
             patterns     = (( patterns == '/' ) ? '' : " ($patterns)" )
 
             getLog( this ).info( "Packing [$sourceDirectoryPath$patterns] to [$destinationArchivePath]" )
-            long time = System.currentTimeMillis()
 
-            if ( ZIP_EXTENSIONS.contains( extension( destinationArchive )))
-            {   // http://evgeny-goldin.org/youtrack/issue/pl-273
+            def time             = System.currentTimeMillis()
+            def archiveExtension = extension( destinationArchive )
+
+            if ( ZIP_EXTENSIONS.contains( archiveExtension ))
+            {  // http://evgeny-goldin.org/javadoc/ant/CoreTasks/zip.html
                 new AntBuilder().zip( destfile  : destinationArchivePath,
                                       basedir   : sourceDirectoryPath,
                                       includes  : ( includes ?: [] ).join( ',' ),
                                       excludes  : ( excludes ?: [] ).join( ',' ),
                                       whenempty : failIfNotFound ? 'fail' : 'skip' )
+            }
+            else if ( TAR_EXTENSIONS.contains( archiveExtension ))
+            {   // http://evgeny-goldin.org/javadoc/ant/CoreTasks/tar.html
+                new AntBuilder().tar( destfile    : destinationArchivePath,
+                                      basedir     : sourceDirectoryPath,
+                                      includes    : ( includes ?: [] ).join( ',' ),
+                                      excludes    : ( excludes ?: [] ).join( ',' ),
+                                      compression : tarCompression( archiveExtension ))
             }
             else
             {
@@ -278,11 +330,20 @@ class FileBean extends BaseBean
             mkdirs( destinationDirectory )
 
             getLog( this ).info( "Unpacking [$sourceArchivePath] to [$destinationDirectoryPath]" )
-            final long time = System.currentTimeMillis()
 
-            if ( ZIP_EXTENSIONS.contains( extension( sourceArchive )))
-            {   // http://evgeny-goldin.org/youtrack/issue/pl-273
-                new AntBuilder().unzip( src : sourceArchivePath, dest : destinationDirectoryPath )
+            def time             = System.currentTimeMillis()
+            def archiveExtension = extension( sourceArchive )
+
+            if ( ZIP_EXTENSIONS.contains( archiveExtension ))
+            {   // http://evgeny-goldin.org/javadoc/ant/CoreTasks/unzip.html
+                new AntBuilder().unzip( src  : sourceArchivePath,
+                                        dest : destinationDirectoryPath )
+            }
+            else if ( TAR_EXTENSIONS.contains( archiveExtension ))
+            {   // http://evgeny-goldin.org/javadoc/ant/CoreTasks/unzip.html
+                new AntBuilder().untar( src         : sourceArchivePath,
+                                        dest        : destinationDirectoryPath,
+                                        compression : tarCompression( archiveExtension ))
             }
             else
             {
@@ -291,8 +352,10 @@ class FileBean extends BaseBean
                  * http://evgeny-goldin.org/javadoc/truezip/
                  * {@link de.schlichtherle.io.File#archiveCopyAllTo(File)}
                  */
-                def detector = new SingleFileArchiveDetector( sourceArchive, extension( sourceArchive ))
-                de.schlichtherle.io.Files.cp_r( true, new de.schlichtherle.io.File( sourceArchive, detector ), destinationDirectory, detector, detector );
+                def detector = new SingleFileArchiveDetector( sourceArchive, archiveExtension )
+                de.schlichtherle.io.Files.cp_r( true,
+                                                new de.schlichtherle.io.File( sourceArchive, detector ),
+                                                destinationDirectory, detector, detector );
                 de.schlichtherle.io.File.umount()
             }
 
