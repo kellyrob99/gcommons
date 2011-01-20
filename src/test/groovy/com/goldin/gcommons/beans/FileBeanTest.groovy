@@ -353,22 +353,37 @@ class FileBeanTest extends BaseTest
                          new File( mavenDir3, 'apache-maven-3.0.1/lib/nekohtml-1.9.6.2.jar' ),
                          new File( mavenDir3, 'apache-maven-3.0.1/NOTICE.txt' ))
 
-        shouldFailWith( RuntimeException ) { fileBean.unpack( new File( resourcesDir, 'apache-maven-3.0.1.tar' ), mavenDir1, entries )}
-        shouldFailWith( RuntimeException ) { fileBean.unpack( new File( resourcesDir, 'plexus-component-annotations-1.5.5.jar' ), mavenDir7, entries, true )}
+        shouldFailWith( RuntimeException ) { fileBean.unpack( new File( resourcesDir, 'apache-maven-3.0.1.tar' ),
+                                                              mavenDir1, entries )}
+        shouldFailWith( RuntimeException ) { fileBean.unpack( new File( resourcesDir, 'plexus-component-annotations-1.5.5.jar' ),
+                                                              mavenDir7, entries, true )}
+        shouldFailWith( RuntimeException ) { fileBean.unpack( new File( resourcesDir, 'plexus-component-annotations-1.5.5.jar' ),
+                                                              mavenDir7, [ 'org/codehaus/plexus/component' ], true )}
+        shouldFailWith( RuntimeException ) { fileBean.unpack( new File( resourcesDir, 'plexus-component-annotations-1.5.5.jar' ),
+                                                              mavenDir7, [ 'META-INF' ], true )}
 
         shouldFailAssert {
             shouldFailWith( RuntimeException ) {
-                fileBean.unpack( new File( resourcesDir, 'plexus-component-annotations-1.5.5.jar' ), mavenDir7, entries2, true )
+                fileBean.unpack( new File( resourcesDir, 'plexus-component-annotations-1.5.5.jar' ),
+                                 mavenDir7, entries2, true )
             }
         }
 
-        shouldFailWith( RuntimeException ) { fileBean.unpack( new File( resourcesDir, 'apache-maven-3.0.1.tgz' ), mavenDir1, entries )}
-        shouldFailWith( RuntimeException ) { fileBean.unpack( new File( resourcesDir, 'apache-maven-3.0.1.tar.gz' ), mavenDir1, entries )}
-        shouldFailAssert{ fileBean.unpack( new File( resourcesDir, 'doesnt-exist.file'      ), mavenDir1, entries )}
-        shouldFailWith( RuntimeException ) { fileBean.unpack( new File( resourcesDir, 'apache-maven-3.0.1.zip' ), mavenDir1, [ 'doesnt-exist/entry' ] )}
-        shouldFailWith( RuntimeException ) { fileBean.unpack( new File( resourcesDir, 'apache-maven-3.0.1.zip' ), mavenDir1, [ 'doesnt-exist/entry' ] )}
-        shouldFailWith( RuntimeException ) { fileBean.unpack( new File( resourcesDir, 'apache-maven-3.0.1.zip' ), mavenDir1, [ '' ] )}
-        shouldFailWith( RuntimeException ) { fileBean.unpack( new File( resourcesDir, 'apache-maven-3.0.1.zip' ), mavenDir1, [ null ] )}
-        shouldFailWith( RuntimeException ) { fileBean.unpack( new File( resourcesDir, 'apache-maven-3.0.1.zip' ), mavenDir1, [ ' ', '',  '  ', null ] )}
+        shouldFailWith( RuntimeException ) { fileBean.unpack( new File( resourcesDir, 'apache-maven-3.0.1.tgz' ),
+                                                              mavenDir1, entries )}
+        shouldFailWith( RuntimeException ) { fileBean.unpack( new File( resourcesDir, 'apache-maven-3.0.1.tar.gz' ),
+                                                              mavenDir1, entries )}
+        shouldFailAssert{ fileBean.unpack( new File( resourcesDir, 'doesnt-exist.file'      ),
+                                           mavenDir1, entries )}
+        shouldFailWith( RuntimeException ) { fileBean.unpack( new File( resourcesDir, 'apache-maven-3.0.1.zip' ),
+                                                              mavenDir1, [ 'doesnt-exist/entry' ] )}
+        shouldFailWith( RuntimeException ) { fileBean.unpack( new File( resourcesDir, 'apache-maven-3.0.1.zip' ),
+                                                              mavenDir1, [ 'doesnt-exist/entry' ] )}
+        shouldFailWith( RuntimeException ) { fileBean.unpack( new File( resourcesDir, 'apache-maven-3.0.1.zip' ),
+                                                              mavenDir1, [ '' ] )}
+        shouldFailWith( RuntimeException ) { fileBean.unpack( new File( resourcesDir, 'apache-maven-3.0.1.zip' ),
+                                                              mavenDir1, [ null ] )}
+        shouldFailWith( RuntimeException ) { fileBean.unpack( new File( resourcesDir, 'apache-maven-3.0.1.zip' ),
+                                                              mavenDir1, [ ' ', '',  '  ', null ] )}
     }
 }
