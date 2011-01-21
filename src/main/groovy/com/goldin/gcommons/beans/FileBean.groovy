@@ -322,11 +322,8 @@ class FileBean extends BaseBean implements InitializingBean
      *
      * @return destination directory where archive was unpacked
      */
-    File unpack ( File         sourceArchive,
-                  File         destinationDirectory,
-                  List<String> zipEntries             = [],
-                  boolean      zipEntriesPreservePath = false,
-                  boolean      zipEntriesVerbose      = true )
+    File unpack ( File sourceArchive,
+                  File destinationDirectory )
     {
         verify.notEmptyFile( sourceArchive )
         verify.notNull( destinationDirectory )
@@ -344,21 +341,11 @@ class FileBean extends BaseBean implements InitializingBean
             def time             = System.currentTimeMillis()
             def archiveExtension = extension( sourceArchive )
 
-            assert (( ! zipEntries ) || ( ZIP_EXTENSIONS.contains( archiveExtension ))), \
-                   "Extension [$archiveExtension] is not recognized as ZIP file, zip entries $zipEntries cannot be used"
-
             if ( ZIP_EXTENSIONS.contains( archiveExtension ))
             {
-                if ( zipEntries )
-                {
-                    unpackZipEntries( sourceArchive, destinationDirectory, zipEntries, zipEntriesPreservePath, zipEntriesVerbose )
-                }
-                else
-                {
-                    // http://evgeny-goldin.org/javadoc/ant/CoreTasks/unzip.html
-                    new AntBuilder().unzip( src  : sourceArchivePath,
-                                            dest : destinationDirectoryPath )
-                }
+                // http://evgeny-goldin.org/javadoc/ant/CoreTasks/unzip.html
+                new AntBuilder().unzip( src  : sourceArchivePath,
+                                        dest : destinationDirectoryPath )
             }
             else if ( TAR_EXTENSIONS.contains( archiveExtension ))
             {   // http://evgeny-goldin.org/javadoc/ant/CoreTasks/unzip.html
@@ -406,17 +393,21 @@ class FileBean extends BaseBean implements InitializingBean
                             File         destinationDirectory,
                             List<String> zipEntries   = [],
                             boolean      preservePath = false,
-                            boolean      verbose      = true)
+                            boolean      verbose      = true )
     {
         verify.notEmptyFile( sourceArchive )
         verify.notNull( destinationDirectory )
 
         def sourceArchivePath        = sourceArchive.canonicalPath
         def destinationDirectoryPath = destinationDirectory.canonicalPath
-        def entries                  = new HashSet<String>( /* Cleanup and normalize */
-            zipEntries.findAll{ it }*.trim().findAll{ it }*.replace( '\\', '/' )*.replaceAll( /^\//, '' ))
+        def archiveExtension         = extension( sourceArchive )
+        def entries                  = new HashSet<String>( /* Cleanup and normalize: '\' => '/', no leading slash */
+            zipEntries*.trim().findAll{ it }*.replace( '\\', '/' )*.replaceAll( /^\//, '' ))
 
-        assert entries, "Zip entries list is empty: $zipEntries => $entries"
+        assert entries, \
+               "Zip entries list is empty: $zipEntries => $entries"
+        assert ZIP_EXTENSIONS.contains( archiveExtension ), \
+               "Extension [$archiveExtension] is not recognized as ZIP file, zip entries $zipEntries cannot be used"
 
         try
         {
@@ -424,24 +415,25 @@ class FileBean extends BaseBean implements InitializingBean
             mkdirs( destinationDirectory )
 
             getLog( this ).info( "Unpacking [$sourceArchivePath] entries $entries to [$destinationDirectoryPath]" )
-            def time             = System.currentTimeMillis()
-
+            
+            def time    = System.currentTimeMillis()
             def zipFile = new ZipFile( sourceArchive )
+
             for ( entry in entries )
             {
-                assert   entry
+                assert   entry,                  "Empty or null entry [$entry]"
                 ZipEntry zipEntry = zipFile.getEntry( entry )
-                assert   zipEntry, "Zip entry [$entry] doesn't exist in [$sourceArchivePath]"
-                assert   zipEntry.name == entry
+                assert   zipEntry,               "Zip entry [$entry] doesn't exist in [$sourceArchivePath]"
+                assert   zipEntry.name == entry, "Zip entry [$entry] doesn't equal to entry name [$zipEntry.name]"
 
                 if ( zipEntry.name.endsWith( '/' ))
                 {   // Directory entry
-                    assert zipEntry.size == 0
+                    assert zipEntry.size == 0, "Zip entry [$entry] ends with '/' but it's size is not zero [$zipEntry.size]"
                     continue
                 }
 
                 def    is = zipFile.getInputStream( zipEntry )
-                assert is, "Failed to read entry [$entry] from [$sourceArchivePath]"
+                assert is, "Failed to read entry [$entry] InputStream from [$sourceArchivePath]"
 
                 def targetFile = delete( new File( destinationDirectory,
                                                    ( preservePath ? zipEntry.name : zipEntry.name.replaceAll( /^.*\//, '' ))))
@@ -457,9 +449,15 @@ class FileBean extends BaseBean implements InitializingBean
                 }
 
                 verify.file( targetFile )
-                assert bytesWritten == zipEntry.size, "Zip entry [$entry]: [$zipEntry.size] size but [$bytesWritten] bytes written"
-                if ( verbose ) { getLog( this ).info( "[$sourceArchivePath]/[$entry] is written to [$targetFile.canonicalPath] "+
-                                                      "([$bytesWritten] byte${ general.s( bytesWritten ) })" )}
+                assert ( bytesWritten == zipEntry.size ) && ( targetFile.size() == zipEntry.size ), \
+                       "Zip entry [$entry]: size is [$zipEntry.size], [$bytesWritten] bytes written, " +
+                       "[${ targetFile.size() }] file size of [$targetFile.canonicalPath]"
+                
+                if ( verbose )
+                {
+                    getLog( this ).info( "[$sourceArchivePath]/[$entry] is written to [$targetFile.canonicalPath], " +
+                                         "[$bytesWritten] byte${ general.s( bytesWritten ) }" )
+                }
             }
 
             verify.directory( destinationDirectory )
