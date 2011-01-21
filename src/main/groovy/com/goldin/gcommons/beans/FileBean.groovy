@@ -194,7 +194,7 @@ class FileBean extends BaseBean implements InitializingBean
         }
 
         assert ( files || ( ! failIfNotFound )), \
-               "No files are included by parent dir [$baseDirectory] and include/exclude patterns $includes/$excludes"
+               "No files are included by parent dir [$baseDirectory] and include/exclude patterns ${ includes ?: [] }/${ excludes ?: [] }"
 
         files
     }
