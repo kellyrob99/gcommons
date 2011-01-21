@@ -320,7 +320,7 @@ class FileBeanTest extends BaseTest
         testArchives.each {
             def testArchiveFile = new File( resourcesDir, it )
             fileBean.unpack( testArchiveFile,  mavenDir8 )
-            fileBean.unpack( testArchiveFile,  mavenDir9, new ZipFile( testArchiveFile ).getEntries()*.name, true )
+            fileBean.unpack( testArchiveFile,  mavenDir9, new ZipFile( testArchiveFile ).entries*.name, true )
         }
 
         assert mavenDir1.list().size() == 6
