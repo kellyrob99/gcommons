@@ -409,12 +409,14 @@ class FileBean extends BaseBean implements InitializingBean
         assert ZIP_EXTENSIONS.contains( archiveExtension ), \
                "Extension [$archiveExtension] is not recognized as ZIP file, zip entries $zipEntries cannot be used"
 
+        def entriesWord = (( entries.size() == 1 ) ? 'entry' : 'entries' )
+
         try
         {
             if ( destinationDirectory.isFile()) { delete( destinationDirectory ) }
             mkdirs( destinationDirectory )
 
-            getLog( this ).info( "Unpacking [$sourceArchivePath] entries $entries to [$destinationDirectoryPath]" )
+            getLog( this ).info( "Unpacking [$sourceArchivePath] $entriesWord $entries to [$destinationDirectoryPath]" )
             
             def time    = System.currentTimeMillis()
             def zipFile = new ZipFile( sourceArchive )
@@ -461,14 +463,14 @@ class FileBean extends BaseBean implements InitializingBean
             }
 
             verify.directory( destinationDirectory )
-            getLog( this ).info( "[$sourceArchivePath] entries $entries unpacked to [$destinationDirectoryPath] " +
+            getLog( this ).info( "[$sourceArchivePath] $entriesWord $entries unpacked to [$destinationDirectoryPath] " +
                                  "(${( System.currentTimeMillis() - time ).intdiv( 1000 )} sec)" )
 
             destinationDirectory
         }
         catch ( Throwable t )
         {
-            throw new RuntimeException( "Failed to unpack [$sourceArchivePath] entries $entries to [$destinationDirectoryPath]: $t",
+            throw new RuntimeException( "Failed to unpack [$sourceArchivePath] $entriesWord $entries to [$destinationDirectoryPath]: $t",
                                         t )
         }
     }
