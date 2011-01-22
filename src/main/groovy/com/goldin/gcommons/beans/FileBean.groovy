@@ -7,9 +7,9 @@ import de.schlichtherle.io.archive.tar.TarDriver
 import de.schlichtherle.io.archive.zip.ZipDriver
 import groovy.io.FileType
 import java.security.MessageDigest
-import java.util.zip.ZipEntry
 import org.apache.tools.ant.DirectoryScanner
 import org.apache.tools.zip.ZipFile
+import org.apache.tools.zip.ZipEntry
 import org.springframework.beans.factory.InitializingBean
 
  /**
@@ -416,7 +416,7 @@ class FileBean extends BaseBean implements InitializingBean
             if ( destinationDirectory.isFile()) { delete( destinationDirectory ) }
             mkdirs( destinationDirectory )
 
-            getLog( this ).info( "Unpacking [$sourceArchivePath] $entriesWord $entries to [$destinationDirectoryPath]" )
+            getLog( this ).info( "Unpacking [$sourceArchivePath] [${ entries.size()}] $entriesWord $entries to [$destinationDirectoryPath]" )
             
             def time    = System.currentTimeMillis()
             def zipFile = new ZipFile( sourceArchive )
@@ -426,28 +426,44 @@ class FileBean extends BaseBean implements InitializingBean
                 assert   entry,                  "Empty or null entry [$entry]"
                 ZipEntry zipEntry = zipFile.getEntry( entry )
                 assert   zipEntry,               "Zip entry [$entry] doesn't exist in [$sourceArchivePath]"
-                assert   zipEntry.name == entry, "Zip entry [$entry] doesn't equal to entry name [$zipEntry.name]"
-
-                if ( zipEntry.name.endsWith( '/' ))
+                assert   zipEntry.name == entry, "Zip entry [$entry] != entry name [$zipEntry.name]"
+                def      targetFile = new File( destinationDirectory,
+                                                ( preservePath ? entry : entry.replaceAll( /^.*\//, '' /* leaving last chunk of the path*/ )))
+                
+                if ( entry.endsWith( '/' ))
                 {   // Directory entry
                     assert zipEntry.size == 0, "Zip entry [$entry] ends with '/' but it's size is not zero [$zipEntry.size]"
+                    if ( targetFile.isDirectory())
+                    {
+                        if ( verbose ) { getLog( this ).info( "[$sourceArchivePath]/[$entry] is a directory that already exists, doing nothing" )}
+                    }
+                    else
+                    {
+                        mkdirs( targetFile )
+                        if ( verbose ) { getLog( this ).info( "[$sourceArchivePath]/[$entry] is a directory, [$targetFile.canonicalPath] is created" )}
+                    }
+
                     continue
                 }
+                else
+                {   // File entry
+                    mkdirs( targetFile.parentFile )
+                }
 
-                def    is = zipFile.getInputStream( zipEntry )
-                assert is, "Failed to read entry [$entry] InputStream from [$sourceArchivePath]"
-
-                def targetFile = delete( new File( destinationDirectory,
-                                                   ( preservePath ? zipEntry.name : zipEntry.name.replaceAll( /^.*\//, '' ))))
-                mkdirs( targetFile.parentFile )
-
-                def os           = new BufferedOutputStream( new FileOutputStream( targetFile ))
                 def bytesWritten = 0
+                delete( targetFile )
+                
+                new BufferedOutputStream( new FileOutputStream( targetFile )).withStream {
+                    OutputStream os ->
 
-                os.withStream { is.eachByte( 10240 ) {
-                    byte[] buffer, int length ->
-                    bytesWritten += length
-                    os.write( buffer, 0, length ) }
+                    def    is = zipFile.getInputStream( zipEntry )
+                    assert is, "Failed to read entry [$entry] InputStream from [$sourceArchivePath]"
+
+                    is.eachByte( 10240 ) {
+                        byte[] buffer, int length ->
+                        bytesWritten += length
+                        os.write( buffer, 0, length )
+                    }
                 }
 
                 verify.file( targetFile )
@@ -463,14 +479,15 @@ class FileBean extends BaseBean implements InitializingBean
             }
 
             verify.directory( destinationDirectory )
-            getLog( this ).info( "[$sourceArchivePath] $entriesWord $entries unpacked to [$destinationDirectoryPath] " +
+            getLog( this ).info( "[$sourceArchivePath] [${ entries.size()}] $entriesWord $entries unpacked to [$destinationDirectoryPath] " +
                                  "(${( System.currentTimeMillis() - time ).intdiv( 1000 )} sec)" )
 
             destinationDirectory
         }
         catch ( Throwable t )
         {
-            throw new RuntimeException( "Failed to unpack [$sourceArchivePath] $entriesWord $entries to [$destinationDirectoryPath]: $t",
+            throw new RuntimeException( "Failed to unpack [$sourceArchivePath] [${ entries.size()}] " +
+                                        "$entriesWord $entries to [$destinationDirectoryPath]: $t",
                                         t )
         }
     }

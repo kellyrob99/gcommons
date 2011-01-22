@@ -379,7 +379,7 @@ class FileBeanTest extends BaseTest
         shouldFailWithCause( AssertionError ) { fileBean.unpackZipEntries( plexusJar,  mavenDir7, [ 'META-INF' ], true )}
         shouldFailWithCause( AssertionError ) { fileBean.unpackZipEntries( plexusJar,  mavenDir7, [ '/META-INF' ], true )}
         shouldFailWithCause( AssertionError ) { fileBean.unpackZipEntries( mavenZip,   mavenDir1, [ 'doesnt-exist/entry' ] )}
-        shouldFailWithCause( AssertionError ) { fileBean.unpackZipEntries( mavenZip,   mavenDir1, [ 'doesnt-exist/entry' ] )}
+        shouldFailWithCause( AssertionError ) { fileBean.unpackZipEntries( mavenZip,   mavenDir1, [ '/doesnt-exist/entry' ] )}
 
         // Not Zip files
         shouldFailAssert { fileBean.unpackZipEntries( mavenTar, mavenDir1, entries )}
