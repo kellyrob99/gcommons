@@ -409,7 +409,7 @@ class FileBean extends BaseBean implements InitializingBean
         assert ZIP_EXTENSIONS.contains( archiveExtension ), \
                "Extension [$archiveExtension] is not recognized as ZIP file, zip entries $zipEntries cannot be used"
 
-        def entriesWord    = ((( entries.size() == 1 ) && ( ! entries[ 0 ].contains( '*' ))) ? 'entry' : 'entries' )
+        def entriesWord    = ((( entries.size() == 1 ) && ( ! ( entries.toArray())[ 0 ].contains( '*' ))) ? 'entry' : 'entries' )
         def entriesCounter = entries.any{ it.contains( '*' ) } ? '' : "[${ entries.size() }] "
 
         try
