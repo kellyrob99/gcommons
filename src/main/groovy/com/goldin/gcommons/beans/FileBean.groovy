@@ -88,7 +88,10 @@ class FileBean extends BaseBean implements InitializingBean
             if ( f.exists())
             {
                 if ( f.isDirectory() && f.listFiles()) { delete( f.listFiles()) }
-                assert (( ! f.listFiles()) && f.delete()), "Failed to delete [$f.canonicalPath]"
+                if ( f.listFiles() || ( ! f.delete()))
+                {
+                    getLog( this ).warn( "Failed to delete [$f.canonicalPath]" )
+                }
             }
 
             assert ( ! f.exists())
@@ -417,7 +420,7 @@ class FileBean extends BaseBean implements InitializingBean
             mkdirs( destinationDirectory )
 
             getLog( this ).info( "Unpacking [$sourceArchivePath] [${ entries.size()}] $entriesWord $entries to [$destinationDirectoryPath]" )
-            
+
             def time    = System.currentTimeMillis()
             def zipFile = new ZipFile( sourceArchive )
 
@@ -429,7 +432,7 @@ class FileBean extends BaseBean implements InitializingBean
                 assert   zipEntry.name == entry, "Zip entry [$entry] != entry name [$zipEntry.name]"
                 def      targetFile = new File( destinationDirectory,
                                                 ( preservePath ? entry : entry.replaceAll( /^.*\//, '' /* leaving last chunk of the path*/ )))
-                
+
                 if ( entry.endsWith( '/' ))
                 {   // Directory entry
                     assert zipEntry.size == 0, "Zip entry [$entry] ends with '/' but it's size is not zero [$zipEntry.size]"
@@ -452,7 +455,7 @@ class FileBean extends BaseBean implements InitializingBean
 
                 def bytesWritten = 0
                 delete( targetFile )
-                
+
                 new BufferedOutputStream( new FileOutputStream( targetFile )).withStream {
                     OutputStream os ->
 
@@ -470,7 +473,7 @@ class FileBean extends BaseBean implements InitializingBean
                 assert ( bytesWritten == zipEntry.size ) && ( targetFile.size() == zipEntry.size ), \
                        "Zip entry [$entry]: size is [$zipEntry.size], [$bytesWritten] bytes written, " +
                        "[${ targetFile.size() }] file size of [$targetFile.canonicalPath]"
-                
+
                 if ( verbose )
                 {
                     getLog( this ).info( "[$sourceArchivePath]/[$entry] is written to [$targetFile.canonicalPath], " +
