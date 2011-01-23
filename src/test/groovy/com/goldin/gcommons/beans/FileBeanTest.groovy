@@ -401,4 +401,64 @@ class FileBeanTest extends BaseTest
         shouldFailAssert { shouldFailWith( RuntimeException ) { fileBean.unpackZipEntries( plexusJar,  mavenDir7, [ 'META-INF/' ], true )}}
         shouldFailAssert { shouldFailWith( RuntimeException ) { fileBean.unpackZipEntries( plexusJar,  mavenDir7, entries2, true ) }}
     }
+
+
+    @Test
+    void shouldUnpackZipEntriesWithPattern()
+    {
+        def resourcesDir = new File( 'src/test/resources' )
+        def mavenZip     = new File( resourcesDir, 'apache-maven-3.0.1.zip' )
+        def mavenJar     = new File( resourcesDir, 'apache-maven-3.0.1.jar' )
+        def mavenDir1    = testDir( 'apache-maven-1' )
+        def mavenDir2    = testDir( 'apache-maven-2' )
+        def mavenDir3    = testDir( 'apache-maven-3' )
+        def mavenDir4    = testDir( 'apache-maven-4' )
+        def mavenDir5    = testDir( 'apache-maven-5' )
+        def mavenDir6    = testDir( 'apache-maven-6' )
+        def mavenDir7    = testDir( 'apache-maven-7' )
+        def mavenDir8    = testDir( 'apache-maven-8' )
+
+        fileBean.unpackZipEntries( mavenZip, mavenDir1, [ 'apache-maven-3.0.1/**/*.jar' ], true  )
+        fileBean.unpackZipEntries( mavenJar, mavenDir2, [ '**/*.jar' ], true  )
+        fileBean.unpackZipEntries( mavenZip, mavenDir3, [ 'apache-maven-3.0.1/**/*.jar' ], false )
+        fileBean.unpackZipEntries( mavenJar, mavenDir4, [ '**/*.jar' ], false )
+        fileBean.unpackZipEntries( mavenZip, mavenDir5, [ '**/*.xml', '**/conf/**' ], false )
+        fileBean.unpackZipEntries( mavenJar, mavenDir6, [ 'apache-maven-3.0.1/conf/settings.xml', '**/*.xml' ], false )
+        fileBean.unpack( mavenZip, mavenDir7 )
+        fileBean.unpackZipEntries( mavenJar, mavenDir8, [ '**' ], true )
+
+        verifyBean.equal( mavenDir1, mavenDir2 )
+        verifyBean.equal( mavenDir3, mavenDir4 )
+        verifyBean.equal( mavenDir5, mavenDir6 )
+        verifyBean.equal( mavenDir7, mavenDir8 )
+
+        assert fileBean.directorySize( mavenDir1 ) == 3301021
+        assert fileBean.directorySize( mavenDir2 ) == 3301021
+        assert fileBean.directorySize( mavenDir3 ) == 3301021
+        assert fileBean.directorySize( mavenDir4 ) == 3301021
+        assert fileBean.directorySize( mavenDir5 ) == 1704
+        assert fileBean.directorySize( mavenDir6 ) == 1704
+        assert fileBean.directorySize( mavenDir7 ) == 3344327
+        assert fileBean.directorySize( mavenDir8 ) == 3344327
+
+        assert mavenDir1.list().size() == 1
+        assert mavenDir2.list().size() == 1
+        assert mavenDir3.list().size() == 32
+        assert mavenDir4.list().size() == 32
+        assert mavenDir5.list().size() == 1
+        assert mavenDir6.list().size() == 1
+        assert mavenDir7.list().size() == 1
+        assert mavenDir8.list().size() == 1
+
+
+        shouldFailWithCause( AssertionError ) {
+            fileBean.unpackZipEntries( mavenZip, mavenDir8, [ '**/*.no-such-file' ], true ) }
+        shouldFailWithCause( AssertionError ) {
+            fileBean.unpackZipEntries( mavenZip, mavenDir8, [ '**/*.jar', '**/*.ppt' ], true ) }
+        shouldFailWithCause( AssertionError ) {
+            fileBean.unpackZipEntries( mavenZip, mavenDir8, [ '**/*.exe', 'apache-maven-3.0.1/conf/**', ], true ) }
+        shouldFailWithCause( AssertionError ) {
+            fileBean.unpackZipEntries( mavenZip, mavenDir8, [ '**/*.xml', 'apache-maven-3.3.1/**', ], true ) }
+    }
+
 }

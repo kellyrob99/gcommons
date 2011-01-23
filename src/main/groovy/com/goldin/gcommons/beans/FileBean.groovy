@@ -255,7 +255,7 @@ class FileBean extends BaseBean implements InitializingBean
             if ( destinationArchive.exists()){ delete( destinationArchive ) }
 
             assert ! destinationArchive.exists()
-            File archiveDir = destinationArchive.getParentFile()
+            File archiveDir = destinationArchive.parentFile
             assert ( archiveDir != null ), "Destination archive [$archiveDir] has no parent folder"
             assert ( archiveDir.isDirectory() || archiveDir.mkdirs())
 
@@ -409,38 +409,36 @@ class FileBean extends BaseBean implements InitializingBean
         assert ZIP_EXTENSIONS.contains( archiveExtension ), \
                "Extension [$archiveExtension] is not recognized as ZIP file, zip entries $zipEntries cannot be used"
 
-        def entriesWord = (( entries.size() == 1 ) ? 'entry' : 'entries' )
+        def entriesWord    = ((( entries.size() == 1 ) && ( ! entries[ 0 ].contains( '*' ))) ? 'entry' : 'entries' )
+        def entriesCounter = entries.any{ it.contains( '*' ) } ? '' : "[${ entries.size() }] "
 
         try
         {
             if ( destinationDirectory.isFile()) { delete( destinationDirectory ) }
             mkdirs( destinationDirectory )
 
-            getLog( this ).info( "Unpacking [$sourceArchivePath] [${ entries.size()}] $entriesWord $entries to [$destinationDirectoryPath]" )
+            getLog( this ).info( "Unpacking [$sourceArchivePath] $entriesCounter$entriesWord $entries to [$destinationDirectoryPath]" )
 
             def time    = System.currentTimeMillis()
             def zipFile = new ZipFile( sourceArchive )
 
-            for ( entry in entries )
+            for ( zipEntry in findMatchingEntries( zipFile.entries, entries ))
             {
-                assert   entry,                  "Empty or null entry [$entry]"
-                ZipEntry zipEntry = zipFile.getEntry( entry )
-                assert   zipEntry,               "Zip entry [$entry] doesn't exist in [$sourceArchivePath]"
-                assert   zipEntry.name == entry, "Zip entry [$entry] != entry name [$zipEntry.name]"
-                def      targetFile = new File( destinationDirectory,
-                                                ( preservePath ? entry : entry.replaceAll( /^.*\//, '' /* leaving last chunk of the path*/ )))
+                def entryName  = zipEntry.name
+                def targetFile = new File( destinationDirectory,
+                                           ( preservePath ? entryName : entryName.replaceAll( /^.*\//, '' /* leaving last chunk of the path*/ )))
 
-                if ( entry.endsWith( '/' ))
+                if ( entryName.endsWith( '/' ))
                 {   // Directory entry
-                    assert zipEntry.size == 0, "Zip entry [$entry] ends with '/' but it's size is not zero [$zipEntry.size]"
+                    assert zipEntry.size == 0, "Zip entry [$entryName] ends with '/' but it's size is not zero [$zipEntry.size]"
                     if ( targetFile.isDirectory())
                     {
-                        if ( verbose ) { getLog( this ).info( "[$sourceArchivePath]/[$entry] is a directory that already exists, doing nothing" )}
+                        if ( verbose ) { getLog( this ).info( "[$sourceArchivePath]/[$entryName] is a directory that already exists, doing nothing" )}
                     }
                     else
                     {
                         mkdirs( targetFile )
-                        if ( verbose ) { getLog( this ).info( "[$sourceArchivePath]/[$entry] is a directory, [$targetFile.canonicalPath] is created" )}
+                        if ( verbose ) { getLog( this ).info( "[$sourceArchivePath]/[$entryName] is a directory, [$targetFile.canonicalPath] is created" )}
                     }
 
                     continue
@@ -457,7 +455,7 @@ class FileBean extends BaseBean implements InitializingBean
                     OutputStream os ->
 
                     def    is = zipFile.getInputStream( zipEntry )
-                    assert is, "Failed to read entry [$entry] InputStream from [$sourceArchivePath]"
+                    assert is, "Failed to read entry [$entryName] InputStream from [$sourceArchivePath]"
 
                     is.eachByte( 10240 ) {
                         byte[] buffer, int length ->
@@ -468,28 +466,66 @@ class FileBean extends BaseBean implements InitializingBean
 
                 verify.file( targetFile )
                 assert ( bytesWritten == zipEntry.size ) && ( targetFile.size() == zipEntry.size ), \
-                       "Zip entry [$entry]: size is [$zipEntry.size], [$bytesWritten] bytes written, " +
+                       "Zip entry [$entryName]: size is [$zipEntry.size], [$bytesWritten] bytes written, " +
                        "[${ targetFile.size() }] file size of [$targetFile.canonicalPath]"
 
                 if ( verbose )
                 {
-                    getLog( this ).info( "[$sourceArchivePath]/[$entry] is written to [$targetFile.canonicalPath], " +
+                    getLog( this ).info( "[$sourceArchivePath]/[$entryName] is written to [$targetFile.canonicalPath], " +
                                          "[$bytesWritten] byte${ general.s( bytesWritten ) }" )
                 }
             }
 
             verify.directory( destinationDirectory )
-            getLog( this ).info( "[$sourceArchivePath] [${ entries.size()}] $entriesWord $entries unpacked to [$destinationDirectoryPath] " +
+            getLog( this ).info( "[$sourceArchivePath] $entriesCounter$entriesWord $entries unpacked to [$destinationDirectoryPath] " +
                                  "(${( System.currentTimeMillis() - time ).intdiv( 1000 )} sec)" )
 
             destinationDirectory
         }
         catch ( Throwable t )
         {
-            throw new RuntimeException( "Failed to unpack [$sourceArchivePath] [${ entries.size()}] " +
-                                        "$entriesWord $entries to [$destinationDirectoryPath]: $t",
+            throw new RuntimeException( "Failed to unpack [$sourceArchivePath] $entriesCounter$entriesWord $entries to [$destinationDirectoryPath]: $t",
                                         t )
         }
+    }
+
+
+    /**
+     * Finds Zip entries that match user patterns specified.
+     *
+     * @param zipEntries  Zip entries to scan
+     * @param userEntries user pattern to match
+     * @return Zip entries that match user patterns specified
+     */
+    private List<ZipEntry> findMatchingEntries ( Enumeration<ZipEntry> zipEntries, Collection<String> userEntries )
+    {
+        verify.notNull( zipEntries )
+        assert zipEntries.hasMoreElements()
+        verify.notNullOrEmpty( userEntries )
+
+        List<ZipEntry> matchingZipEntries = []
+
+        /**
+         * Collecting Zip entries that match at least one of user patterns
+         */
+        for ( ZipEntry zipEntry in zipEntries )
+        {
+            if ( userEntries.any{ general.match( zipEntry.name, it ) } )
+            {
+                matchingZipEntries << zipEntry
+            }
+        }
+
+        /**
+         * Making sure each user pattern was matched at least once
+         */
+        for ( userEntry in userEntries )
+        {
+            assert matchingZipEntries.any{ general.match( it.name, userEntry ) }, \
+                   "Failed to match [$userEntries] pattern in Zip entries $zipEntries"
+        }
+
+        verify.notNullOrEmpty( matchingZipEntries )
     }
 
 
