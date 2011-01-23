@@ -94,7 +94,7 @@ class FileBean extends BaseBean implements InitializingBean
                 }
             }
 
-            assert ( ! f.exists())
+//            assert ( ! f.exists())
         }
 
         first( files )
