@@ -87,13 +87,10 @@ class FileBean extends BaseBean implements InitializingBean
         {
             if ( f.exists())
             {
-                if ( f.isDirectory() && f.listFiles()) { delete( f.listFiles()) }
-                if ( f.listFiles() || ( ! f.delete()))
-                {
-                    getLog( this ).warn( "Failed to delete [$f.canonicalPath]" )
-                }
+                if ( f.isDirectory()) { delete( f.listFiles()) }
+                if ( f.listFiles())   { getLog( this ).warn( "Failed to cleanup directory [$f.canonicalPath]" )}
+                if ( ! f.delete())    { getLog( this ).warn( "Failed to delete [$f.canonicalPath]" )}
             }
-
 //            assert ( ! f.exists())
         }
 
