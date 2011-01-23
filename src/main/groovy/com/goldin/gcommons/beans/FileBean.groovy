@@ -11,8 +11,9 @@ import org.apache.tools.ant.DirectoryScanner
 import org.apache.tools.zip.ZipFile
 import org.apache.tools.zip.ZipEntry
 import org.springframework.beans.factory.InitializingBean
+import com.goldin.gcommons.GCommons
 
- /**
+/**
  * File-related helper utilities.
  */
 class FileBean extends BaseBean implements InitializingBean
@@ -422,7 +423,7 @@ class FileBean extends BaseBean implements InitializingBean
             def time    = System.currentTimeMillis()
             def zipFile = new ZipFile( sourceArchive )
 
-            for ( zipEntry in findMatchingEntries( zipFile.entries, entries ))
+            for ( zipEntry in findMatchingEntries( zipFile.entries.toList(), entries ))
             {
                 def entryName  = zipEntry.name
                 def targetFile = new File( destinationDirectory,
@@ -497,12 +498,9 @@ class FileBean extends BaseBean implements InitializingBean
      * @param userEntries user pattern to match
      * @return Zip entries that match user patterns specified
      */
-    private List<ZipEntry> findMatchingEntries ( Enumeration<ZipEntry> zipEntries, Collection<String> userEntries )
+    private List<ZipEntry> findMatchingEntries ( List<ZipEntry> zipEntries, Collection<String> userEntries )
     {
-        verify.notNull( zipEntries )
-        assert zipEntries.hasMoreElements()
-        verify.notNullOrEmpty( userEntries )
-
+        assert zipEntries && userEntries
         List<ZipEntry> matchingZipEntries = []
 
         /**
@@ -522,7 +520,7 @@ class FileBean extends BaseBean implements InitializingBean
         for ( userEntry in userEntries )
         {
             assert matchingZipEntries.any{ general.match( it.name, userEntry ) }, \
-                   "Failed to match [$userEntries] pattern in Zip entries $zipEntries"
+                   "Failed to match [$userEntry] pattern in Zip entries $zipEntries"
         }
 
         verify.notNullOrEmpty( matchingZipEntries )
