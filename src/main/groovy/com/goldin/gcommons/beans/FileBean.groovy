@@ -8,10 +8,9 @@ import de.schlichtherle.io.archive.zip.ZipDriver
 import groovy.io.FileType
 import java.security.MessageDigest
 import org.apache.tools.ant.DirectoryScanner
-import org.apache.tools.zip.ZipFile
 import org.apache.tools.zip.ZipEntry
+import org.apache.tools.zip.ZipFile
 import org.springframework.beans.factory.InitializingBean
-import com.goldin.gcommons.GCommons
 
 /**
  * File-related helper utilities.
@@ -420,10 +419,13 @@ class FileBean extends BaseBean implements InitializingBean
 
             getLog( this ).info( "Unpacking [$sourceArchivePath] $entriesCounter$entriesWord $entries to [$destinationDirectoryPath]" )
 
-            def time    = System.currentTimeMillis()
-            def zipFile = new ZipFile( sourceArchive )
+            def time            = System.currentTimeMillis()
+            def zipFile         = new ZipFile( sourceArchive )
+            def matchingEntries = findMatchingEntries( zipFile.entries.toList(), entries )
+            entriesCounter      = "[${ matchingEntries.size() }] "
+            entriesWord         = (( matchingEntries.size() == 1 ) ? 'entry' : 'entries' )
 
-            for ( zipEntry in findMatchingEntries( zipFile.entries.toList(), entries ))
+            for ( zipEntry in matchingEntries )
             {
                 def entryName  = zipEntry.name
                 def targetFile = new File( destinationDirectory,
@@ -478,7 +480,7 @@ class FileBean extends BaseBean implements InitializingBean
             }
 
             verify.directory( destinationDirectory )
-            getLog( this ).info( "[$sourceArchivePath] $entriesCounter$entriesWord $entries unpacked to [$destinationDirectoryPath] " +
+            getLog( this ).info( "[$sourceArchivePath] $entriesCounter$entriesWord unpacked to [$destinationDirectoryPath] " +
                                  "(${( System.currentTimeMillis() - time ).intdiv( 1000 )} sec)" )
 
             destinationDirectory
