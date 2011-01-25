@@ -1,11 +1,10 @@
 package com.goldin.gcommons.beans
 
-
-
 import com.goldin.gcommons.BaseTest
+import org.apache.commons.net.ftp.FTPFile
 import org.junit.Test
 
- /**
+/**
  * {@link NetBean} tests
  */
 class NetBeanTest extends BaseTest
@@ -85,4 +84,24 @@ class NetBeanTest extends BaseTest
                                     'apache-maven-3.0.1/README.txt' ]
         assert txtFiles*.size  == [ 11560, 1030, 2559 ]
     }
+
+
+    @Test
+    void shouldListFtpFilesWithExcludes()
+    {
+        def fileNames = [ 'wagon-file-1.0-beta-7.jar', 'wagon-provider-api-1.0-beta-7.jar', 'xercesMinimal-1.9.6.2.jar' ]
+        def files1    = netBean.listFiles( ZYMIC_FTP, ['apache-maven-3.0.1/lib/*.jar'],      [ '**/wagon-http*' ] )
+        def files2    = netBean.listFiles( ZYMIC_FTP, [ '**/lib/*.jar'], [ 'apache-maven-3.0.1/lib/wagon-http-lightweight-1.0-beta-7.jar',
+                                                                           'apache-maven-3.0.1/lib/wagon-http-shared-1.0-beta-7.jar' ] )
+        def files3    = netBean.listFiles( ZYMIC_FTP + 'apache-maven-3.0.1', [ 'lib/*.jar'], [ 'lib/wagon-http-*.jar' ] )
+        def files4    = netBean.listFiles( ZYMIC_FTP + 'apache-maven-3.0.1', [ '**/*.jar'],  [ 'boot/**', '**/lib/wagon-h*.jar' ] )
+
+        assert [ files1, files2, files3, files4 ].every {
+            List<FTPFile> files ->
+            ( files.size() == fileNames.size()) &&
+            ( fileNames.each{    String fileName -> files*.name.any{ it.endsWith( fileName ) }} ) &&
+            ( files*.name.every{ String fileName -> fileNames.any{ fileName.endsWith( it )   }} )
+        }
+    }
+
 }
