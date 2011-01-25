@@ -55,6 +55,7 @@ class GCommonsTest extends BaseTest
 
 // http://evgeny-goldin.org/youtrack/issue/gc-9
 //        assert GCommons.general() != GCommons.general( true  )
-//        assert GCommons.verify() != GCommons.verify( true  )
+//        assert GCommons.verify()  != GCommons.verify( true  )
+//        assert GCommons.net()     != GCommons.net( true  )
     }
 }

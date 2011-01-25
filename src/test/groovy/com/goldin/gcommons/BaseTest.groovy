@@ -1,30 +1,24 @@
 package com.goldin.gcommons
 
 import org.junit.Test
-import org.junit.runner.RunWith
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.test.context.ContextConfiguration
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner
 import com.goldin.gcommons.beans.*
 
-/**
+ /**
  * Base class for the tests
  */
-@RunWith( SpringJUnit4ClassRunner.class )
-@ContextConfiguration( '/gcommons-application-context.xml' )
 class BaseTest
 {
     /**
      * Injected by Spring
      */
-    @Autowired final ConstantsBean  constantsBean
-    @Autowired final VerifyBean     verifyBean
-    @Autowired final GeneralBean    generalBean
-    @Autowired final FileBean       fileBean
-    @Autowired final NetBean        netBean
-    @Autowired final GroovyBean     groovyBean
+    final ConstantsBean  constantsBean = GCommons.constants()
+    final VerifyBean     verifyBean    = GCommons.verify()
+    final GeneralBean    generalBean   = GCommons.general()
+    final FileBean       fileBean      = GCommons.file()
+    final NetBean        netBean       = GCommons.net()
+    final GroovyBean     groovyBean    = GCommons.groovy()
 
 
     /**
@@ -74,7 +68,7 @@ class BaseTest
         LOGGERS[ test.class ] = LOGGERS[ test.class ] ?: LoggerFactory.getLogger( test.class )
     }
 
-    
+
     @Test
     void testEmpty() { /* To prevent "java.lang.Exception: No runnable methods" */ }
 }
