@@ -151,7 +151,7 @@ class NetBean extends BaseBean
                 for ( String globPattern in globPatterns*.trim().collect{ verify.notNullOrEmpty( it ) } )
                 {
                     FTPFile[] files = client.listFiles( globPattern ).findAll {
-                        FTPFile file -> ( ! excludes.any{ general.match( file.name, it ) } )
+                        FTPFile file -> ( ! excludes.any{ general.match( file.name, it ) || it.endsWith( file.name ) } )
                     }
 
                     if ( getLog( this ).isDebugEnabled())
