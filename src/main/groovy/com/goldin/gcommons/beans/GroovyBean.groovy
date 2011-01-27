@@ -26,7 +26,7 @@ class GroovyBean extends BaseBean
     public <T> T eval ( String       expression,
                         Class<T>     resultType   = null,
                         Binding      binding      = null,
-                        GroovyConfig config       = null )
+                        GroovyConfig config       = new GroovyConfig())
     {
         if (( ! expression ) || ( expression.trim().length() < 1 ))
         {
