@@ -9,7 +9,7 @@ group               = 'com.goldin'
 version             = '0.4-SNAPSHOT'
 
 groovyVersion       = '1.8.0-beta-3'
-antVersion          = '1.8.1'
+antVersion          = '1.8.2'
 springVersion       = '3.0.5.RELEASE'
 junitVersion        = '4.8.2'
 truezipVersion      = '6.8.2'
