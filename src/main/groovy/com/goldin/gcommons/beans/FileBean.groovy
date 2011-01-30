@@ -278,12 +278,13 @@ class FileBean extends BaseBean implements InitializingBean
             }
             else if ( TAR_EXTENSIONS.contains( archiveExtension ))
             {   // http://evgeny-goldin.org/javadoc/ant/CoreTasks/tar.html
-                new AntBuilder().tar( destfile    : destinationArchivePath,
-                                      basedir     : sourceDirectoryPath,
-                                      includes    : ( includes ?: [] ).join( ',' ),
-                                      excludes    : ( excludes ?: [] ).join( ',' ),
-                                      longfile    : 'gnu',
-                                      compression : tarCompression( archiveExtension ))
+                new AntBuilder().tar( destfile        : destinationArchivePath,
+                                      basedir         : sourceDirectoryPath,
+                                      includes        : ( includes ?: [] ).join( ',' ),
+                                      excludes        : ( excludes ?: [] ).join( ',' ),
+                                      defaultexcludes : 'no',
+                                      longfile        : 'gnu',
+                                      compression     : tarCompression( archiveExtension ))
             }
             else
             {
