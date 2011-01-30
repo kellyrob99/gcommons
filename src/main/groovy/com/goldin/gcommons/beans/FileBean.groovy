@@ -269,11 +269,12 @@ class FileBean extends BaseBean implements InitializingBean
 
             if ( ZIP_EXTENSIONS.contains( archiveExtension ))
             {  // http://evgeny-goldin.org/javadoc/ant/CoreTasks/zip.html
-                new AntBuilder().zip( destfile  : destinationArchivePath,
-                                      basedir   : sourceDirectoryPath,
-                                      includes  : ( includes ?: [] ).join( ',' ),
-                                      excludes  : ( excludes ?: [] ).join( ',' ),
-                                      whenempty : failIfNotFound ? 'fail' : 'skip' )
+                new AntBuilder().zip( destfile        : destinationArchivePath,
+                                      basedir         : sourceDirectoryPath,
+                                      includes        : ( includes ?: [] ).join( ',' ),
+                                      excludes        : ( excludes ?: [] ).join( ',' ),
+                                      defaultexcludes : 'no',
+                                      whenempty       : failIfNotFound ? 'fail' : 'skip' )
             }
             else if ( TAR_EXTENSIONS.contains( archiveExtension ))
             {   // http://evgeny-goldin.org/javadoc/ant/CoreTasks/tar.html
