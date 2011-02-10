@@ -67,8 +67,4 @@ class BaseTest
     {
         LOGGERS[ test.class ] = LOGGERS[ test.class ] ?: LoggerFactory.getLogger( test.class )
     }
-
-
-    @Test
-    void testEmpty() { /* To prevent "java.lang.Exception: No runnable methods" */ }
 }
