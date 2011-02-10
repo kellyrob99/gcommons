@@ -11,7 +11,7 @@ import com.goldin.gcommons.beans.*
 class BaseTest
 {
     /**
-     * Injected by Spring
+     * Initializing all beans
      */
     final ConstantsBean  constantsBean = GCommons.constants()
     final VerifyBean     verifyBean    = GCommons.verify()
