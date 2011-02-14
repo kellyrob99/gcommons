@@ -11,9 +11,7 @@ import com.goldin.gcommons.beans.*
 class GCommons
 {
     private static ApplicationContext CONTEXT = newContext()
-    private static ApplicationContext newContext(){
-        new ClassPathXmlApplicationContext( '/gcommons-application-context.xml', GCommons )
-    }
+    private static ApplicationContext newContext(){ new ClassPathXmlApplicationContext( '/gcommons-application-context.xml' )}
 
     /**
      * Mapping of all beans: bean class => bean instance
