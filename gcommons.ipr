@@ -602,7 +602,6 @@
         <inspection_tool class="JUnitAssertAlwaysFails" enabled="true" level="WARNING" enabled_by_default="true" />
         <inspection_tool class="JUnitAssertAlwaysSucceeds" enabled="true" level="WARNING" enabled_by_default="true" />
         <inspection_tool class="JUnitFailWithoutMessage" enabled="true" level="WARNING" enabled_by_default="true" />
-        <inspection_tool class="JUnitPublicNonTestMethod" enabled="true" level="WARNING" enabled_by_default="true" />
         <inspection_tool class="JUnitSetUpCallsSuper" enabled="true" level="WARNING" enabled_by_default="true" />
         <inspection_tool class="JUnitStyleAssertions" enabled="true" level="WARNING" enabled_by_default="true" />
         <inspection_tool class="JUnitTearDownCallsSuper" enabled="true" level="WARNING" enabled_by_default="true" />
@@ -645,7 +644,6 @@
         <inspection_tool class="ThrowException" enabled="true" level="WARNING" enabled_by_default="true" />
         <inspection_tool class="ThrowExceptionFromFinallyBlock" enabled="true" level="WARNING" enabled_by_default="true" />
         <inspection_tool class="ThrowNullPointerException" enabled="true" level="WARNING" enabled_by_default="true" />
-        <inspection_tool class="ThrowRuntimeException" enabled="true" level="WARNING" enabled_by_default="true" />
         <inspection_tool class="ThrowThrowable" enabled="true" level="WARNING" enabled_by_default="true" />
         <inspection_tool class="UnnecessaryBigDecimalInstantiation" enabled="true" level="WARNING" enabled_by_default="true" />
         <inspection_tool class="UnnecessaryBigIntegerInstantiation" enabled="true" level="WARNING" enabled_by_default="true" />
