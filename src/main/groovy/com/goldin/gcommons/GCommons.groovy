@@ -1,6 +1,6 @@
 package com.goldin.gcommons
 
-
+import groovy.io.FileType
 import org.springframework.context.ApplicationContext
 import org.springframework.context.support.ClassPathXmlApplicationContext
 import com.goldin.gcommons.beans.*
@@ -17,6 +17,40 @@ class GCommons
      * Mapping of all beans: bean class => bean instance
      */
     private static final Map<Class<? extends BaseBean>, ? extends BaseBean> BEANS = [:]
+
+
+    static {
+        /**
+         * Splits an object to a list using its "iterating" each-like mthod
+         * http://evgeny-goldin.com/blog/2010/09/01/groovy-splitwith/
+         */
+         Object.metaClass.splitWith = { String methodName ->
+
+             assert     methodName
+             MetaMethod m = delegate.metaClass.pickMethod( methodName, Closure )
+             assert     m
+
+             def result = []
+             m.doMethodInvoke( delegate, { result << it } )
+
+             result
+         }
+        
+
+        /**
+         * Calculates directory size
+         */
+        File.metaClass.directorySize = {->
+
+            File   directory = delegate
+            assert directory.isDirectory(), "[$directory.canonicalPath] is not a directory"
+
+            long size = 0
+            directory.eachFileRecurse( FileType.FILES ){ size += it.size() }
+            size
+        }
+    }
+
 
 
     /**

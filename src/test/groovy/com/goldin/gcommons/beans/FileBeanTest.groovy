@@ -215,13 +215,12 @@ class FileBeanTest extends BaseTest
             verifyBean.equal( zipDir,    tarGzDir )
             verifyBean.equal( tarGzDir,  unpackDir )
 
-            assert fileBean.directorySize( unpackDir ) == TEST_ARCHIVES[ archiveName ]
-            assert fileBean.directorySize( jarDir )    == TEST_ARCHIVES[ archiveName ]
-            assert fileBean.directorySize( tarDir )    == TEST_ARCHIVES[ archiveName ]
-            assert fileBean.directorySize( tgzDir )    == TEST_ARCHIVES[ archiveName ]
-            assert fileBean.directorySize( zipDir )    == TEST_ARCHIVES[ archiveName ]
-            assert fileBean.directorySize( tarGzDir )  == TEST_ARCHIVES[ archiveName ]
-            assert fileBean.directorySize( unpackDir, jarDir, tarDir, tgzDir, zipDir, tarGzDir ) == TEST_ARCHIVES[ archiveName ] * 6
+            assert unpackDir.directorySize() == TEST_ARCHIVES[ archiveName ]
+            assert jarDir.directorySize()    == TEST_ARCHIVES[ archiveName ]
+            assert tarDir.directorySize()    == TEST_ARCHIVES[ archiveName ]
+            assert tgzDir.directorySize()    == TEST_ARCHIVES[ archiveName ]
+            assert zipDir.directorySize()    == TEST_ARCHIVES[ archiveName ]
+            assert tarGzDir.directorySize()  == TEST_ARCHIVES[ archiveName ]
         }
     }
 
@@ -311,12 +310,11 @@ class FileBeanTest extends BaseTest
             verifyBean.equal( zipDir,   tarGzDir )
             verifyBean.equal( tarGzDir, jarDir )
 
-            assert fileBean.directorySize( jarDir )   == TEST_ARCHIVES[ archiveName ]
-            assert fileBean.directorySize( tarDir )   == TEST_ARCHIVES[ archiveName ]
-            assert fileBean.directorySize( tgzDir )   == TEST_ARCHIVES[ archiveName ]
-            assert fileBean.directorySize( zipDir )   == TEST_ARCHIVES[ archiveName ]
-            assert fileBean.directorySize( tarGzDir ) == TEST_ARCHIVES[ archiveName ]
-            assert fileBean.directorySize( jarDir, tarDir, tgzDir, zipDir, tarGzDir ) == TEST_ARCHIVES[ archiveName ] * 5
+            assert jarDir.directorySize()   == TEST_ARCHIVES[ archiveName ]
+            assert tarDir.directorySize()   == TEST_ARCHIVES[ archiveName ]
+            assert tgzDir.directorySize()   == TEST_ARCHIVES[ archiveName ]
+            assert zipDir.directorySize()   == TEST_ARCHIVES[ archiveName ]
+            assert tarGzDir.directorySize() == TEST_ARCHIVES[ archiveName ]
         }
     }
 
@@ -390,15 +388,15 @@ class FileBeanTest extends BaseTest
         verifyBean.equal( mavenDir6, mavenDir7 )
         verifyBean.equal( mavenDir8, mavenDir9 )
 
-        assert fileBean.directorySize( mavenDir1 ) == 235902
-        assert fileBean.directorySize( mavenDir2 ) == 235902
-        assert fileBean.directorySize( mavenDir3 ) == 235902
-        assert fileBean.directorySize( mavenDir4 ) == 235902
-        assert fileBean.directorySize( mavenDir5 ) == 235902
-        assert fileBean.directorySize( mavenDir6 ) == 3420
-        assert fileBean.directorySize( mavenDir7 ) == 3420
-        assert fileBean.directorySize( mavenDir8 ) == TEST_ARCHIVES.values().sum()
-        assert fileBean.directorySize( mavenDir9 ) == TEST_ARCHIVES.values().sum()
+        assert mavenDir1.directorySize() == 235902
+        assert mavenDir2.directorySize() == 235902
+        assert mavenDir3.directorySize() == 235902
+        assert mavenDir4.directorySize() == 235902
+        assert mavenDir5.directorySize() == 235902
+        assert mavenDir6.directorySize() == 3420
+        assert mavenDir7.directorySize() == 3420
+        assert mavenDir8.directorySize() == TEST_ARCHIVES.values().sum()
+        assert mavenDir9.directorySize() == TEST_ARCHIVES.values().sum()
 
         verifyBean.file( new File( mavenDir1, 'aether-api-1.8.jar' ),
                          new File( mavenDir1, 'commons-cli-1.2.jar' ),
@@ -481,14 +479,14 @@ class FileBeanTest extends BaseTest
         verifyBean.equal( mavenDir5, mavenDir6 )
         verifyBean.equal( mavenDir7, mavenDir8 )
 
-        assert fileBean.directorySize( mavenDir1 ) == 3301021
-        assert fileBean.directorySize( mavenDir2 ) == 3301021
-        assert fileBean.directorySize( mavenDir3 ) == 3301021
-        assert fileBean.directorySize( mavenDir4 ) == 3301021
-        assert fileBean.directorySize( mavenDir5 ) == 1704
-        assert fileBean.directorySize( mavenDir6 ) == 1704
-        assert fileBean.directorySize( mavenDir7 ) == 3344327
-        assert fileBean.directorySize( mavenDir8 ) == 3344327
+        assert mavenDir1.directorySize() == 3301021
+        assert mavenDir2.directorySize() == 3301021
+        assert mavenDir3.directorySize() == 3301021
+        assert mavenDir4.directorySize() == 3301021
+        assert mavenDir5.directorySize() == 1704
+        assert mavenDir6.directorySize() == 1704
+        assert mavenDir7.directorySize() == 3344327
+        assert mavenDir8.directorySize() == 3344327
 
         assert mavenDir1.list().size() == 1
         assert mavenDir2.list().size() == 1

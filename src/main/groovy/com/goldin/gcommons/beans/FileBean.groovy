@@ -5,7 +5,6 @@ import de.schlichtherle.io.GlobalArchiveDriverRegistry
 import de.schlichtherle.io.archive.spi.ArchiveDriver
 import de.schlichtherle.io.archive.tar.TarDriver
 import de.schlichtherle.io.archive.zip.ZipDriver
-import groovy.io.FileType
 import java.security.MessageDigest
 import org.apache.tools.ant.DirectoryScanner
 import org.apache.tools.ant.util.FileUtils
@@ -585,25 +584,5 @@ class FileBean extends BaseBean implements InitializingBean
 
         def dotIndex = name.lastIndexOf( '.' )
         ( dotIndex > 0 ) ? name.substring( dotIndex + 1 ) : null
-    }
-
-
-    /**
-     * Calculates total size of directories specified.
-     *
-     * @param directories directories to read
-     * @return total size of all files, iterated with
-     *         {@link org.codehaus.groovy.runtime.DefaultGroovyMethods#eachFileRecurse(File, Closure)}
-     */
-    long directorySize( File ... directories )
-    {
-        long size = 0
-
-        for ( directory in directories )
-        {
-            verify.directory( directory ).eachFileRecurse( FileType.FILES ){ size += it.size() }
-        }
-
-        size
     }
 }
