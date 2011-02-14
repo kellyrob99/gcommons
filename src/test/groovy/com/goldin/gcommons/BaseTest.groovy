@@ -49,7 +49,10 @@ class BaseTest
      */
     File testDir( String dirName = System.currentTimeMillis() as String )
     {
-        def caller = ( StackTraceElement ) new Throwable().stackTrace.findAll { it.className.startsWith( 'com.goldin' ) }[ 2 ]
+        def    elements = new Throwable().stackTrace.findAll { it.className.startsWith( 'com.goldin' ) }
+        assert elements.size() > 1, "[$elements] in current stack trace"
+
+        def caller = ( StackTraceElement ) elements[ 1 ]
         fileBean.delete( new File( "build/test/${ this.class.name }/${ caller.methodName }/$dirName" ))
     }
 

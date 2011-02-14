@@ -211,6 +211,7 @@ class FileBean extends BaseBean implements InitializingBean
      *         http://evgeny-goldin.org/javadoc/ant/CoreTasks/tar.html
      *         http://evgeny-goldin.org/javadoc/ant/CoreTasks/untar.html
      */
+    @SuppressWarnings( "GroovyMultipleReturnPointsPerMethod" )
     private String tarCompression( String archiveExtension )
     {
         switch ( verify.notNullOrEmpty( archiveExtension ))
@@ -222,9 +223,9 @@ class FileBean extends BaseBean implements InitializingBean
 
             case 'tbz2'    :
             case 'tar.bz2' : return 'bzip2'
-        }
 
-        throw new RuntimeException( "Unknown tar extension [$archiveExtension]" )
+            default        : throw new RuntimeException( "Unknown tar extension [$archiveExtension]" )
+        }
     }
 
 
@@ -237,6 +238,7 @@ class FileBean extends BaseBean implements InitializingBean
      * @param excludes           patterns to use for excluding files, no files are excluded if null
      * @param caseSensitive      whether or not include and exclude patterns are matched in a case sensitive way
      * @param failIfNotFound     whether execution should fail if no files were found
+     * @param update             whether target archive should be updated if already exists
      *
      * @return archive packed
      */
@@ -245,7 +247,8 @@ class FileBean extends BaseBean implements InitializingBean
                 List<String> includes       = null,
                 List<String> excludes       = null,
                 boolean      caseSensitive  = true,
-                boolean      failIfNotFound = true )
+                boolean      failIfNotFound = true,
+                boolean      update         = false )
     {
         verify.directory( sourceDirectory )
         verify.notNull( destinationArchive )
@@ -255,7 +258,7 @@ class FileBean extends BaseBean implements InitializingBean
 
         try
         {
-            if ( destinationArchive.exists()){ delete( destinationArchive ) }
+            if ( destinationArchive.exists() && ( ! update )) { delete( destinationArchive ) }
 
             assert ! destinationArchive.exists()
             File archiveDir = destinationArchive.parentFile
