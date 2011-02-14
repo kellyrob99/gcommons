@@ -166,25 +166,28 @@ class FileBean extends BaseBean implements InitializingBean
     {
         verify.directory( baseDirectory )
 
-        def ds    = new DirectoryScanner()
-        def files = []
+        def scanner = new DirectoryScanner()
+        def files   = []
 
-        ds.setBasedir( baseDirectory )
-        ds.setIncludes( includes as String[] )
-        ds.setExcludes( excludes as String[] )
-        ds.setCaseSensitive( caseSensitive )
-        ds.setErrorOnMissingDir( true )
-        ds.setFollowSymlinks( false )
-        ds.scan()
 
-        for ( String filePath in ds.getIncludedFiles())
+        scanner.basedir           = baseDirectory
+        scanner.basedir           = baseDirectory
+        scanner.includes          = includes as String[]
+        scanner.excludes          = excludes as String[]
+        scanner.caseSensitive     = caseSensitive
+        scanner.errorOnMissingDir = true
+        scanner.followSymlinks    = false
+
+        scanner.scan()
+
+        for ( String filePath in scanner.includedFiles )
         {
             files << verify.file( new File( baseDirectory, filePath ))
         }
 
         if ( includeDirectories )
         {
-            for ( String directoryPath in ds.getIncludedDirectories())
+            for ( String directoryPath in scanner.includedDirectories )
             {
                 if ( directoryPath )
                 {
