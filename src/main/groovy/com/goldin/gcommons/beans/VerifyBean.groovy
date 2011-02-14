@@ -12,7 +12,7 @@ class VerifyBean extends BaseBean
      */
     VerifyEqualHelper verifyEqualHelper
 
-    
+
     /**
      * Verifies all objects specified are nulls
      * @param objects objects to check
@@ -20,7 +20,7 @@ class VerifyBean extends BaseBean
     void isNull( Object ... objects )
     {
         assert objects != null
-        
+
         for ( o in objects )
         {
             assert ( o == null ), "Object specified [$o] is *not* null"
@@ -56,7 +56,7 @@ class VerifyBean extends BaseBean
 
         for ( file in files )
         {
-            assert file.exists(), "File specified [$file] *does not* exist"
+            assert file.exists(), "File specified [$file.canonicalPath] *does not* exist"
         }
 
         first( files )
@@ -74,13 +74,13 @@ class VerifyBean extends BaseBean
 
         for ( file in files )
         {
-            assert file.isFile(), "File specified [$file] is *not* an existing file"
+            assert file.isFile(), "File specified [$file.canonicalPath] is *not* an existing file"
         }
 
         first( files )
     }
 
-    
+
     /**
      * Verifies files specified are actual files that are not empty.
      * @param files file to check
@@ -92,14 +92,14 @@ class VerifyBean extends BaseBean
 
         for ( file in files )
         {
-            assert file.isFile(),    "File specified [$file] is *not* an existing file"
-            assert file.size() > 0 , "File specified [$file] *is* empty"
+            assert file.isFile(),    "File specified [$file.canonicalPath] is *not* an existing file"
+            assert file.size() > 0 , "File specified [$file.canonicalPath] *is* empty"
         }
 
         first( files )
     }
 
-    
+
     /**
      * Verifies that directories specified are existing directories.
      * @param directories directories to check
@@ -111,16 +111,16 @@ class VerifyBean extends BaseBean
 
         for ( directory in directories )
         {
-            assert directory.isDirectory(), "Directory specified [$directory] is *not* an existing directory"
+            assert directory.isDirectory(), "Directory specified [$directory.canonicalPath] is *not* an existing directory"
         }
 
         first( directories )
     }
 
-    
+
     /**
      * Verifies two files or directories specified are equal.
-     * 
+     *
      * @param file1          file or directory
      * @param file2          another file or directory
      * @param verifyChecksum whether content checksum verification should be performed
@@ -131,7 +131,7 @@ class VerifyBean extends BaseBean
      *                       Nothing is done if <code>null</code>,
      *                       normalized to "\r\n" if <code>"windows"</code>,
      *                       normalized to "\n" if any other value
-     * 
+     *
      * @return number of files checked and verified
      */
     int equal ( File    file1,
@@ -156,7 +156,7 @@ class VerifyBean extends BaseBean
     String notNullOrEmpty( String ... strings )
     {
         assert strings != null
-        
+
         for ( s in strings )
         {
             assert s?.trim()?.length(), "String specified [$s] *is* null or empty"

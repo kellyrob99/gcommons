@@ -178,6 +178,7 @@ class FileBeanTest extends BaseTest
     private static final Map LARGE_ARCHIVES = [ 'gradle-0.9'         : 27848286 ]
     private static final Map TEST_ARCHIVES  = SMALL_ARCHIVES + ( System.properties[ 'slowTests' ] ? LARGE_ARCHIVES : [:] )
 
+
     @Test
     void shouldPack()
     {
@@ -221,6 +222,54 @@ class FileBeanTest extends BaseTest
             assert fileBean.directorySize( zipDir )    == TEST_ARCHIVES[ archiveName ]
             assert fileBean.directorySize( tarGzDir )  == TEST_ARCHIVES[ archiveName ]
             assert fileBean.directorySize( unpackDir, jarDir, tarDir, tgzDir, zipDir, tarGzDir ) == TEST_ARCHIVES[ archiveName ] * 6
+        }
+    }
+
+
+    @Test
+    void shouldPackWithUpdate()
+    {
+        def resourcesDir  = new File( 'src/test/resources' )
+        def filesToUpdate = [ 'image-3-abc.sima', 'image-3-abc.sima1', 'image-3-abc.zip' ]
+
+        def c =
+        {
+            File unpackDir, File archive ->
+
+            verifyBean.directory( unpackDir )
+            verifyBean.file( archive )
+
+            fileBean.pack( resourcesDir, archive, filesToUpdate, null, true, true, true ) /* Updating an archive */
+            fileBean.unpackZipEntries( archive, unpackDir, filesToUpdate )
+            fileBean.unpackZipEntries( archive, unpackDir, ['**/*.jar' ] )
+
+            filesToUpdate.each{ String fileName -> verifyBean.file( new File( unpackDir, fileName )) }
+            assert unpackDir.listFiles().any{ it.name.endsWith( '.jar' ) }
+        }
+
+        for ( archiveName in TEST_ARCHIVES.keySet())
+        {
+            def packDir   = testDir( 'pack' )
+            def unpackZip = testDir( 'unpackZip' )
+            def unpackJar = testDir( 'unpackJar' )
+
+            c( unpackZip, fileBean.copy( new File( resourcesDir, "${archiveName}.zip" ), packDir ))
+            c( unpackJar, fileBean.copy( new File( resourcesDir, "${archiveName}.jar" ), packDir ))
+
+            verifyBean.equal( unpackZip, unpackJar )
+            verifyBean.equal( unpackZip, unpackJar, true, '*.jar'   )
+            verifyBean.equal( unpackZip, unpackJar, true, '*.sima'  )
+            verifyBean.equal( unpackZip, unpackJar, true, '*.sima1' )
+
+            for ( extension in [ 'tar', 'tgz', 'tar.gz' ] )
+            {
+                shouldFailWith( RuntimeException )
+                {
+                    fileBean.pack( resourcesDir,
+                                   fileBean.copy( new File( resourcesDir, "${archiveName}.$extension" ), packDir ),
+                                   filesToUpdate, null, true, true, true )
+                }
+            }
         }
     }
 

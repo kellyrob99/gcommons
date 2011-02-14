@@ -8,11 +8,12 @@ import de.schlichtherle.io.archive.zip.ZipDriver
 import groovy.io.FileType
 import java.security.MessageDigest
 import org.apache.tools.ant.DirectoryScanner
+import org.apache.tools.ant.util.FileUtils
 import org.apache.tools.zip.ZipEntry
 import org.apache.tools.zip.ZipFile
 import org.springframework.beans.factory.InitializingBean
 
-/**
+ /**
  * File-related helper utilities.
  */
 class FileBean extends BaseBean implements InitializingBean
@@ -230,6 +231,32 @@ class FileBean extends BaseBean implements InitializingBean
 
 
     /**
+     * Copies file specified to destination directory provided.
+     *
+     * @param file      source file
+     * @param directory destination directory
+     * @return destination file created
+     */
+    File copy ( File file, File directory )
+    {
+        verify.file( file )
+        verify.notNull( directory )
+
+        File destinationFile = new File( directory, file.name )
+        if ( destinationFile.exists()) { delete( destinationFile )}
+
+        FileUtils.newFileUtils().copyFile( file, destinationFile )
+
+        verify.file( destinationFile )
+        assert file.size() == destinationFile.size()
+
+        getLog( this ).info( "[$file.canonicalPath] copied to [$destinationFile.canonicalPath]" )
+
+        destinationFile
+    }
+
+
+    /**
      * Archives directory to archive specified. Empty directories are not archived!
      *
      * @param sourceDirectory    directory to archive
@@ -238,7 +265,8 @@ class FileBean extends BaseBean implements InitializingBean
      * @param excludes           patterns to use for excluding files, no files are excluded if null
      * @param caseSensitive      whether or not include and exclude patterns are matched in a case sensitive way
      * @param failIfNotFound     whether execution should fail if no files were found
-     * @param update             whether target archive should be updated if already exists
+     * @param update             whether target archive should be updated if already exists,
+     *                           only works for ZIP files (jar, ear, war, hpi, etc)
      *
      * @return archive packed
      */
@@ -258,31 +286,36 @@ class FileBean extends BaseBean implements InitializingBean
 
         try
         {
-            if ( destinationArchive.exists() && ( ! update )) { delete( destinationArchive ) }
+            def time             = System.currentTimeMillis()
+            def patterns         = "${ includes ?: '' }/${ excludes ?: '' }"
+            patterns             = (( patterns == '/' ) ? '' : " ($patterns)" )
+            def archiveExtension = extension( destinationArchive )
+            def isZip            = ZIP_EXTENSIONS.contains( archiveExtension )
+            def izTar            = TAR_EXTENSIONS.contains( archiveExtension )
 
-            assert ! destinationArchive.exists()
-            File archiveDir = destinationArchive.parentFile
-            assert ( archiveDir != null ), "Destination archive [$archiveDir] has no parent folder"
-            assert ( archiveDir.isDirectory() || archiveDir.mkdirs())
-
-            def patterns = "${ includes ?: '' }/${ excludes ?: '' }"
-            patterns     = (( patterns == '/' ) ? '' : " ($patterns)" )
+            if ( update )
+            {
+                assert isZip, "Archive update is only supported for Zip archives: $ZIP_EXTENSIONS, not supported for [$destinationArchivePath]"
+                verify.file( destinationArchive )
+            }
+            else
+            {
+                mkdirs( delete( destinationArchive ).parentFile )
+            }
 
             getLog( this ).info( "Packing [$sourceDirectoryPath$patterns] to [$destinationArchivePath]" )
 
-            def time             = System.currentTimeMillis()
-            def archiveExtension = extension( destinationArchive )
-
-            if ( ZIP_EXTENSIONS.contains( archiveExtension ))
+            if ( isZip )
             {  // http://evgeny-goldin.org/javadoc/ant/CoreTasks/zip.html
                 new AntBuilder().zip( destfile        : destinationArchivePath,
                                       basedir         : sourceDirectoryPath,
                                       includes        : ( includes ?: [] ).join( ',' ),
                                       excludes        : ( excludes ?: [] ).join( ',' ),
                                       defaultexcludes : 'no',
+                                      update          : update,
                                       whenempty       : failIfNotFound ? 'fail' : 'skip' )
             }
-            else if ( TAR_EXTENSIONS.contains( archiveExtension ))
+            else if ( izTar )
             {   // http://evgeny-goldin.org/javadoc/ant/CoreTasks/tar.html
                 new AntBuilder().tar( destfile        : destinationArchivePath,
                                       basedir         : sourceDirectoryPath,
@@ -294,11 +327,13 @@ class FileBean extends BaseBean implements InitializingBean
             }
             else
             {
+                /**
+                 * http://truezip.java.net/
+                 * http://evgeny-goldin.org/javadoc/truezip   - v6.8.1
+                 * http://truezip.java.net/apidocs/index.html - v7
+                 */
                 for ( File file in files( sourceDirectory, includes, excludes, caseSensitive, false, failIfNotFound ))
-                {   /**
-                     * https://truezip.dev.java.net/manual-6.html
-                     * http://evgeny-goldin.org/javadoc/truezip/
-                     */
+                {
                     def relativePath = verify.notNullOrEmpty( file.canonicalPath.substring( sourceDirectoryPath.length()))
                     de.schlichtherle.io.File.cp_p( file, new de.schlichtherle.io.File( destinationArchive, relativePath ))
                 }
@@ -306,12 +341,10 @@ class FileBean extends BaseBean implements InitializingBean
                 de.schlichtherle.io.File.umount()
             }
 
-            verify.notEmptyFile( destinationArchive )
-
             getLog( this ).info( "[$sourceDirectory$patterns] packed to [$destinationArchivePath] " +
                                  "(${( System.currentTimeMillis() - time ).intdiv( 1000 )} sec)" )
 
-            destinationArchive
+            verify.notEmptyFile( destinationArchive )
         }
         catch ( Throwable t )
         {
