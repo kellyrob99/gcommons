@@ -38,20 +38,6 @@ class GCommons
 
 
         /**
-         * Calculates directory size
-         */
-        File.metaClass.directorySize = {->
-
-            File   directory = delegate
-            assert directory.isDirectory(), "[$directory.canonicalPath] is not a directory"
-
-            long size = 0
-            directory.eachFileRecurse( FileType.FILES ){ size += it.size() }
-            size
-        }
-
-
-        /**
          * Improved version of resursive directory iteration
          * http://evgeny-goldin.org/youtrack/issue/gc-6
          */
@@ -59,11 +45,22 @@ class GCommons
                                    Closure  callback,
                                    Closure  filter = { true } ->
 
-            assert callback, "Callback is not provided"
-            assert filter,   "Filter callback is not provided"
-            assert fileType, "FileType is not provided"
+            assert delegate.isDirectory(), "[$delegate] is not a directory"
+            assert fileType, "recurse(): FileType is not provided"
+            assert callback, "recurse(): Callback is not provided"
+            assert filter,   "recurse(): Filter callback is not provided"
 
             handleDirectory(( File ) delegate, callback, filter, fileType )
+        }
+
+
+        /**
+         * Calculates directory size
+         */
+        File.metaClass.directorySize = {->
+            long size = 0
+            delegate.recurse( FileType.FILES ){ size += it.size() }
+            size
         }
     }
 
