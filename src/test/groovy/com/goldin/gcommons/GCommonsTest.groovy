@@ -137,8 +137,16 @@ AWD;    2394OI9RURAl    129ui
         }
 
         write( '1/2/3.txt',  'aaaaaaaaaaaa' ) /* length is 12 */
-        write( '5/6/7.txt',  'bbbbbbbbbbb' )  /* length is 11 */
-        write( '7/8/22.txt', 'cccccccccc'  )  /* length is 10 */
+        write( '5/6/7.txt',  'bbbbbbbbbbb'  ) /* length is 11 */
+        write( '7/8/22.txt', 'cccccccccc'   ) /* length is 10 */
+
+        testDir.recurse( FileType.FILES,       { assert it.isFile() } )
+        testDir.recurse( FileType.DIRECTORIES, { assert it.isDirectory() } )
+        testDir.recurse( FileType.ANY,         { assert it.isFile() || it.isDirectory() } )
+
+        constantsBean.USER_DIR_FILE.recurse( FileType.FILES,       { assert it.isFile() } )
+        constantsBean.USER_DIR_FILE.recurse( FileType.DIRECTORIES, { assert it.isDirectory() } )
+        constantsBean.USER_DIR_FILE.recurse( FileType.ANY,         { assert it.isFile() || it.isDirectory() } )
 
         def names = []
         testDir.recurse( FileType.FILES, { names << it.name } )
@@ -180,16 +188,48 @@ AWD;    2394OI9RURAl    129ui
         testDir.recurse( FileType.DIRECTORIES, { sizes[ it.name ] = it.directorySize() } )
         eqMap( sizes, [ '1': 12, '2':12, '5':11, '6':11, '7':10, '8':10 ])
 
-        def counter = 0
-        testDir.recurse( FileType.DIRECTORIES, { counter++; true } )
-        assert counter == 6
+        def counter = -1
+        testDir.recurse( FileType.DIRECTORIES, { counter++ })
+        assert counter == 5
+
+        counter = -1
+        testDir.recurse( FileType.DIRECTORIES, { counter++ }, { true }, true )
+        assert counter == 1
+
+        counter = -1
+        testDir.recurse( FileType.DIRECTORIES, { ++counter }, { true }, true )
+        assert counter == 0
 
         counter = 0
-        testDir.recurse( FileType.DIRECTORIES, { counter++; ( counter < 4 ) } )
+        testDir.recurse( FileType.ANY, { counter++ } )
+        assert counter == 9
+
+        counter = 0
+        testDir.recurse( FileType.ANY, { ++counter; ( counter < 5 ) } )
+        assert counter == 9
+
+        counter = 0
+        testDir.recurse( FileType.ANY, { ++counter; false } )
+        assert counter == 9
+
+        counter = 0
+        testDir.recurse( FileType.FILES, { ++counter; false }, { it.isFile() && it.text.size() == 10 } )
+        assert counter == 1
+
+        counter = 0
+        testDir.recurse( FileType.ANY, { ++counter; ( counter < 3 ) }, { it.isDirectory() }, true )
+        assert counter == 3
+
+        counter = 0
+        testDir.recurse( FileType.DIRECTORIES, { counter++; ( counter < 4 ) }, { true }, true )
         assert counter == 4
 
         counter = 0
-        testDir.recurse( FileType.DIRECTORIES, { counter++; ( counter == 1 ) } )
+        testDir.recurse( FileType.DIRECTORIES, { counter++; ( counter == 1 ) }, { ! it.isFile() }, true )
         assert counter == 2
+
+        counter = 0
+        testDir.recurse( FileType.DIRECTORIES, { counter++; ( counter > 0 ) }, { ! it.isFile() }, true )
+        assert counter == 6
     }
 }

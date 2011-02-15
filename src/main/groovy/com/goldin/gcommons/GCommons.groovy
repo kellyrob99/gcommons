@@ -43,14 +43,15 @@ class GCommons
          */
         File.metaClass.recurse = { FileType fileType,
                                    Closure  callback,
-                                   Closure  filter = { true } ->
+                                   Closure  filter      = { true },
+                                   boolean  stopOnFalse = false ->
 
             assert delegate.isDirectory(), "[$delegate] is not a directory"
             assert fileType, "recurse(): FileType is not provided"
             assert callback, "recurse(): Callback is not provided"
             assert filter,   "recurse(): Filter callback is not provided"
 
-            handleDirectory(( File ) delegate, callback, filter, fileType )
+            handleDirectory(( File ) delegate, fileType, callback, filter, stopOnFalse )
         }
 
 
@@ -68,33 +69,36 @@ class GCommons
     /**
      * "File.metaClass.recurse" helper - handles directory provided.
      *
-     * @param file     directory to handle
-     * @param callback callback to invoke
-     * @param filter   filter to invoke
-     * @param fileType file type filter
-     * @return false if recursive chain should be stopped,
-     *         true  otherwise
+     * @param file        directory to handle
+     * @param fileType    file type filter
+     * @param callback    callback to invoke
+     * @param filter      filter callback
+     * @param stopOnFalse whether false value value returned by callback stops recursive iteration
+     * 
+     * @return <code>false</code> if recursive iteration should be stopped,
+     *         <code>true</code>  otherwise
      */
     private static boolean handleDirectory( File             directory,
+                                            FileType         fileType,
                                             Closure<?>       callback,
                                             Closure<Boolean> filter,
-                                            FileType         fileType )
+                                            boolean          stopOnFalse )
     {
         verify().directory( directory )
-        verify().notNull( callback, filter, fileType )
+        verify().notNull( fileType, callback, filter )
 
         for ( File f in directory.listFiles())
         {
-            if ( ! invokeCallback( f, callback, filter, fileType ))
+            if (( ! invokeCallback( f, callback, filter, fileType )) && stopOnFalse )
             {   /**
-                 * If result of callback invocation is false - iteration is stopped
+                 * stopOnFalse + result of callback invocation is false - iteration is stopped
                  */
                 return false
             }
 
-            if ( f.isDirectory() && ( ! handleDirectory( f, callback, filter, fileType )))
+            if ( f.isDirectory() && ( ! handleDirectory( f, fileType, callback, filter, stopOnFalse )))
             {   /**
-                 * If result of recursive invocation is false - iteration is stopped
+                 * Result of recursive invocation is false - iteration is stopped
                  */
                 return false
             }
@@ -111,7 +115,9 @@ class GCommons
      * @param callback callback to invoke
      * @param filter   filter to invoke
      * @param fileType file type filter
-     * @return callback invocation result "as boolean" or true if callback provides no result
+     * 
+     * @return callback invocation result "as boolean" or
+     *         <code>true</code> if callback provides no result or was not invoked at all due to filters applied
      */
     private static boolean invokeCallback ( File             file,
                                             Closure<?>       callback,
