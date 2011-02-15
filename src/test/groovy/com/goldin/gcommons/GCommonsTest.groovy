@@ -130,7 +130,7 @@ AWD;    2394OI9RURAl    129ui
 
         def names = []
         testDir.recurse( FileType.FILES, { names << it.name } )
-        assert names == [ '3.txt', '7.txt', '22.txt' ]
+        assert ( names.size() == 3 ) && [ '3.txt', '7.txt', '22.txt' ].every { names.contains( it ) }
 
         names = []
         testDir.recurse( FileType.FILES, { names << it.name }, { it.name.endsWith( '3.txt' ) } )
@@ -138,7 +138,7 @@ AWD;    2394OI9RURAl    129ui
 
         names = []
         testDir.recurse( FileType.FILES, { names << it.name }, { it.name.endsWith( '.txt' ) } )
-        assert names == [ '3.txt', '7.txt', '22.txt' ]
+        assert ( names.size() == 3 ) && [ '3.txt', '7.txt', '22.txt' ].every { names.contains( it ) }
 
         names = []
         testDir.recurse( FileType.FILES, { names << it.name }, { it.name.endsWith( '.pdf' ) } )
