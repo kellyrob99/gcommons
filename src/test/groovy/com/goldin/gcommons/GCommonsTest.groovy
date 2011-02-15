@@ -1,5 +1,6 @@
 package com.goldin.gcommons
 
+import groovy.io.FileType
 import org.junit.Test
 
 /**
@@ -44,6 +45,7 @@ class GCommonsTest extends BaseTest
 
     }
 
+
     @Test
     void shouldRefresh()
     {
@@ -57,5 +59,125 @@ class GCommonsTest extends BaseTest
 //        assert GCommons.general() != GCommons.general( true  )
 //        assert GCommons.verify()  != GCommons.verify( true  )
 //        assert GCommons.net()     != GCommons.net( true  )
+    }
+
+
+    @Test
+    void testSplitWithDirectorySize()
+    {
+        def text1 = '1\n2\n3'
+        def text2 = """
+11111111111111111
+rrrrrrrrrrr
+yyyyyyyyyyyyyyyyyyyyyyyyy
+"""
+        def text3 = """
+eqweqwdsadfaf
+dfsafsas saf asf safasfa
+wetqfasfdasfasf
+"""
+        def text4 = """
+d;akjcZL;KJCal;kf kl LK
+QWRJALKJF DFK AFSLAKJF AKJ
+AWD;    2394OI9RURAl    129ui
+"""
+
+        def mkdir     = { File f   -> fileBean.mkdirs( f.parentFile ); f }
+        def eachLine  = { String s -> s.splitWith( 'eachLine' )*.trim().findAll{ it }}
+        def eachLineF = { File f   -> f.splitWith( 'eachLine' )*.trim().findAll{ it }}
+
+        assert [ '1', '2', '3' ]                                                                            == eachLine( text1 )
+        assert [ '11111111111111111', 'rrrrrrrrrrr', 'yyyyyyyyyyyyyyyyyyyyyyyyy' ]                          == eachLine( text2 )
+        assert [ 'eqweqwdsadfaf', 'dfsafsas saf asf safasfa', 'wetqfasfdasfasf'  ]                          == eachLine( text3 )
+        assert [ 'd;akjcZL;KJCal;kf kl LK', 'QWRJALKJF DFK AFSLAKJF AKJ', 'AWD;    2394OI9RURAl    129ui' ] == eachLine( text4 )
+
+        def filesDir = testDir( 'files' )
+        def f1       = mkdir( new File( filesDir, '1.txt'     ))
+        def f2       = mkdir( new File( filesDir, '1/2/3.txt' ))
+        def f3       = mkdir( new File( filesDir, '5/6/8.txt' ))
+
+        f1.write ( text1 )
+        f1.append( text2 )
+
+        f2.write ( text2 )
+        f2.append( text3 )
+
+        f3.write ( text3 )
+        f3.append( text4 )
+
+        assert eachLineF( f1 ) == [ '1', '2', '3', '11111111111111111', 'rrrrrrrrrrr', 'yyyyyyyyyyyyyyyyyyyyyyyyy' ]
+        assert eachLineF( f2 ) == [ '11111111111111111', 'rrrrrrrrrrr', 'yyyyyyyyyyyyyyyyyyyyyyyyy', 'eqweqwdsadfaf', 'dfsafsas saf asf safasfa', 'wetqfasfdasfasf' ]
+        assert eachLineF( f3 ) == [ 'eqweqwdsadfaf', 'dfsafsas saf asf safasfa', 'wetqfasfdasfasf', 'd;akjcZL;KJCal;kf kl LK', 'QWRJALKJF DFK AFSLAKJF AKJ', 'AWD;    2394OI9RURAl    129ui' ]
+
+        [( text1 + text2 ), ( text2 + text3 ), ( text3 + text4 )].bytes as List == [ f1, f2, f3 ]*.splitWith( 'eachByte' )
+        assert filesDir.directorySize() == text1.size() + text2.size() + text2.size() + text3.size() + text3.size() + text4.size()
+    }
+
+
+    @Test
+    void testRecurse()
+    {
+        def testDir = testDir( 'recurse' )
+        def write   = { String path, String content ->
+            def file = new File( testDir, path )
+            fileBean.mkdirs( file.parentFile )
+            file.write( content )
+        }
+
+        write( '1/2/3.txt',  'aaaaaaaaaaaa' ) /* length is 12 */
+        write( '5/6/7.txt',  'bbbbbbbbbbb' )  /* length is 11 */
+        write( '7/8/22.txt', 'cccccccccc'  )  /* length is 10 */
+
+        def names = []
+        testDir.recurse( FileType.FILES, { names << it.name } )
+        assert names == [ '3.txt', '7.txt', '22.txt' ]
+
+        names = []
+        testDir.recurse( FileType.FILES, { names << it.name }, { it.name.endsWith( '3.txt' ) } )
+        assert names == [ '3.txt' ]
+
+        names = []
+        testDir.recurse( FileType.FILES, { names << it.name }, { it.name.endsWith( '.txt' ) } )
+        assert names == [ '3.txt', '7.txt', '22.txt' ]
+
+        names = []
+        testDir.recurse( FileType.FILES, { names << it.name }, { it.name.endsWith( '.pdf' ) } )
+        assert names == []
+
+        names = []
+        testDir.recurse( FileType.FILES, { names << it.name }, { it.text.contains( 'b' )} )
+        assert names == [ '7.txt' ]
+
+        names = []
+        testDir.recurse( FileType.DIRECTORIES, { names << it.name } )
+        assert names == [ '1', '2', '5', '6', '7', '8' ]
+
+        names = []
+        testDir.recurse( FileType.DIRECTORIES, { names << it.name }, { it.directorySize() < 11 } )
+        assert names == [ '7', '8' ]
+
+        names = []
+        testDir.recurse( FileType.DIRECTORIES, { names << it.name }, { it.listFiles().name.contains( '8' ) } )
+        assert names == [ '7' ]
+
+        names = []
+        testDir.recurse( FileType.DIRECTORIES, { names << it.name }, { it.listFiles().name.contains( '7.txt' ) } )
+        assert names == [ '6' ]
+
+        def sizes = [:]
+        testDir.recurse( FileType.DIRECTORIES, { sizes[ it.name ] = it.directorySize() } )
+        assert sizes == [ '1': 12, '2':12, '5':11, '6':11, '7':10, '8':10 ]
+
+        def counter = 0
+        testDir.recurse( FileType.DIRECTORIES, { counter++; true } )
+        assert counter == 6
+
+        counter = 0
+        testDir.recurse( FileType.DIRECTORIES, { counter++; ( counter < 4 ) } )
+        assert counter == 4
+
+        counter = 0
+        testDir.recurse( FileType.DIRECTORIES, { counter++; ( counter == 1 ) } )
+        assert counter == 2
     }
 }

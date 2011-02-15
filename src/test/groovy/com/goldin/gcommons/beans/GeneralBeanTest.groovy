@@ -244,59 +244,7 @@ class GeneralBeanTest extends BaseTest
         assert 'one chance'   == "one chance${ generalBean.s( 1 ) }"
     }
 
-    
-    @Test
-    void testSplitWithDirectorySize()
-    {
-        def text1 = '1\n2\n3'
-        def text2 = """
-11111111111111111
-rrrrrrrrrrr
-yyyyyyyyyyyyyyyyyyyyyyyyy               
-"""
-        def text3 = """
-eqweqwdsadfaf
-dfsafsas saf asf safasfa               
-wetqfasfdasfasf
-"""
-        def text4 = """
-d;akjcZL;KJCal;kf kl LK
-QWRJALKJF DFK AFSLAKJF AKJ
-AWD;    2394OI9RURAl    129ui
-"""
 
-        def mkdir     = { File f   -> fileBean.mkdirs( f.parentFile ); f }
-        def eachLine  = { String s -> s.splitWith( 'eachLine' )*.trim().findAll{ it }}
-        def eachLineF = { File f   -> f.splitWith( 'eachLine' )*.trim().findAll{ it }}
-
-        assert [ '1', '2', '3' ]                                                                            == eachLine( text1 )
-        assert [ '11111111111111111', 'rrrrrrrrrrr', 'yyyyyyyyyyyyyyyyyyyyyyyyy' ]                          == eachLine( text2 )
-        assert [ 'eqweqwdsadfaf', 'dfsafsas saf asf safasfa', 'wetqfasfdasfasf'  ]                          == eachLine( text3 )
-        assert [ 'd;akjcZL;KJCal;kf kl LK', 'QWRJALKJF DFK AFSLAKJF AKJ', 'AWD;    2394OI9RURAl    129ui' ] == eachLine( text4 )
-
-        def filesDir = testDir( 'files' )
-        def f1       = mkdir( new File( filesDir, '1.txt'     ))
-        def f2       = mkdir( new File( filesDir, '1/2/3.txt' ))
-        def f3       = mkdir( new File( filesDir, '5/6/8.txt' ))
-
-        f1.write ( text1 )
-        f1.append( text2 )
-
-        f2.write ( text2 )
-        f2.append( text3 )
-
-        f3.write ( text3 )
-        f3.append( text4 )
-
-        assert eachLineF( f1 ) == [ '1', '2', '3', '11111111111111111', 'rrrrrrrrrrr', 'yyyyyyyyyyyyyyyyyyyyyyyyy' ]
-        assert eachLineF( f2 ) == [ '11111111111111111', 'rrrrrrrrrrr', 'yyyyyyyyyyyyyyyyyyyyyyyyy', 'eqweqwdsadfaf', 'dfsafsas saf asf safasfa', 'wetqfasfdasfasf' ]
-        assert eachLineF( f3 ) == [ 'eqweqwdsadfaf', 'dfsafsas saf asf safasfa', 'wetqfasfdasfasf', 'd;akjcZL;KJCal;kf kl LK', 'QWRJALKJF DFK AFSLAKJF AKJ', 'AWD;    2394OI9RURAl    129ui' ]
-
-        [( text1 + text2 ), ( text2 + text3 ), ( text3 + text4 )].bytes as List == [ f1, f2, f3 ]*.splitWith( 'eachByte' )
-        assert filesDir.directorySize() == text1.size() + text2.size() + text2.size() + text3.size() + text3.size() + text4.size()
-    }
-
-    
     @Test
     void testArray()
     {

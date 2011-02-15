@@ -35,7 +35,7 @@ class GCommons
 
              result
          }
-        
+
 
         /**
          * Calculates directory size
@@ -49,7 +49,98 @@ class GCommons
             directory.eachFileRecurse( FileType.FILES ){ size += it.size() }
             size
         }
+
+
+        /**
+         * Improved version of resursive directory iteration
+         * http://evgeny-goldin.org/youtrack/issue/gc-6
+         */
+        File.metaClass.recurse = { FileType fileType,
+                                   Closure  callback,
+                                   Closure  filter = { true } ->
+
+            assert callback, "Callback is not provided"
+            assert filter,   "Filter callback is not provided"
+            assert fileType, "FileType is not provided"
+
+            handleDirectory(( File ) delegate, callback, filter, fileType )
+        }
     }
+
+
+    /**
+     * "File.metaClass.recurse" helper - handles directory provided.
+     *
+     * @param file     directory to handle
+     * @param callback callback to invoke
+     * @param filter   filter to invoke
+     * @param fileType file type filter
+     * @return false if recursive chain should be stopped,
+     *         true  otherwise
+     */
+    private static boolean handleDirectory( File             directory,
+                                            Closure<?>       callback,
+                                            Closure<Boolean> filter,
+                                            FileType         fileType )
+    {
+        verify().directory( directory )
+        verify().notNull( callback, filter, fileType )
+
+        for ( File f in directory.listFiles())
+        {
+            if ( ! invokeCallback( f, callback, filter, fileType ))
+            {   /**
+                 * If result of callback invocation is false - iteration is stopped
+                 */
+                return false
+            }
+
+            if ( f.isDirectory() && ( ! handleDirectory( f, callback, filter, fileType )))
+            {   /**
+                 * If result of recursive invocation is false - iteration is stopped
+                 */
+                return false
+            }
+        }
+
+        true
+    }
+
+
+    /**
+     * "File.metaClass.recurse" helper - invokes callback provided.
+     *
+     * @param file     file or directory to handle
+     * @param callback callback to invoke
+     * @param filter   filter to invoke
+     * @param fileType file type filter
+     * @return callback invocation result "as boolean" or true if callback provides no result
+     */
+    private static boolean invokeCallback ( File             file,
+                                            Closure<?>       callback,
+                                            Closure<Boolean> filter,
+                                            FileType         fileType )
+    {
+        verify().exists( file )
+        verify().notNull( callback, filter, fileType )
+
+        def result    = true
+        def typeMatch = ((  fileType == FileType.ANY         )  ||
+                         (( fileType == FileType.DIRECTORIES ) && file.isDirectory()) ||
+                         (( fileType == FileType.FILES       ) && file.isFile()))
+
+        if ( typeMatch && filter( file ))
+        {
+            Object callbackResult = callback( file )
+            if ( callbackResult != null )
+            {
+                result = callbackResult as boolean
+            }
+        }
+
+        result
+    }
+
 
 
 
