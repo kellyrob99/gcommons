@@ -124,13 +124,25 @@ AWD;    2394OI9RURAl    129ui
             file.write( content )
         }
 
+        def eqList = { List l1, List l2 ->
+            assert l1.size() == l2.size()
+            assert l1.every { l2.contains( it ) }
+            assert l2.every { l1.contains( it ) }
+        }
+
+        def eqMap = { Map m1, Map m2 ->
+            assert m1.size() == m2.size()
+            assert m1.every{ key, value -> m2[ key ] == value }
+            assert m2.every{ key, value -> m1[ key ] == value }
+        }
+
         write( '1/2/3.txt',  'aaaaaaaaaaaa' ) /* length is 12 */
         write( '5/6/7.txt',  'bbbbbbbbbbb' )  /* length is 11 */
         write( '7/8/22.txt', 'cccccccccc'  )  /* length is 10 */
 
         def names = []
         testDir.recurse( FileType.FILES, { names << it.name } )
-        assert ( names.size() == 3 ) && [ '3.txt', '7.txt', '22.txt' ].every { names.contains( it ) }
+        eqList( names, [ '3.txt', '7.txt', '22.txt' ])
 
         names = []
         testDir.recurse( FileType.FILES, { names << it.name }, { it.name.endsWith( '3.txt' ) } )
@@ -138,7 +150,7 @@ AWD;    2394OI9RURAl    129ui
 
         names = []
         testDir.recurse( FileType.FILES, { names << it.name }, { it.name.endsWith( '.txt' ) } )
-        assert ( names.size() == 3 ) && [ '3.txt', '7.txt', '22.txt' ].every { names.contains( it ) }
+        eqList( names, [ '3.txt', '7.txt', '22.txt' ])
 
         names = []
         testDir.recurse( FileType.FILES, { names << it.name }, { it.name.endsWith( '.pdf' ) } )
@@ -150,11 +162,11 @@ AWD;    2394OI9RURAl    129ui
 
         names = []
         testDir.recurse( FileType.DIRECTORIES, { names << it.name } )
-        assert names == [ '1', '2', '5', '6', '7', '8' ]
+        eqList( names, [ '1', '2', '5', '6', '7', '8' ])
 
         names = []
         testDir.recurse( FileType.DIRECTORIES, { names << it.name }, { it.directorySize() < 11 } )
-        assert names == [ '7', '8' ]
+        eqList( names, [ '7', '8' ])
 
         names = []
         testDir.recurse( FileType.DIRECTORIES, { names << it.name }, { it.listFiles().name.contains( '8' ) } )
@@ -166,7 +178,7 @@ AWD;    2394OI9RURAl    129ui
 
         def sizes = [:]
         testDir.recurse( FileType.DIRECTORIES, { sizes[ it.name ] = it.directorySize() } )
-        assert sizes == [ '1': 12, '2':12, '5':11, '6':11, '7':10, '8':10 ]
+        eqMap( sizes, [ '1': 12, '2':12, '5':11, '6':11, '7':10, '8':10 ])
 
         def counter = 0
         testDir.recurse( FileType.DIRECTORIES, { counter++; true } )
