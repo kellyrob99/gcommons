@@ -35,6 +35,25 @@ class GeneralBean extends BaseBean
 
 
     /**
+     * Retrieves first non-null object.
+     * @param objects objects to check
+     * @return first non-null object
+     */
+    public <T> T choose ( T ... objects )
+    {
+        for ( def o in objects )
+        {
+            if ( o != null )
+            {
+                return o
+            }
+        }
+
+        throw new RuntimeException( "All objects specified are null" )
+    }
+
+
+    /**
      * Attempts to execute a closure specified and return its result.
      *
      * @param nTries     number of time execution will be attempted

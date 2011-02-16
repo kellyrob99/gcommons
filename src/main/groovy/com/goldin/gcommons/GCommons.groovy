@@ -41,17 +41,14 @@ class GCommons
          * Improved version of resursive directory iteration
          * http://evgeny-goldin.org/youtrack/issue/gc-6
          */
-        File.metaClass.recurse = { FileType fileType,
-                                   Closure  callback,
-                                   Closure  filter      = { true },
-                                   boolean  stopOnFalse = false ->
-
+        File.metaClass.recurse = { Map     configs = [:],
+                                   Closure callback ->
+            
             assert delegate.isDirectory(), "[$delegate] is not a directory"
-            assert fileType, "recurse(): FileType is not provided"
             assert callback, "recurse(): Callback is not provided"
-            assert filter,   "recurse(): Filter callback is not provided"
+            assert configs,  "recurse(): Configs Map is not provided"
 
-            handleDirectory(( File ) delegate, fileType, callback, filter, stopOnFalse )
+            handleDirectory(( File ) delegate, configs, callback )
         }
 
 
@@ -60,7 +57,8 @@ class GCommons
          */
         File.metaClass.directorySize = {->
             long size = 0
-            delegate.recurse( FileType.FILES ){ size += it.size() }
+            delegate.recurse([ type        : FileType.FILES,
+                               detectLoops : true ]){ size += it.size() }
             size
         }
     }
@@ -69,34 +67,31 @@ class GCommons
     /**
      * "File.metaClass.recurse" helper - handles directory provided.
      *
-     * @param file        directory to handle
-     * @param fileType    file type filter
-     * @param callback    callback to invoke
-     * @param filter      filter callback
-     * @param stopOnFalse whether false value value returned by callback stops recursive iteration
-     * 
+     * @param file     directory to handle
+     * @param configs  invocation configs with keys "filter", "type", "stopOnFalse" and "detectLoops"
+     * @param callback callback to invoke
+     *
      * @return <code>false</code> if recursive iteration should be stopped,
      *         <code>true</code>  otherwise
      */
-    private static boolean handleDirectory( File             directory,
-                                            FileType         fileType,
-                                            Closure<?>       callback,
-                                            Closure<Boolean> filter,
-                                            boolean          stopOnFalse )
+    private static boolean handleDirectory( File       directory,
+                                            Map        configs,
+                                            Closure<?> callback )
     {
         verify().directory( directory )
-        verify().notNull( fileType, callback, filter )
+        verify().notNull( configs, callback )
+
 
         for ( File f in directory.listFiles())
         {
-            if (( ! invokeCallback( f, callback, filter, fileType )) && stopOnFalse )
+            if (( ! invokeCallback( f, configs, callback )) && configs[ 'stopOnFalse' ] )
             {   /**
                  * stopOnFalse + result of callback invocation is false - iteration is stopped
                  */
                 return false
             }
 
-            if ( f.isDirectory() && ( ! handleDirectory( f, fileType, callback, filter, stopOnFalse )))
+            if ( f.isDirectory() && ( ! handleDirectory( f, configs, callback )))
             {   /**
                  * Result of recursive invocation is false - iteration is stopped
                  */
@@ -112,32 +107,39 @@ class GCommons
      * "File.metaClass.recurse" helper - invokes callback provided.
      *
      * @param file     file or directory to handle
+     * @param configs  invocation configs with keys "filter", "type", "stopOnFalse" and "detectLoops"
      * @param callback callback to invoke
-     * @param filter   filter to invoke
-     * @param fileType file type filter
      * 
      * @return callback invocation result "as boolean" or
-     *         <code>true</code> if callback provides no result or was not invoked at all due to filters applied
+     *         <code>true</code> if callback provides no result or
+     *                           was not invoked at all due to filters applied or
+     *                           there's no need to read invocation result at all 
      */
-    private static boolean invokeCallback ( File             file,
-                                            Closure<?>       callback,
-                                            Closure<Boolean> filter,
-                                            FileType         fileType )
+    private static boolean invokeCallback ( File       file,
+                                            Map        configs,
+                                            Closure<?> callback )
     {
         verify().exists( file )
-        verify().notNull( callback, filter, fileType )
+        verify().notNull( configs, callback )
 
         def result    = true
-        def typeMatch = ((  fileType == FileType.ANY         )  ||
-                         (( fileType == FileType.DIRECTORIES ) && file.isDirectory()) ||
-                         (( fileType == FileType.FILES       ) && file.isFile()))
+        def fileType  = general().choose( configs[ 'type' ], FileType.ANY )
+        def typeMatch = ( fileType == FileType.ANY         ) ? true               :
+                        ( fileType == FileType.FILES       ) ? file.isFile()      :
+                        ( fileType == FileType.DIRECTORIES ) ? file.isDirectory() :
+                                                                 null
+        assert ( typeMatch != null ), "Unknown FileType [$fileType], should be an instance of [${ FileType.class.name }] enum"
 
-        if ( typeMatch && filter( file ))
+        if ( typeMatch )
         {
-            Object callbackResult = callback( file )
-            if ( callbackResult != null )
+            def filter = configs[ 'filter' ]
+            if (( filter == null ) || filter( file ))
             {
-                result = callbackResult as boolean
+                Object callbackResult = callback( file )
+                if ( callbackResult != null )
+                {
+                    result = callbackResult as boolean
+                }
             }
         }
 

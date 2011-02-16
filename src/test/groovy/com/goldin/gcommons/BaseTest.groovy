@@ -55,6 +55,33 @@ class BaseTest
         fileBean.mkdirs( fileBean.delete( testDir ))
     }
 
+
+    /**
+     * Verifies both lists specified contain identical elements.
+     * 
+     * @param l1 first list to check
+     * @param l2 second list to check
+     */
+    void assertSameLists( List l1, List l2 )
+    {
+        assert l1.size() == l2.size()
+        assert l1.every { l2.contains( it ) }
+        assert l2.every { l1.contains( it ) }
+    }
+
+    /**
+     * Verifies both maps specified contain identical elements.
+     *
+     * @param m1 first map to check
+     * @param m2 second map to check
+     */
+    void assertSameMaps( Map m1, Map m2 )
+    {
+        assert m1.size() == m2.size()
+        assert m1.every{ key, value -> m2[ key ] == value }
+        assert m2.every{ key, value -> m1[ key ] == value }
+    }
+
     /**
      * Map of loggers for each bean
      */

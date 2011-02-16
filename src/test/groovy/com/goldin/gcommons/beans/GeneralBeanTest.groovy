@@ -255,4 +255,16 @@ class GeneralBeanTest extends BaseTest
         assert []     as Integer[] == generalBean.array( [] as Integer[],     5,    Integer )
         assert []     as Integer[] == generalBean.array( null,                null, Integer )
     }
+
+
+    @Test
+    void testChoose()
+    {
+        assert 3   == generalBean.choose( null, null, null, 3 )
+        assert 3   == generalBean.choose( null, null, null, 3, null )
+        assert "4" == generalBean.choose( null, null, null, null, "4", "5" )
+        assert [:] == generalBean.choose( [:] )
+        assert [:] == generalBean.choose( null, [:], null )
+        assert []  == generalBean.choose( null, [], [:], null )
+    }
 }
