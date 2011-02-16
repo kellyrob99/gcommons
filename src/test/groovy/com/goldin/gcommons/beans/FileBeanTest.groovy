@@ -1,6 +1,7 @@
 package com.goldin.gcommons.beans
 
 import com.goldin.gcommons.BaseTest
+import groovy.io.FileType
 import org.apache.tools.zip.ZipFile
 import org.junit.Test
 
@@ -506,6 +507,26 @@ class FileBeanTest extends BaseTest
             fileBean.unpackZipEntries( mavenZip, mavenDir8, [ '**/*.exe', 'apache-maven-3.0.1/conf/**', ], true ) }
         shouldFailWithCause( AssertionError ) {
             fileBean.unpackZipEntries( mavenZip, mavenDir8, [ '**/*.xml', 'apache-maven-3.3.1/**', ], true ) }
+    }
+
+
+    @Test
+    void shouldMatchType()
+    {
+        def testFile = new File( testDir( 'typeMatch' ), '111' )
+        testFile.write( System.currentTimeMillis() as String )
+
+        assert   fileBean.typeMatch( FileType.ANY,         constantsBean.USER_DIR_FILE )
+        assert   fileBean.typeMatch( FileType.DIRECTORIES, constantsBean.USER_DIR_FILE )
+        assert ! fileBean.typeMatch( FileType.FILES,       constantsBean.USER_DIR_FILE )
+
+        assert   fileBean.typeMatch( FileType.ANY,         constantsBean.USER_HOME_FILE )
+        assert   fileBean.typeMatch( FileType.DIRECTORIES, constantsBean.USER_HOME_FILE )
+        assert ! fileBean.typeMatch( FileType.FILES,       constantsBean.USER_HOME_FILE )
+
+        assert   fileBean.typeMatch( FileType.ANY,         testFile )
+        assert ! fileBean.typeMatch( FileType.DIRECTORIES, testFile )
+        assert   fileBean.typeMatch( FileType.FILES,       testFile )
     }
 
 }

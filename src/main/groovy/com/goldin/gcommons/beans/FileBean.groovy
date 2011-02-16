@@ -5,6 +5,7 @@ import de.schlichtherle.io.GlobalArchiveDriverRegistry
 import de.schlichtherle.io.archive.spi.ArchiveDriver
 import de.schlichtherle.io.archive.tar.TarDriver
 import de.schlichtherle.io.archive.zip.ZipDriver
+import groovy.io.FileType
 import java.security.MessageDigest
 import org.apache.tools.ant.DirectoryScanner
 import org.apache.tools.ant.util.FileUtils
@@ -12,7 +13,7 @@ import org.apache.tools.zip.ZipEntry
 import org.apache.tools.zip.ZipFile
 import org.springframework.beans.factory.InitializingBean
 
- /**
+/**
  * File-related helper utilities.
  */
 class FileBean extends BaseBean implements InitializingBean
@@ -252,6 +253,25 @@ class FileBean extends BaseBean implements InitializingBean
         getLog( this ).info( "[$file.canonicalPath] copied to [$destinationFile.canonicalPath]" )
 
         destinationFile
+    }
+
+
+    /**
+     * Determines if there's a match between file type and file specified.
+     *
+     * @param fileType file type to check
+     * @param file     file to check
+     * @return <code>true</code>  if file matches the file type specified,
+     *         <code>false</code> otherwise
+     */
+    boolean typeMatch( FileType fileType, File file )
+    {
+        def typeMatch  = ( fileType == FileType.ANY         ) ? true               :
+                         ( fileType == FileType.FILES       ) ? file.isFile()      :
+                         ( fileType == FileType.DIRECTORIES ) ? file.isDirectory() :
+                                                                 null
+        assert ( typeMatch != null ), "Unknown FileType [$fileType], should be an instance of [${ FileType.class.name }] enum"
+        typeMatch
     }
 
 

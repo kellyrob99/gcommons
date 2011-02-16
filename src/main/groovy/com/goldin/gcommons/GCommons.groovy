@@ -19,6 +19,17 @@ class GCommons
     private static final Map<Class<? extends BaseBean>, ? extends BaseBean> BEANS = [:]
 
 
+    /**
+     * Container that holds callback invocation results.
+     * See {@link #invokeCallback}
+     */
+    static class InvocationResult
+    {
+        boolean filterPass
+        boolean invocationResult
+    }
+
+
     static {
         /**
          * Splits an object to a list using its "iterating" each-like mthod
@@ -26,9 +37,10 @@ class GCommons
          */
          Object.metaClass.splitWith = { String methodName ->
 
-             assert     methodName
+             methodName = ( methodName ?: '' ).trim()
+             assert     methodName, "Method name should be provided"
              MetaMethod m = delegate.metaClass.pickMethod( methodName, Closure )
-             assert     m
+             assert     m, "No method [$methodName] accepting Closure argument is found for class [${ delegate.class.name }]"
 
              def result = []
              m.doMethodInvoke( delegate, { result << it } )
@@ -40,10 +52,12 @@ class GCommons
         /**
          * Improved version of resursive directory iteration
          * http://evgeny-goldin.org/youtrack/issue/gc-6
+         * ??????????????????????????????????????????????????????????????
+         * Documentation link
          */
         File.metaClass.recurse = { Map     configs = [:],
                                    Closure callback ->
-            
+
             assert delegate.isDirectory(), "[$delegate] is not a directory"
             assert callback, "recurse(): Callback is not provided"
             assert configs,  "recurse(): Configs Map is not provided"
@@ -81,21 +95,27 @@ class GCommons
         verify().directory( directory )
         verify().notNull( configs, callback )
 
+        def stopOnFalse  = general().choose( configs[ 'stopOnFalse'  ], false )
+        def stopOnFilter = general().choose( configs[ 'stopOnFilter' ], false )
 
         for ( File f in directory.listFiles())
         {
-            if (( ! invokeCallback( f, configs, callback )) && configs[ 'stopOnFalse' ] )
-            {   /**
-                 * stopOnFalse + result of callback invocation is false - iteration is stopped
-                 */
+            def result = invokeCallback( f, configs, callback )
+            if ( stopOnFalse && ( ! result.invocationResult ))
+            {
+                // stopOnFalse + callback was invoked with negative result - iteration is stopped
                 return false
             }
 
-            if ( f.isDirectory() && ( ! handleDirectory( f, configs, callback )))
-            {   /**
-                 * Result of recursive invocation is false - iteration is stopped
-                 */
-                return false
+            if ( f.isDirectory())
+            {
+                // If we look at directory and it didn't pass the filter - no recursive invocation is made
+                def recursiveInvoke = (( ! stopOnFilter ) || ( result.filterPass ))
+                if ( recursiveInvoke && ( ! handleDirectory( f, configs, callback )))
+                {
+                    // Result of recursive invocation is false - iteration is stopped
+                    return false
+                }
             }
         }
 
@@ -109,44 +129,37 @@ class GCommons
      * @param file     file or directory to handle
      * @param configs  invocation configs with keys "filter", "type", "stopOnFalse" and "detectLoops"
      * @param callback callback to invoke
-     * 
+     *
      * @return callback invocation result "as boolean" or
      *         <code>true</code> if callback provides no result or
      *                           was not invoked at all due to filters applied or
-     *                           there's no need to read invocation result at all 
+     *                           there's no need to read invocation result at all
      */
-    private static boolean invokeCallback ( File       file,
-                                            Map        configs,
-                                            Closure<?> callback )
+    private static InvocationResult invokeCallback ( File       file,
+                                                     Map        configs,
+                                                     Closure<?> callback )
     {
         verify().exists( file )
         verify().notNull( configs, callback )
 
-        def result    = true
-        def fileType  = general().choose( configs[ 'type' ], FileType.ANY )
-        def typeMatch = ( fileType == FileType.ANY         ) ? true               :
-                        ( fileType == FileType.FILES       ) ? file.isFile()      :
-                        ( fileType == FileType.DIRECTORIES ) ? file.isDirectory() :
-                                                                 null
-        assert ( typeMatch != null ), "Unknown FileType [$fileType], should be an instance of [${ FileType.class.name }] enum"
+        def filter          = configs[ 'filter' ]
+        def fileType        = general().choose(( FileType ) configs[ 'type'       ], FileType.ANY )
+        def filterType      = general().choose(( FileType ) configs[ 'filterType' ], fileType     )
+        def fileTypeMatch   = GCommons.file().typeMatch( fileType,   file )
+        def filterTypeMatch = GCommons.file().typeMatch( filterType, file )
+        def result          = new InvocationResult()
 
-        if ( typeMatch )
+        result.filterPass       = (( filter == null ) || ( ! filterTypeMatch ) || filter( file ))
+        result.invocationResult = true
+
+        if ( fileTypeMatch && result.filterPass )
         {
-            def filter = configs[ 'filter' ]
-            if (( filter == null ) || filter( file ))
-            {
-                Object callbackResult = callback( file )
-                if ( callbackResult != null )
-                {
-                    result = callbackResult as boolean
-                }
-            }
+            Object callbackResult   = callback( file )
+            result.invocationResult = general().choose( callbackResult as boolean, true )
         }
 
         result
     }
-
-
 
 
     /**

@@ -3,8 +3,7 @@ package com.goldin.gcommons
 import groovy.io.FileType
 import org.junit.Test
 
-
-/**
+ /**
  * {@link GCommons} entry points test
  */
 class GCommonsTest extends BaseTest
@@ -112,6 +111,27 @@ AWD;    2394OI9RURAl    129ui
 
         [( text1 + text2 ), ( text2 + text3 ), ( text3 + text4 )].bytes as List == [ f1, f2, f3 ]*.splitWith( 'eachByte' )
         assert filesDir.directorySize() == text1.size() + text2.size() + text2.size() + text3.size() + text3.size() + text4.size()
+
+
+        shouldFailAssert { "aa".splitWith( ''   ) }
+        shouldFailAssert { "aa".splitWith( '  ' ) }
+        shouldFailAssert { "aa".splitWith( null ) }
+        shouldFailAssert { "aa".splitWith( 'opa' ) }
+        shouldFailAssert { "aa".splitWith( 'eachLine1' ) }
+        shouldFailAssert { "aa".splitWith( 'size' ) }
+        shouldFailAssert { "aa".splitWith( 'toString' ) }
+
+        shouldFailAssert { constantsBean.USER_DIR_FILE.splitWith( 'eachDi'   ) }
+        shouldFailAssert { constantsBean.USER_DIR_FILE.splitWith( 'eachDirr' ) }
+        shouldFailAssert { constantsBean.USER_DIR_FILE.splitWith( 'exists'   ) }
+        shouldFailAssert { constantsBean.USER_DIR_FILE.splitWith( 'isFile'   ) }
+
+        shouldFailAssert { shouldFailAssert { "aa".splitWith( 'eachLine' ) }}
+        shouldFailAssert { shouldFailAssert { "aa\nbb".splitWith( 'eachLine' ) }}
+        shouldFailAssert { shouldFailAssert { "aa\nbb\ncc".splitWith( 'eachLine' ) }}
+        shouldFailAssert { shouldFailAssert { constantsBean.USER_DIR_FILE.splitWith( 'eachDir'  ) }}
+        shouldFailAssert { shouldFailAssert { constantsBean.USER_DIR_FILE.splitWith( 'eachFile' ) }}
+
     }
 
 
@@ -136,28 +156,29 @@ AWD;    2394OI9RURAl    129ui
     void testRecurseFiles()
     {
         def testDir = prepareTestRecurse()
+        def names   = []
+        def c       = { names << it.name }
 
         testDir.recurse([ type: FileType.FILES       ]){ assert it.isFile() }
         testDir.recurse([ type: FileType.DIRECTORIES ]){ assert it.isDirectory() }
         testDir.recurse([ type: FileType.ANY         ]){ assert it.isFile() || it.isDirectory() }
 
-        def names = []
-        testDir.recurse([ type: FileType.FILES ]){ names << it.name }
+        testDir.recurse([ type: FileType.FILES ], c )
         assertSameLists( names, [ '3.txt', '7.txt', '22.txt' ])
 
         names = []
         testDir.recurse([ type   : FileType.FILES,
-                          filter : { it.name.endsWith( '3.txt' )} ]){ names << it.name }
+                          filter : { it.name.endsWith( '3.txt' )} ], c )
         assert names == [ '3.txt' ]
 
         names = []
         testDir.recurse([ type   : FileType.FILES,
-                          filter : { it.name.endsWith( '.txt' )} ]){ names << it.name }
+                          filter : { it.name.endsWith( '.txt' )} ], c )
         assertSameLists( names, [ '3.txt', '7.txt', '22.txt' ])
 
         names = []
         testDir.recurse([ type   : FileType.FILES,
-                          filter : { it.name.endsWith( '.pdf' )} ]){ names << it.name }
+                          filter : { it.name.endsWith( '.pdf' )} ], c )
         assert names == []
 
         names = []
@@ -177,25 +198,41 @@ AWD;    2394OI9RURAl    129ui
     void testRecurseDirectories()
     {
         def testDir = prepareTestRecurse()
+        def names   = []
+        def c       = { names << it.name }
 
-        def names = []
-        testDir.recurse([ type : FileType.DIRECTORIES ]){ names << it.name }
+        testDir.recurse([ type : FileType.DIRECTORIES ], c )
         assertSameLists( names, [ '1', '2', '5', '6', '7', '8' ])
 
         names = []
         testDir.recurse([ type   : FileType.DIRECTORIES,
-                          filter : { it.directorySize() < 11 } ]){ names << it.name }
+                          filter : { it.directorySize() < 11 } ], c )
         assertSameLists( names, [ '7', '8' ])
 
         names = []
         testDir.recurse([ type   : FileType.DIRECTORIES,
-                          filter : { it.listFiles().name.contains( '8' )} ]){ names << it.name }
+                          filter : { it.listFiles().name.contains( '8' )} ], c )
         assert names == [ '7' ]
 
         names = []
         testDir.recurse([ type   : FileType.DIRECTORIES,
-                          filter : { it.listFiles().name.contains( '7.txt' ) } ]){ names << it.name }
+                          filter : { it.listFiles().name.contains( '7.txt' ) } ], c )
         assert names == [ '6' ]
+
+        names = []
+        testDir.recurse([ type   : FileType.DIRECTORIES,
+                          filter : { it.listFiles().name.contains( 'aaa.exe' ) } ], c )
+        assert names == []
+
+        names = []
+        testDir.recurse([ type   : FileType.DIRECTORIES,
+                          filter : { ( it.listFiles() as List ).contains( new File( 'aaaa' )) } ], c )
+        assert names == []
+
+        names = []
+        testDir.recurse([ type   : FileType.DIRECTORIES,
+                          filter : { File dir -> dir.listFiles().name.any{ String s -> s ==~ /.*\.txt/ }} ], c )
+        assertSameLists( names, [ '2', '6', '8' ])
 
         def sizes = [:]
         testDir.recurse([ type   : FileType.DIRECTORIES ]){ sizes[ it.name ] = it.directorySize() }
@@ -229,7 +266,7 @@ AWD;    2394OI9RURAl    129ui
         def testDir = prepareTestRecurse()
         def counter = 0
 
-        
+
         testDir.recurse([ type : FileType.ANY ]) { counter++ }
         assert counter == 9
 
