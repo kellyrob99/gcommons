@@ -1,5 +1,5 @@
 *.iws
+*.iml
 .gradle
 build
 gradle-app.setting
-
