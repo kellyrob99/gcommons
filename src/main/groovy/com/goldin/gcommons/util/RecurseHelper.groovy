@@ -47,41 +47,28 @@ class RecurseHelper extends BaseBean
      * @return <code>false</code> if recursive iteration should be stopped,
      *         <code>true</code>  otherwise
      */
-    boolean handleDirectory( File             directory,
-                             Closure<?>       callback,
-                             Closure<Boolean> filter,
-                             FileType         fileType,
-                             FileType         filterType,
-                             boolean          stopOnFalse,
-                             boolean          stopOnFilter )
+    void handleDirectory( File             directory,
+                          Closure<?>       callback,
+                          Closure<Boolean> filter,
+                          FileType         fileType,
+                          FileType         filterType,
+                          boolean          stopOnFalse,
+                          boolean          stopOnFilter )
     {
         verify.directory( directory )
         verify.notNull( callback, fileType, filterType, stopOnFalse )
 
         for ( File f in directory.listFiles())
         {
-            def result = invokeCallback( f, callback, filter, fileType, filterType )
-            if ( stopOnFalse && ( ! result.invocationResult ))
+            def result          = invokeCallback( f, callback, filter, fileType, filterType )
+            def recursiveInvoke = ( f.isDirectory() &&
+                                    (( ! stopOnFilter ) || ( filterType != FileType.DIRECTORIES ) || ( result.filterPass )) &&
+                                    (( ! stopOnFalse  ) || ( result.invocationResult )))
+            if ( recursiveInvoke )
             {
-                // stopOnFalse + callback was invoked with negative result - iteration is stopped
-                return false
-            }
-
-            if ( f.isDirectory())
-            {
-                // Recursive invocation is made if filter type is not "directory" or "stopOnFilter" is not activated or directory passes the filter
-                def recursiveInvoke = (( filterType != FileType.DIRECTORIES ) || ( ! stopOnFilter ) || ( result.filterPass ))
-
-                // Recursive invocation returns false - iteration is stopped
-                if ( recursiveInvoke && ( ! handleDirectory( f, callback, filter, fileType, filterType, stopOnFalse, stopOnFilter )))
-                {
-                    // Result of recursive invocation is false - iteration is stopped
-                    return false
-                }
+                handleDirectory( f, callback, filter, fileType, filterType, stopOnFalse, stopOnFilter )
             }
         }
-
-        true
     }
 
 
