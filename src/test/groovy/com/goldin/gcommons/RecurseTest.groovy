@@ -316,9 +316,7 @@ class RecurseTest extends BaseTest
                           stopOnFilter : true ]){ poms << it.canonicalPath.replace( '\\', '/' ) }
 
         assert poms.size() == 3
-        assert poms[ 0 ].endsWith( '/poms/moduleA/pom.xml' )
-        assert poms[ 1 ].endsWith( '/poms/moduleB/pom.xml' )
-        assert poms[ 2 ].endsWith( '/poms/pom.xml' )
+        assert poms.every { String path -> [ '/poms/moduleA/pom.xml', '/poms/moduleB/pom.xml', '/poms/pom.xml' ].any{ path.endsWith( it ) }}
     }
 
 
@@ -385,10 +383,7 @@ class RecurseTest extends BaseTest
 
         assert projectRoots.size() == 3
         assert counter             == 4
-        assert projectRoots[ 0 ].endsWith( '/svn/project' )
-        assert projectRoots[ 1 ].endsWith( '/svn/project2' )
-        assert projectRoots[ 2 ].endsWith( '/svn/project3/project4' )
-
+        assert projectRoots.every { String path -> [ '/svn/project', '/svn/project2', '/svn/project3/project4' ].any{ path.endsWith( it ) }}
 
         projectRoots = []
         counter      = 0
@@ -403,8 +398,6 @@ class RecurseTest extends BaseTest
 
         assert projectRoots.size() == 3
         assert counter             == 4
-        assert projectRoots[ 0 ].endsWith( '/svn/project' )
-        assert projectRoots[ 1 ].endsWith( '/svn/project2' )
-        assert projectRoots[ 2 ].endsWith( '/svn/project3/project4' )
+        assert projectRoots.every { String path -> [ '/svn/project', '/svn/project2', '/svn/project3/project4' ].any{ path.endsWith( it ) }}
     }
 }

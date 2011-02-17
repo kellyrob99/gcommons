@@ -95,7 +95,6 @@ class RecurseHelper extends BaseBean
         def fileTypeMatch       = fileBean.typeMatch( fileType,   file )
         def filterTypeMatch     = fileBean.typeMatch( filterType, file )
         def result              = new InvocationResult()
-
         result.filterPass       = (( filter == null ) || ( ! filterTypeMatch ) || filter( file ))
         result.invocationResult = true
 
