@@ -269,7 +269,7 @@ class FileBean extends BaseBean implements InitializingBean
         def typeMatch  = ( fileType == FileType.ANY         ) ? true               :
                          ( fileType == FileType.FILES       ) ? file.isFile()      :
                          ( fileType == FileType.DIRECTORIES ) ? file.isDirectory() :
-                                                                 null
+                                                                null
         assert ( typeMatch != null ), "Unknown FileType [$fileType], should be an instance of [${ FileType.class.name }] enum"
         typeMatch
     }

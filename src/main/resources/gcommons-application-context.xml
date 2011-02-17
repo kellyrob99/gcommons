@@ -14,9 +14,17 @@
           p:constants-ref         = "constants"
           p:verifyEqualHelper-ref = "verifyEqualHelper"/>
 
+    <bean name                    = "recurseHelper"
+          class                   = "com.goldin.gcommons.util.RecurseHelper"
+          p:constants-ref         = "constants"
+          p:verify-ref            = "verify"
+          p:general-ref           = "general"
+          p:fileBean-ref          = "file"/>
+
     <bean name                    = "verifyEqualHelper"
           class                   = "com.goldin.gcommons.util.VerifyEqualHelper"
           p:constants-ref         = "constants"
+          p:verify-ref            = "verify"
           p:general-ref           = "general"
           p:file-ref              = "file"/>
 

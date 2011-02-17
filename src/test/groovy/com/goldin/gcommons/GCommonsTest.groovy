@@ -135,7 +135,7 @@ AWD;    2394OI9RURAl    129ui
     }
 
 
-    File prepareTestRecurse()
+    private File prepareTestRecurse()
     {
         def testDir = testDir( 'recurse' )
         def write   = { String path, String content ->
@@ -153,15 +153,45 @@ AWD;    2394OI9RURAl    129ui
 
 
     @Test
+    void testRecurseTypes()
+    {
+        def testDir = prepareTestRecurse()
+
+        testDir.with {
+            recurse([ type : FileType.FILES       ]){ assert it.isFile() }
+            recurse([ type : FileType.DIRECTORIES ]){ assert it.isDirectory() }
+            recurse([ type : FileType.ANY         ]){ assert it.isFile() || it.isDirectory() }
+
+            recurse([ filterType: FileType.FILES,
+                      filter    : { assert it.isFile() }]){}
+
+            recurse([ filterType: FileType.DIRECTORIES,
+                      filter    : { assert it.isDirectory() }]){}
+
+            recurse([ filterType: FileType.ANY,
+                     filter    : { assert it.isFile() || it.isDirectory() }]){}
+
+            recurse([ type      : FileType.DIRECTORIES,
+                      filterType: FileType.FILES,
+                      filter    : { assert it.isFile() }]){ assert it.isDirectory() }
+
+            recurse([ type      : FileType.FILES,
+                      filterType: FileType.DIRECTORIES,
+                      filter    : { assert it.isDirectory() }]){ assert it.isFile() }
+            
+            recurse([ type      : FileType.FILES,
+                      filterType: FileType.ANY,
+                      filter    : { assert it.isFile() || it.isDirectory() }]){ assert it.isFile() }
+        }
+    }
+    
+
+    @Test
     void testRecurseFiles()
     {
         def testDir = prepareTestRecurse()
         def names   = []
         def c       = { names << it.name }
-
-        testDir.recurse([ type: FileType.FILES       ]){ assert it.isFile() }
-        testDir.recurse([ type: FileType.DIRECTORIES ]){ assert it.isDirectory() }
-        testDir.recurse([ type: FileType.ANY         ]){ assert it.isFile() || it.isDirectory() }
 
         testDir.recurse([ type: FileType.FILES ], c )
         assertSameLists( names, [ '3.txt', '7.txt', '22.txt' ])
@@ -266,7 +296,6 @@ AWD;    2394OI9RURAl    129ui
         def testDir = prepareTestRecurse()
         def counter = 0
 
-
         testDir.recurse([ type : FileType.ANY ]) { counter++ }
         assert counter == 9
 
@@ -295,5 +324,82 @@ AWD;    2394OI9RURAl    129ui
                           filter      : { ! it.isFile() },
                           stopOnFalse : true ]) { counter++; ( counter > 0 ) }
         assert counter == 6
+    }
+
+    
+    @Test
+    void testRecurseStopOnFilter()
+    {
+        def testDir = prepareTestRecurse()
+        def counter = 0
+        def names   = []
+        def c       = { names << it.name }
+
+        testDir.recurse([ filterType   : FileType.DIRECTORIES,
+                          filter       : { File dir -> ['1', '2'].any{ it == dir.name } /* Dir name is '1' or '2' */ },
+                          stopOnFilter : true ], c )
+        assert names == [ '3.txt' ]
+
+        names = []
+        testDir.recurse([ filterType   : FileType.DIRECTORIES,
+                          filter       : { File dir -> ['1', '2'].any{ it == dir.name }} /* Dir name is '1' or '2' */ ], c )
+        assertSameLists( names, [ '3.txt', '7.txt', '22.txt' ] )
+
+        names = []
+        testDir.recurse([ filterType   : FileType.DIRECTORIES,
+                          filter       : {},
+                          stopOnFilter : true ], c )
+        assert names == []
+
+        names = []
+        testDir.recurse([ filterType   : FileType.DIRECTORIES,
+                          filter       : { false },
+                          stopOnFilter : true ], c )
+        assert names == []
+
+        names = []
+        testDir.recurse([ type         : FileType.ANY,
+                          filterType   : FileType.DIRECTORIES,
+                          filter       : { it.name != '5' },
+                          stopOnFilter : true ], c )
+        assertSameLists( names, [ '1', '2', '3.txt', '7', '8', '22.txt' ])
+
+        names = []
+        testDir.recurse([ filterType   : FileType.DIRECTORIES,
+                          filter       : { true },
+                          stopOnFilter : true ], c )
+        assertSameLists( names, [ '3.txt', '7.txt', '22.txt' ] )
+
+        names   = []
+        testDir.recurse([ filterType   : FileType.DIRECTORIES,
+                          filter       : { it.name == '5' },
+                          stopOnFilter : true ], c )
+        assert names   == []
+
+        names   = []
+        testDir.recurse([ filterType   : FileType.DIRECTORIES,
+                          filter       : { File dir -> [ '5', '6' ].any{ it == dir.name }},
+                          stopOnFilter : true ], c )
+        assert names == [ '7.txt' ]
+
+        names   = []
+        testDir.recurse([ filterType   : FileType.DIRECTORIES,
+                          filter       : { File dir -> [ '5', '6' ].any{ it == dir.name }},
+                          stopOnFilter : false ], c )
+        assertSameLists( names, [ '3.txt', '7.txt', '22.txt' ] )
+
+        names   = []
+        testDir.recurse([ type         : FileType.DIRECTORIES,
+                          filterType   : FileType.DIRECTORIES,
+                          filter       : { File dir -> dir.listFiles()[ 0 ].name == '22.txt' },
+                          stopOnFilter : false ], c )
+        assert names == [ '8' ]
+
+        names   = []
+        testDir.recurse([ type         : FileType.DIRECTORIES,
+                          filterType   : FileType.DIRECTORIES,
+                          filter       : { File dir -> [ '8', '22.txt' ].any{ it == dir.listFiles()[ 0 ].name }},
+                          stopOnFilter : true ], c )
+        assertSameLists( names, [ '7', '8' ])
     }
 }
