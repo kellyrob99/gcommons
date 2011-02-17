@@ -1,8 +1,9 @@
 package com.goldin.gcommons.util
 
+import ch.qos.logback.classic.gaffer.ConfigurationDelegate
+import ch.qos.logback.core.util.ContextUtil
 import com.goldin.gcommons.beans.BaseBean
 import groovy.io.FileType
-
 
 /**
  * MOP updates implementations.
@@ -12,6 +13,20 @@ class MopHelper extends BaseBean
 
     MopHelper ()
     {
+        /**
+         * Patching logback - specifying CL when initializing a GroovyShell
+         */
+
+        ch.qos.logback.classic.gaffer.GafferConfigurator.metaClass.run = {
+            String dslText->
+            Binding binding = new Binding();
+            binding.setProperty("hostname", ContextUtil.getLocalHostName());
+            Script dslScript = new GroovyShell( MopHelper.class.classLoader, binding ).parse( dslText ) // <==== Patch
+            dslScript.metaClass.mixin(ConfigurationDelegate)
+            dslScript.setContext(context)
+            dslScript.metaClass.getDeclaredOrigin = { dslScript }
+            dslScript.run()
+        }
     }
 
     
