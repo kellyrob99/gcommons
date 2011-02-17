@@ -120,6 +120,13 @@ AWD;    2394OI9RURAl    129ui
 
 
         generalBean.with {
+
+            List<String> l1 = splitWith( 'aa\nbb\ncc', 'eachLine', String )
+            assert l1 == [ 'aa', 'bb', 'cc' ]
+
+            List<File> l2 = splitWith( filesDir, 'eachFile', File )
+            assert l2.each{ File f -> [ '1.txt', '1', '5' ].any{ f.name == it }}
+
             shouldFailAssert { splitWith( "aa", ''          ) }
             shouldFailAssert { splitWith( "aa", ''          ) }
             shouldFailAssert { splitWith( "aa", '  '        ) }
@@ -140,8 +147,5 @@ AWD;    2394OI9RURAl    129ui
             shouldFailAssert { shouldFailAssert { splitWith( constantsBean.USER_DIR_FILE, 'eachDir'  ) }}
             shouldFailAssert { shouldFailAssert { splitWith( constantsBean.USER_DIR_FILE, 'eachFile' ) }}
         }
-
-
-
     }
 }
