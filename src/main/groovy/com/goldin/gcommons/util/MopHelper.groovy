@@ -5,6 +5,7 @@ import ch.qos.logback.core.util.ContextUtil
 import com.goldin.gcommons.beans.BaseBean
 import groovy.io.FileType
 
+
 /**
  * MOP updates implementations.
  */
@@ -15,6 +16,7 @@ class MopHelper extends BaseBean
     {
         /**
          * Patching logback - specifying CL when initializing a GroovyShell
+         * http://jira.qos.ch/browse/LBCLASSIC-252
          */
 
         ch.qos.logback.classic.gaffer.GafferConfigurator.metaClass.run = {
