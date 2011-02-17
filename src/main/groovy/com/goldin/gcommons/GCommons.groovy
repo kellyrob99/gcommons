@@ -20,32 +20,6 @@ class GCommons
 
 
     /**
-     * MOP updates
-     */
-    static {
-
-        MopHelper helper = ( MopHelper ) getBean( MopHelper, false )
-
-        /**
-         * Splits an object to a list using its "iterating" each-like method
-         * http://evgeny-goldin.com/blog/2010/09/01/groovy-splitwith/
-         */
-        Object.metaClass.splitWith = { Object[] args -> helper.splitWith( delegate, args ) }
-
-        /**
-         * Improved version of resursive directory iteration
-         * http://evgeny-goldin.org/youtrack/issue/gc-6
-         */
-        File.metaClass.recurse = { Map configs = [:], Closure callback -> helper.recurse(( File ) delegate, configs, callback ) }
-
-        /**
-         * Calculates directory size
-         */
-        File.metaClass.directorySize = { helper.directorySize(( File ) delegate ) }
-    }
-
-
-    /**
      * Retrieves bean instance for the class specified.
      *
      * @param beanClass bean class, extends {@link BaseBean}
@@ -54,7 +28,17 @@ class GCommons
      */
     private static <T extends BaseBean> T getBean( Class<T> beanClass, boolean refresh )
     {
-        synchronized ( GCommons.class ) { CONTEXT = ( CONTEXT ?: newContext()) }
+        synchronized ( GCommons.class )
+        {
+            if ( ! CONTEXT )
+            {
+                CONTEXT          = newContext()
+                MopHelper helper = ( MopHelper ) getBean( MopHelper, false )
+                Object.metaClass.splitWith   = { Object[] args                       -> helper.splitWith( delegate, args ) }
+                File.metaClass.recurse       = { Map configs = [:], Closure callback -> helper.recurse(( File ) delegate, configs, callback ) }
+                File.metaClass.directorySize = { helper.directorySize(( File ) delegate ) }
+            }
+        }
 
         assert context()
         assert BaseBean.class.isAssignableFrom( beanClass )
