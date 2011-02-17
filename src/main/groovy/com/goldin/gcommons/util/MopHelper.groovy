@@ -168,6 +168,9 @@ class MopHelper extends BaseBean
         verify.directory( directory )
         verify.notNull( callback, config )
 
+        getLog( this ).info( "Handling [$directory.canonicalPath]" )
+
+
         if ( config.detectLoops && ( ! directories.add( directory.canonicalPath )))
         {
             getLog( this ).info( "Loop detected - [$directory.canonicalPath] was already visited" )
