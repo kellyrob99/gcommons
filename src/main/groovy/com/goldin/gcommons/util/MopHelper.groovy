@@ -3,6 +3,7 @@ package com.goldin.gcommons.util
 import com.goldin.gcommons.beans.BaseBean
 import groovy.io.FileType
 
+
 /**
  * MOP updates implementations.
  */
@@ -162,10 +163,16 @@ class MopHelper extends BaseBean
     private void handleDirectory( File          directory,
                                   Closure<?>    callback,
                                   RecurseConfig config,
-                                  Set<File>     directories )
+                                  Set<String>   directories )
     {
         verify.directory( directory )
         verify.notNull( callback, config )
+
+        if ( config.detectLoops && ( ! directories.add( directory.canonicalPath )))
+        {
+            getLog( this ).info( "Loop detected - [$directory.canonicalPath] was already visited" )
+            return
+        }
 
         for ( File f in directory.listFiles())
         {
