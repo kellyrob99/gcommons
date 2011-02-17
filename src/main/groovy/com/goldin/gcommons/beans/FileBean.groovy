@@ -13,7 +13,7 @@ import org.apache.tools.zip.ZipEntry
 import org.apache.tools.zip.ZipFile
 import org.springframework.beans.factory.InitializingBean
 
-/**
+ /**
  * File-related helper utilities.
  */
 class FileBean extends BaseBean implements InitializingBean
@@ -605,4 +605,23 @@ class FileBean extends BaseBean implements InitializingBean
         def dotIndex = name.lastIndexOf( '.' )
         ( dotIndex > 0 ) ? name.substring( dotIndex + 1 ) : null
     }
+
+
+    /**
+     * {@code "File.metaClass.directorySize"} wrapper - calculates directory size.
+     *
+     * @param directory directory to read
+     * @return directory size in bytes
+     */
+    long directorySize( File directory ) { directory.directorySize() }
+
+
+    /**
+     * {@code "File.metaClass.recurse"} wrapper - iterates directory recursively.
+     *
+     * @param directory directory to iterate recursievly
+     * @param configs   configurations map
+     * @param callback  callback to invoke
+     */
+    void recurse ( File directory, Map configs = [:], Closure callback ) { directory.recurse( configs, callback ) }
 }

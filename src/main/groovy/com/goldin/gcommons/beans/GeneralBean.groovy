@@ -92,7 +92,7 @@ class GeneralBean extends BaseBean
         }
     }
 
-    
+
     /**
      * Returns '' if number specified is 1, 's' otherwise. Used for combining plural sentences in log messages.
      * @param n number to check
@@ -100,7 +100,16 @@ class GeneralBean extends BaseBean
      */
     String s( Number n ) { ( n == 1 ) ? '' : 's' }
 
-    
+
+    /**
+     * {@code "Object.metaClass.splitWith"} wrapper - splits object to "pieces" uses method specified.
+     *
+     * @param o          object to split
+     * @param methodName name of the method to use, the method should accept a Closure argument
+     * @return           list of objects returned by iterating method
+     */
+    public <T> List<T> splitWith( Object o, String methodName, Class<T> type = Object ) { o.splitWith( methodName ) }
+
 
     /**
      * Retrieves an array combined from values provided:

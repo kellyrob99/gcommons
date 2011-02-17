@@ -82,8 +82,8 @@ AWD;    2394OI9RURAl    129ui
 """
 
         def mkdir     = { File f   -> fileBean.mkdirs( f.parentFile ); f }
-        def eachLine  = { String s -> s.splitWith( 'eachLine' )*.trim().findAll{ it }}
-        def eachLineF = { File f   -> f.splitWith( 'eachLine' )*.trim().findAll{ it }}
+        def eachLine  = { String s -> generalBean.splitWith( s, 'eachLine' )*.trim().findAll{ it }}
+        def eachLineF = { File f   -> generalBean.splitWith( f, 'eachLine' )*.trim().findAll{ it }}
 
         assert [ '1', '2', '3' ]                                                                            == eachLine( text1 )
         assert [ '11111111111111111', 'rrrrrrrrrrr', 'yyyyyyyyyyyyyyyyyyyyyyyyy' ]                          == eachLine( text2 )
@@ -108,28 +108,40 @@ AWD;    2394OI9RURAl    129ui
         assert eachLineF( f2 ) == [ '11111111111111111', 'rrrrrrrrrrr', 'yyyyyyyyyyyyyyyyyyyyyyyyy', 'eqweqwdsadfaf', 'dfsafsas saf asf safasfa', 'wetqfasfdasfasf' ]
         assert eachLineF( f3 ) == [ 'eqweqwdsadfaf', 'dfsafsas saf asf safasfa', 'wetqfasfdasfasf', 'd;akjcZL;KJCal;kf kl LK', 'QWRJALKJF DFK AFSLAKJF AKJ', 'AWD;    2394OI9RURAl    129ui' ]
 
-        [( text1 + text2 ), ( text2 + text3 ), ( text3 + text4 )].bytes as List == [ f1, f2, f3 ]*.splitWith( 'eachByte' )
-        assert filesDir.directorySize() == text1.size() + text2.size() + text2.size() + text3.size() + text3.size() + text4.size()
+
+        fileBean.with {
+            [( text1 + text2 ), ( text2 + text3 ), ( text3 + text4 )].bytes as List == [ f1, f2, f3 ]*.splitWith( 'eachByte' )
+            assert directorySize( filesDir )                 == text1.size() + text2.size() + text2.size() + text3.size() + text3.size() + text4.size()
+            assert directorySize( new File( filesDir, '1' )) == directorySize( new File( filesDir, '1/2' ))
+            assert directorySize( new File( filesDir, '1' )) == text2.size() + text3.size()
+            assert directorySize( new File( filesDir, '5' )) == directorySize( new File( filesDir, '5/6' ))
+            assert directorySize( new File( filesDir, '5' )) == text3.size() + text4.size()
+        }
 
 
-        shouldFailAssert { "aa".splitWith( ''   ) }
-        shouldFailAssert { "aa".splitWith( '  ' ) }
-        shouldFailAssert { "aa".splitWith( null ) }
-        shouldFailAssert { "aa".splitWith( 'opa' ) }
-        shouldFailAssert { "aa".splitWith( 'eachLine1' ) }
-        shouldFailAssert { "aa".splitWith( 'size' ) }
-        shouldFailAssert { "aa".splitWith( 'toString' ) }
+        generalBean.with {
+            shouldFailAssert { splitWith( "aa", ''          ) }
+            shouldFailAssert { splitWith( "aa", ''          ) }
+            shouldFailAssert { splitWith( "aa", '  '        ) }
+            shouldFailAssert { splitWith( "aa", null        ) }
+            shouldFailAssert { splitWith( "aa", 'opa'       ) }
+            shouldFailAssert { splitWith( "aa", 'eachLine1' ) }
+            shouldFailAssert { splitWith( "aa", 'size'      ) }
+            shouldFailAssert { splitWith( "aa", 'toString'  ) }
 
-        shouldFailAssert { constantsBean.USER_DIR_FILE.splitWith( 'eachDi'   ) }
-        shouldFailAssert { constantsBean.USER_DIR_FILE.splitWith( 'eachDirr' ) }
-        shouldFailAssert { constantsBean.USER_DIR_FILE.splitWith( 'exists'   ) }
-        shouldFailAssert { constantsBean.USER_DIR_FILE.splitWith( 'isFile'   ) }
+            shouldFailAssert { splitWith( constantsBean.USER_DIR_FILE, 'eachDi'   ) }
+            shouldFailAssert { splitWith( constantsBean.USER_DIR_FILE, 'eachDirr' ) }
+            shouldFailAssert { splitWith( constantsBean.USER_DIR_FILE, 'exists'   ) }
+            shouldFailAssert { splitWith( constantsBean.USER_DIR_FILE, 'isFile'   ) }
 
-        shouldFailAssert { shouldFailAssert { "aa".splitWith( 'eachLine' ) }}
-        shouldFailAssert { shouldFailAssert { "aa\nbb".splitWith( 'eachLine' ) }}
-        shouldFailAssert { shouldFailAssert { "aa\nbb\ncc".splitWith( 'eachLine' ) }}
-        shouldFailAssert { shouldFailAssert { constantsBean.USER_DIR_FILE.splitWith( 'eachDir'  ) }}
-        shouldFailAssert { shouldFailAssert { constantsBean.USER_DIR_FILE.splitWith( 'eachFile' ) }}
+            shouldFailAssert { shouldFailAssert { splitWith( "aa", 'eachLine' ) }}
+            shouldFailAssert { shouldFailAssert { splitWith( "aa\nbb", 'eachLine' ) }}
+            shouldFailAssert { shouldFailAssert { splitWith( "aa\nbb\ncc", 'eachLine' ) }}
+            shouldFailAssert { shouldFailAssert { splitWith( constantsBean.USER_DIR_FILE, 'eachDir'  ) }}
+            shouldFailAssert { shouldFailAssert { splitWith( constantsBean.USER_DIR_FILE, 'eachFile' ) }}
+        }
+
+
 
     }
 }
