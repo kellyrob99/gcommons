@@ -35,11 +35,14 @@ dependencies {
 
 
 /**
- * http://gradle.org/0.9/docs/userguide/idea_plugin.html
+ * http://gradle.org/0.9.2/docs/dsl/org.gradle.plugins.idea.IdeaModule.html
  */
 ideaProject.javaVersion    = '1.6.0_23'
+ideaModule.javaVersion     = ideaProject.javaVersion
 ideaModule.downloadSources = true
 ideaModule.downloadJavadoc = false
+ideaModule.outputDir       = new File( project.buildDir, 'idea' )
+ideaModule.testOutputDir   = new File( project.buildDir, 'idea/test' )
 
 
 /**
