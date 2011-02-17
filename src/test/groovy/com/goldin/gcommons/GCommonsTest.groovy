@@ -127,6 +127,12 @@ AWD;    2394OI9RURAl    129ui
             List<File> l2 = splitWith( filesDir, 'eachFile', File )
             assert l2.each{ File f -> [ '1.txt', '1', '5' ].any{ f.name == it }}
 
+            shouldFailAssert { splitWith( '1\n2',   'eachLine', File   ) }
+            shouldFailAssert { splitWith( '1\n2',   'eachLine', Map    ) }
+            shouldFailAssert { splitWith( filesDir, 'eachFile', String ) }
+            shouldFailAssert { shouldFailAssert { splitWith( '1\n2\n3', 'eachLine', String ) }}
+            shouldFailAssert { shouldFailAssert { splitWith( filesDir,  'eachFile', File   ) }}
+
             shouldFailAssert { splitWith( "aa", ''          ) }
             shouldFailAssert { splitWith( "aa", ''          ) }
             shouldFailAssert { splitWith( "aa", '  '        ) }
@@ -141,11 +147,28 @@ AWD;    2394OI9RURAl    129ui
             shouldFailAssert { splitWith( constantsBean.USER_DIR_FILE, 'exists'   ) }
             shouldFailAssert { splitWith( constantsBean.USER_DIR_FILE, 'isFile'   ) }
 
-            shouldFailAssert { shouldFailAssert { splitWith( "aa", 'eachLine' ) }}
-            shouldFailAssert { shouldFailAssert { splitWith( "aa\nbb", 'eachLine' ) }}
-            shouldFailAssert { shouldFailAssert { splitWith( "aa\nbb\ncc", 'eachLine' ) }}
-            shouldFailAssert { shouldFailAssert { splitWith( constantsBean.USER_DIR_FILE, 'eachDir'  ) }}
-            shouldFailAssert { shouldFailAssert { splitWith( constantsBean.USER_DIR_FILE, 'eachFile' ) }}
+            shouldFailAssert { shouldFailAssert { splitWith( "aa", 'eachLine'         ) }}
+            shouldFailAssert { shouldFailAssert { splitWith( "aa", 'eachLine', String ) }}
+            shouldFailAssert { shouldFailAssert { splitWith( "aa\nbb", 'eachLine'         ) }}
+            shouldFailAssert { shouldFailAssert { splitWith( "aa\nbb", 'eachLine', String ) }}
+            shouldFailAssert { shouldFailAssert { splitWith( "aa\nbb\ncc", 'eachLine'         ) }}
+            shouldFailAssert { shouldFailAssert { splitWith( "aa\nbb\ncc", 'eachLine', String ) }}
+            shouldFailAssert { shouldFailAssert { splitWith( constantsBean.USER_DIR_FILE, 'eachDir'        ) }}
+            shouldFailAssert { shouldFailAssert { splitWith( constantsBean.USER_DIR_FILE, 'eachDir', File  ) }}
+            shouldFailAssert { shouldFailAssert { splitWith( constantsBean.USER_DIR_FILE, 'eachFile'       ) }}
+            shouldFailAssert { shouldFailAssert { splitWith( constantsBean.USER_DIR_FILE, 'eachFile', File ) }}
+
+            assert ['aa']              == splitWith( "aa", 'eachLine'         )
+            assert ['aa']              == splitWith( "aa", 'eachLine', String )
+            assert ['aa', 'bb' ]       == splitWith( "aa\nbb", 'eachLine'         )
+            assert ['aa', 'bb' ]       == splitWith( "aa\nbb", 'eachLine', String )
+            assert ['aa', 'bb', 'cc' ] == splitWith( "aa\nbb\ncc", 'eachLine'         )
+            assert ['aa', 'bb', 'cc' ] == splitWith( "aa\nbb\ncc", 'eachLine', String )
+
+            assert splitWith( constantsBean.USER_DIR_FILE, 'eachDir'        ).every { it.isDirectory()}
+            assert splitWith( constantsBean.USER_DIR_FILE, 'eachDir', File  ).every { it.isDirectory()}
+            assert splitWith( constantsBean.USER_DIR_FILE, 'eachFile'       ).every { it.exists()}
+            assert splitWith( constantsBean.USER_DIR_FILE, 'eachFile', File ).every { it.exists()}
         }
     }
 }

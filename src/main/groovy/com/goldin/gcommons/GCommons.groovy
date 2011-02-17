@@ -21,22 +21,35 @@ class GCommons
 
 
     /**
-     * MOP updates 
+     * MOP updates
      */
     static {
         /**
-         * Splits an object to a list using its "iterating" each-like mthod
+         * Splits an object to a list using its "iterating" each-like method
          * http://evgeny-goldin.com/blog/2010/09/01/groovy-splitwith/
          */
-         Object.metaClass.splitWith = { String methodName ->
+         Object.metaClass.splitWith = { Object[] args ->
+
+             assert args.size().any{( it >= 1 ) && ( it <= 3 )}, "splitWith() args is of size [${args.size()}]: [$args]"
+             Object o          = ( args.size() == 1 ) ? delegate  : args[ 0 ]
+             String methodName = ( args.size() == 1 ) ? args[ 0 ] :
+                                 ( args.size() == 2 ) ? args[ 1 ] :
+                                 ( args.size() == 3 ) ? args[ 1 ] : null
+             Class type        = ( args.size() == 3 ) ? args[ 2 ] : null
 
              methodName = ( methodName ?: '' ).trim()
-             assert     methodName, "Method name should be provided"
-             MetaMethod m = delegate.metaClass.pickMethod( methodName, Closure )
-             assert     m, "No method [$methodName] accepting Closure argument is found for class [${ delegate.class.name }]"
+             assert     methodName, "Method name is not provided"
+             MetaMethod m = o.metaClass.pickMethod( methodName, Closure )
+             assert     m, "No method [$methodName] accepting Closure argument is found for class [${ o.class.name }]"
 
              def result = []
-             m.doMethodInvoke( delegate, { result << it } )
+             m.doMethodInvoke( o, { result << it } )
+
+             if ( type )
+             {
+                 result.each{ assert type.isInstance( it ), \
+                              "Object [$it][${ it.class.name }] returned by method [$methodName] is not an instance of type [$type.name]" }
+             }
 
              result
          }
