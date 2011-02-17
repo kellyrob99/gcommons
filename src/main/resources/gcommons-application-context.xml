@@ -14,20 +14,6 @@
           p:constants-ref         = "constants"
           p:verifyEqualHelper-ref = "verifyEqualHelper"/>
 
-    <bean name                    = "recurseHelper"
-          class                   = "com.goldin.gcommons.util.RecurseHelper"
-          p:constants-ref         = "constants"
-          p:verify-ref            = "verify"
-          p:general-ref           = "general"
-          p:fileBean-ref          = "file"/>
-
-    <bean name                    = "verifyEqualHelper"
-          class                   = "com.goldin.gcommons.util.VerifyEqualHelper"
-          p:constants-ref         = "constants"
-          p:verify-ref            = "verify"
-          p:general-ref           = "general"
-          p:file-ref              = "file"/>
-
     <bean name                    = "general"
           class                   = "com.goldin.gcommons.beans.GeneralBean"
           p:constants-ref         = "constants"
@@ -40,21 +26,38 @@
           p:general-ref           = "general"
           p:io-ref                = "io"/>
 
+    <bean name                    = "mopHelper"
+          class                   = "com.goldin.gcommons.util.MopHelper"
+          p:constants-ref         = "constants"
+          p:verify-ref            = "verify"
+          p:general-ref           = "general"
+          p:file-ref              = "file"/>
+
+    <bean name                    = "verifyEqualHelper"
+          class                   = "com.goldin.gcommons.util.VerifyEqualHelper"
+          p:constants-ref         = "constants"
+          p:verify-ref            = "verify"
+          p:general-ref           = "general"
+          p:file-ref              = "file"/>
+
     <bean name                    = "io"
           class                   = "com.goldin.gcommons.beans.IOBean"
           p:constants-ref         = "constants"
           p:verify-ref            = "verify"
-          p:general-ref           = "general"/>
+          p:general-ref           = "general"
+          p:file-ref              = "file"/>
 
     <bean name                    = "net"
           class                   = "com.goldin.gcommons.beans.NetBean"
           p:constants-ref         = "constants"
           p:verify-ref            = "verify"
-          p:general-ref           = "general"/>
+          p:general-ref           = "general"
+          p:file-ref              = "file"/>
 
     <bean name                    = "groovy"
           class                   = "com.goldin.gcommons.beans.GroovyBean"
           p:constants-ref         = "constants"
           p:verify-ref            = "verify"
-          p:general-ref           = "general"/>
+          p:general-ref           = "general"
+          p:file-ref              = "file"/>
 </beans>

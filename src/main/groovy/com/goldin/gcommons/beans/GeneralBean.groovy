@@ -41,15 +41,9 @@ class GeneralBean extends BaseBean
      */
     public <T> T choose ( T ... objects )
     {
-        for ( def o in objects )
-        {
-            if ( o != null )
-            {
-                return o
-            }
-        }
-
-        throw new RuntimeException( "All objects specified are null" )
+        def      result = ( T ) objects.find { it != null }
+        assert ( result != null ), "All objects specified are null"
+        result
     }
 
 

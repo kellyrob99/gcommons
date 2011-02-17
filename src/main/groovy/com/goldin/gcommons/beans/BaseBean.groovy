@@ -21,7 +21,8 @@ class BaseBean
     ConstantsBean constants
     VerifyBean    verify
     GeneralBean   general
-
+    FileBean      file
+    
 
     /**
      * Retrieves logger for the bean instance specified.
