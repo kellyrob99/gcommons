@@ -11,7 +11,7 @@ import com.goldin.gcommons.beans.*
  */
 class GCommons
 {
-    private static ApplicationContext CONTEXT = newContext()
+    private static ApplicationContext CONTEXT
     private static ApplicationContext newContext(){ new ClassPathXmlApplicationContext( '/gcommons-application-context.xml' )}
 
     /**
@@ -129,12 +129,18 @@ class GCommons
      */
     private static <T extends BaseBean> T getBean( Class<T> beanClass, boolean refresh )
     {
+        synchronized ( GCommons.class ) { CONTEXT = ( CONTEXT ?: newContext()) }
+
+        assert context()
         assert BaseBean.class.isAssignableFrom( beanClass )
 
-        BEANS[ beanClass ] = (( refresh ) || ( ! BEANS.containsKey( beanClass ))) ? context().getBean( beanClass ) :
-                                                                                    BEANS[ beanClass ]
+        if ( refresh || ( ! BEANS.containsKey( beanClass )))
+        {
+            T bean = context().getBean( beanClass )
+            assert (( bean instanceof BaseBean ) && ( beanClass.isInstance( bean )))
+            BEANS[ beanClass ] = bean
+        }
 
-        assert ( beanClass.isInstance( BEANS[ beanClass ] )) && ( BEANS[ beanClass ] instanceof BaseBean )
         BEANS[ beanClass ]
     }
 
