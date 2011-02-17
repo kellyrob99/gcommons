@@ -26,13 +26,13 @@ class RecurseHelper extends BaseBean
      * Injected by Spring
      */
     FileBean fileBean
-        
+
 
     RecurseHelper ()
     {
     }
 
-    
+
     /**
      * "File.metaClass.recurse" helper - handles directory provided.
      *
@@ -92,9 +92,9 @@ class RecurseHelper extends BaseBean
         verify.exists( file )
         verify.notNull( callback, fileType, filterType )
 
-        def fileTypeMatch   = fileBean.typeMatch( fileType,   file )
-        def filterTypeMatch = fileBean.typeMatch( filterType, file )
-        def result          = new InvocationResult()
+        def fileTypeMatch       = fileBean.typeMatch( fileType,   file )
+        def filterTypeMatch     = fileBean.typeMatch( filterType, file )
+        def result              = new InvocationResult()
 
         result.filterPass       = (( filter == null ) || ( ! filterTypeMatch ) || filter( file ))
         result.invocationResult = true
