@@ -108,7 +108,7 @@ class GeneralBean extends BaseBean
      * @param methodName name of the method to use, the method should accept a Closure argument
      * @return           list of objects returned by iterating method
      */
-    public <T> List<T> splitWith( Object o, String methodName, Class<T> type = Object ) { o.splitWith( methodName ) }
+    public <T> List<T> splitWith( Object o, String methodName, Class<T> type = Object ) { o.splitWith( methodName, type ) }
 
 
     /**

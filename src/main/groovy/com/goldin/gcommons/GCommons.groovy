@@ -30,12 +30,44 @@ class GCommons
          */
          Object.metaClass.splitWith = { Object[] args ->
 
-             assert args.size().any{( it >= 1 ) && ( it <= 3 )}, "splitWith() args is of size [${args.size()}]: [$args]"
-             Object o          = ( args.size() == 1 ) ? delegate  : args[ 0 ]
-             String methodName = ( args.size() == 1 ) ? args[ 0 ] :
-                                 ( args.size() == 2 ) ? args[ 1 ] :
-                                 ( args.size() == 3 ) ? args[ 1 ] : null
-             Class type        = ( args.size() == 3 ) ? args[ 2 ] : null
+             Object o           // Invocation object
+             String methodName  // name of method to invoke
+             Class type        // Type of elements returned
+
+             switch( args.size())
+             {
+             /**
+              * [0] = {java.lang.String@2412}"eachByte"
+              */
+                 case 1 : o          = delegate
+                          methodName = args[ 0 ]
+                          type       = null
+                          break
+             /**
+              * [0] = {java.lang.String@1944}"eachLine"
+              * [1] = {java.lang.Class@1585}"class java.lang.Object"
+              *
+              * or
+              *
+              * [0] = {java.lang.String@2726}"aa" - object
+              * [1] = {java.lang.String@2727}""   - method
+              */
+                 case 2 : def typeAvailable = args[ 1 ] instanceof Class
+                          o                 = typeAvailable ? delegate  : args[ 0 ]
+                          methodName        = typeAvailable ? args[ 0 ] : args[ 1 ]
+                          type              = typeAvailable ? args[ 1 ] : null
+                          break
+             /**
+              * [0] = {java.lang.String@2549}"1\n2"
+              * [1] = {java.lang.String@1936}"eachLine"
+              * [2] = {java.lang.Class@1421}"class java.io.File"
+              */
+                 case 3 : o          = args[ 0 ]
+                          methodName = args[ 1 ]
+                          type       = args[ 2 ]
+                          break
+                 default : throw new RuntimeException( "splitWith() args is of size [${args.size()}]: [$args]" )
+             }
 
              methodName = ( methodName ?: '' ).trim()
              assert     methodName, "Method name is not provided"
