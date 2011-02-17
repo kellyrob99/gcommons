@@ -32,25 +32,27 @@ class GCommons
 
              Object o           // Invocation object
              String methodName  // name of method to invoke
-             Class type        // Type of elements returned
+             Class  type        // Type of elements returned
 
              switch( args.size())
              {
              /**
-              * [0] = {java.lang.String@2412}"eachByte"
+              * [0] = {java.lang.String@2412}"eachByte" - invocation method
               */
                  case 1 : o          = delegate
                           methodName = args[ 0 ]
                           type       = null
                           break
              /**
-              * [0] = {java.lang.String@1944}"eachLine"
-              * [1] = {java.lang.Class@1585}"class java.lang.Object"
+              * Two options:
+              * 
+              * [0] = {java.lang.String@1944}"eachLine"              - invocation method
+              * [1] = {java.lang.Class@1585}"class java.lang.Object" - type
               *
               * or
               *
-              * [0] = {java.lang.String@2726}"aa" - object
-              * [1] = {java.lang.String@2727}""   - method
+              * [0] = {java.lang.String@2726}"aa" - invocation object
+              * [1] = {java.lang.String@2727}""   - invocation method
               */
                  case 2 : def typeAvailable = args[ 1 ] instanceof Class
                           o                 = typeAvailable ? delegate  : args[ 0 ]
@@ -58,9 +60,9 @@ class GCommons
                           type              = typeAvailable ? args[ 1 ] : null
                           break
              /**
-              * [0] = {java.lang.String@2549}"1\n2"
-              * [1] = {java.lang.String@1936}"eachLine"
-              * [2] = {java.lang.Class@1421}"class java.io.File"
+              * [0] = {java.lang.String@2549}"1\n2"              - invocation object
+              * [1] = {java.lang.String@1936}"eachLine"          - invocation method
+              * [2] = {java.lang.Class@1421}"class java.io.File" - type
               */
                  case 3 : o          = args[ 0 ]
                           methodName = args[ 1 ]
