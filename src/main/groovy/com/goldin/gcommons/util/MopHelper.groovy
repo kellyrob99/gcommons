@@ -1,9 +1,7 @@
 package com.goldin.gcommons.util
 
-import groovy.io.FileType
 import com.goldin.gcommons.beans.BaseBean
-
-
+import groovy.io.FileType
 
 /**
  * MOP updates implementations.
@@ -26,6 +24,21 @@ class MopHelper extends BaseBean
         boolean invocationResult
     }
 
+
+    /**
+     * Recursive iteration configuration parameters.
+     */
+    static class RecurseConfig
+    {
+        Closure  filter
+        FileType fileType
+        FileType filterType
+        boolean  stopOnFalse
+        boolean  stopOnFilter
+        boolean  detectLoops
+    }
+
+    
     /**
      * Splits object to "pieces" with an "each"-like function specified by name.
      *
@@ -106,13 +119,15 @@ class MopHelper extends BaseBean
         assert configs,  "recurse(): Configs Map is not provided"
         assert callback, "recurse(): Callback is not provided"
 
-        Closure  filter       = ( Closure ) configs[ 'filter' ] // Allowed to be null
-        FileType fileType     = general.choose(( FileType ) configs[ 'type'        ],  FileType.FILES )
-        FileType filterType   = general.choose(( FileType ) configs[ 'filterType'  ],  fileType       )
-        boolean  stopOnFalse  = general.choose(( boolean )  configs[ 'stopOnFalse' ],  false          )
-        boolean  stopOnFilter = general.choose(( boolean )  configs[ 'stopOnFilter' ], false          )
+        def config          = new RecurseConfig()
+        config.filter       = ( Closure ) configs[ 'filter' ] // Allowed to be null
+        config.fileType     = general.choose(( FileType ) configs[ 'type'         ], FileType.FILES  )
+        config.filterType   = general.choose(( FileType ) configs[ 'filterType'   ], config.fileType )
+        config.stopOnFalse  = general.choose(( boolean )  configs[ 'stopOnFalse'  ], false           )
+        config.stopOnFilter = general.choose(( boolean )  configs[ 'stopOnFilter' ], false           )
+        config.detectLoops  = general.choose(( boolean )  configs[ 'detectLoops'  ], false           )
 
-        handleDirectory(( File ) delegate, callback, filter, fileType, filterType, stopOnFalse, stopOnFilter )
+        handleDirectory(( File ) delegate, callback, config, ( config.detectLoops ? [] as Set : null ))
     }
 
 
@@ -144,26 +159,23 @@ class MopHelper extends BaseBean
      * @return <code>false</code> if recursive iteration should be stopped,
      *         <code>true</code>  otherwise
      */
-    private void handleDirectory( File             directory,
-                                  Closure<?>       callback,
-                                  Closure<Boolean> filter,
-                                  FileType         fileType,
-                                  FileType         filterType,
-                                  boolean          stopOnFalse,
-                                  boolean          stopOnFilter )
+    private void handleDirectory( File          directory,
+                                  Closure<?>    callback,
+                                  RecurseConfig config,
+                                  Set<File>     directories )
     {
         verify.directory( directory )
-        verify.notNull( callback, fileType, filterType, stopOnFalse )
+        verify.notNull( callback, config )
 
         for ( File f in directory.listFiles())
         {
-            def result          = invokeCallback( f, callback, filter, fileType, filterType )
+            def result          = invokeCallback( f, callback, config )
             def recursiveInvoke = ( f.isDirectory() &&
-                                    (( ! stopOnFilter ) || ( filterType != FileType.DIRECTORIES ) || ( result.filterPass )) &&
-                                    (( ! stopOnFalse  ) || ( result.invocationResult )))
+                                    (( ! config.stopOnFilter ) || ( config.filterType != FileType.DIRECTORIES ) || ( result.filterPass )) &&
+                                    (( ! config.stopOnFalse  ) || ( result.invocationResult )))
             if ( recursiveInvoke )
             {
-                handleDirectory( f, callback, filter, fileType, filterType, stopOnFalse, stopOnFilter )
+                handleDirectory( f, callback, config, directories )
             }
         }
     }
@@ -180,19 +192,17 @@ class MopHelper extends BaseBean
      *
      * @return callback invocation result
      */
-    private InvocationResult invokeCallback ( File             callbackFile,
-                                              Closure<?>       callback,
-                                              Closure<Boolean> filter,
-                                              FileType         fileType,
-                                              FileType         filterType )
+    private InvocationResult invokeCallback ( File          callbackFile,
+                                              Closure<?>    callback,
+                                              RecurseConfig config )
     {
         verify.exists( callbackFile )
-        verify.notNull( callback, fileType, filterType )
+        verify.notNull( callback, config )
 
-        def fileTypeMatch       = file.typeMatch( fileType,   callbackFile )
-        def filterTypeMatch     = file.typeMatch( filterType, callbackFile )
+        def fileTypeMatch       = file.typeMatch( config.fileType,   callbackFile )
+        def filterTypeMatch     = file.typeMatch( config.filterType, callbackFile )
         def result              = new InvocationResult()
-        result.filterPass       = (( filter == null ) || ( ! filterTypeMatch ) || filter( callbackFile ))
+        result.filterPass       = (( config.filter == null ) || ( ! filterTypeMatch ) || config.filter( callbackFile ))
         result.invocationResult = true
 
         if ( fileTypeMatch && result.filterPass )
