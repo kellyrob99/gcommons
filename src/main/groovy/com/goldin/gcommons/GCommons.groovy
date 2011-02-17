@@ -1,17 +1,20 @@
 package com.goldin.gcommons
 
 import com.goldin.gcommons.util.MopHelper
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationContext
 import org.springframework.context.support.ClassPathXmlApplicationContext
 import com.goldin.gcommons.beans.*
 
- /**
+/**
  * "GCommons" entry points
  */
 class GCommons
 {
     private static ApplicationContext CONTEXT
     private static ApplicationContext newContext(){ new ClassPathXmlApplicationContext( '/gcommons-application-context.xml' )}
+    private static Logger LOG
 
     /**
      * Mapping of all beans: bean class => bean instance
@@ -32,11 +35,14 @@ class GCommons
         {
             if ( ! CONTEXT )
             {
-                CONTEXT          = newContext()
+                CONTEXT = newContext()
+                LOG     = LoggerFactory.getLogger( GCommons.class )
                 MopHelper helper = ( MopHelper ) getBean( MopHelper, false )
                 Object.metaClass.splitWith   = { Object[] args                       -> helper.splitWith( delegate, args ) }
                 File.metaClass.recurse       = { Map configs = [:], Closure callback -> helper.recurse(( File ) delegate, configs, callback ) }
                 File.metaClass.directorySize = { helper.directorySize(( File ) delegate ) }
+
+                LOG.info( "GCommons context initialized: [$CONTEXT.beanDefinitionCount] beans - $CONTEXT.beanDefinitionNames" )
             }
         }
 
