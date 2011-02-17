@@ -32,23 +32,27 @@ class FileBean extends BaseBean implements InitializingBean
     @Override
     void afterPropertiesSet ()
     {
-        def c =
-        {
-            def requiredDriverClass ->
+        ZIP_EXTENSIONS = driverExtensions( ZipDriver )
+        TAR_EXTENSIONS = driverExtensions( TarDriver )
+    }
 
-            (( Map<String,?> ) GlobalArchiveDriverRegistry.INSTANCE ).findAll
-            {
-                def extension, driver -> // String => Driver instance or String
-                def driverClass = (( driver instanceof ArchiveDriver ) ? driver.class            :
-                                   ( driver instanceof String        ) ? Class.forName( driver ) :
-                                                                        null )
-                driverClass && requiredDriverClass.isAssignableFrom( driverClass )
-            }.
-            keySet()*.toLowerCase()
-        }
 
-        ZIP_EXTENSIONS = c( ZipDriver )
-        TAR_EXTENSIONS = c( TarDriver )
+    /**
+     * Retrieves archive extensions that are supported by driver specified.
+     *
+     * @param requiredDriverClass driver class that supports extensions required
+     * @return extensions supported by driver specified: 'war', 'jar', 'zip', etc.
+     */
+    private Set<String> driverExtensions( Class<? extends ArchiveDriver> requiredDriverClass )
+    {
+        (( Map<String,?> ) GlobalArchiveDriverRegistry.INSTANCE ).findAll {
+            def extension, driver ->
+            def driverClass = (( driver instanceof ArchiveDriver ) ? driver.class :
+                               ( driver instanceof String        ) ? this.class.classLoader.loadClass( driver, true ) :
+                                                                     null )
+            driverClass && requiredDriverClass.isAssignableFrom( driverClass )
+        }.
+        keySet()*.toLowerCase()
     }
 
 
