@@ -1,3 +1,5 @@
+import org.gradle.api.tasks.javadoc.Groovydoc.Link
+
 apply plugin: 'groovy'
 apply plugin: 'maven'
 apply plugin: 'idea'
@@ -39,30 +41,40 @@ dependencies {
  * http://gradle.org/0.9.2/docs/dsl/org.gradle.plugins.idea.IdeaModule.html
  */
 ideaProject.javaVersion    = '1.6.0_23'
-ideaModule.javaVersion     = ideaProject.javaVersion
-ideaModule.downloadSources = true
-ideaModule.downloadJavadoc = false
-ideaModule.outputDir       = new File( project.buildDir, 'idea' )
-ideaModule.testOutputDir   = new File( project.buildDir, 'idea/test' )
+ideaModule {
+    javaVersion     = ideaProject.javaVersion
+    downloadSources = true
+    downloadJavadoc = false
+    outputDir       = new File( project.buildDir, 'idea' )
+    testOutputDir   = new File( project.buildDir, 'idea/test' )
+}
 
 
 /**
  * http://gradle.org/0.9.2/docs/dsl/org.gradle.api.tasks.testing.Test.html
  * http://gradle.org/0.9.2/docs/javadoc/org/gradle/api/tasks/testing/Test.html
  */
-test.enableTestReport()
-test.testReportDir    = new File(( File ) project.buildDir, 'test/reports' )
-test.testResultsDir   = new File(( File ) project.buildDir, 'test/results' )
-test.systemProperties = System.properties.containsKey( 'slowTests' ) ? [ slowTests : 'true' ] : [:]
-test.setDebug( System.properties.containsKey( 'debug' ))
+test {
+    test.testReportDir    = new File(( File ) project.buildDir, 'test/reports' )
+    test.testResultsDir   = new File(( File ) project.buildDir, 'test/results' )
+    test.systemProperties = System.properties.containsKey( 'slowTests' ) ? [ slowTests : 'true' ] : [:]
+    test.setDebug( System.properties.containsKey( 'debug' ))
+}
 
 
 /**
  * http://gradle.org/0.9.2/docs/dsl/org.gradle.api.tasks.javadoc.Groovydoc.html
  */
-
-groovydoc.destinationDir = new File(( System.getProperty( 'groovydocDir' ) ?: project.buildDir.path + '/groovydoc' ),
-                                    ( version.contains( '-SNAPSHOT' ) ? '' : version ))
+groovydoc {
+    destinationDir = new File(( System.getProperty( 'groovydocDir' ) ?: project.buildDir.path + '/groovydoc' ),
+                              ( version.contains( '-SNAPSHOT' ) ? '' : version ))
+    header = '<a href="http://evgeny-goldin.com/wiki/GCommons">evgeny-goldin.com/wiki/GCommons</a>'
+    footer = '<a href="http://evgeny-goldin.com/">Evgeny Goldin</a>'
+    links  = [ new Link( 'http://static.springsource.org/spring/docs/3.0.x/javadoc-api/', 'org.springframework' ),
+               new Link( 'http://download.oracle.com/javase/6/docs/api/',                 'java' ),
+               new Link( 'http://groovy.codehaus.org/api/',                               'groovy', 'org.codehaus.groovy' ),
+               new Link( 'http://evgeny-goldin.org/javadoc/truezip/',                     'de.schlichtherle' )] as Set
+}
 
 /**
  * Adding sources artifact
@@ -72,5 +84,4 @@ task sourcesJar( type: Jar, dependsOn: classes ) {
      classifier = 'sources'
      from sourceSets.main.allSource
 }
-
 artifacts { archives sourcesJar }
