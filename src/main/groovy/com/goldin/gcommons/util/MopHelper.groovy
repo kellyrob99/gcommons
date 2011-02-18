@@ -17,6 +17,7 @@ class MopHelper extends BaseBean
         /**
          * Patching logback - specifying CL when initializing a GroovyShell
          * http://jira.qos.ch/browse/LBCLASSIC-252
+         * https://github.com/ceki/logback/blob/v_0.9.28/logback-classic/src/main/groovy/ch/qos/logback/classic/gaffer/GafferConfigurator.groovy#L45
          */
 
         ch.qos.logback.classic.gaffer.GafferConfigurator.metaClass.run = {
