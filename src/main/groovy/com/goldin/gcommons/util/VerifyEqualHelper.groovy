@@ -87,7 +87,7 @@ class VerifyEqualHelper extends BaseBean
         /**
          * Verifying that each file in 'dir1' has a corresponding and equal file in 'dir2'
          */
-        dir1.eachFileRecurse {
+        dir1.recurse {
 
             File dir1File ->
             File dir2File = new File( dir2, dir1File.canonicalPath.replace( dir1Path, '' ))
@@ -104,7 +104,7 @@ class VerifyEqualHelper extends BaseBean
          */
         if ( ! pattern )
         {
-            dir2.eachFileRecurse {
+            dir2.recurse {
 
                 File dir2File ->
 

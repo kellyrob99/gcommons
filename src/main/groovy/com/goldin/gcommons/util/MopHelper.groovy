@@ -135,8 +135,8 @@ class MopHelper extends BaseBean
     void recurse( File delegate, Map configs = [:], Closure callback )
     {
         assert delegate.isDirectory(), "[$delegate.canonicalPath] is not a directory"
-        assert configs,  "recurse(): Configs Map is not provided"
-        assert callback, "recurse(): Callback is not provided"
+        assert ( configs  != null ), "recurse(): Configs Map is not provided"
+        assert ( callback != null ), "recurse(): Callback is not provided"
 
         def config          = new RecurseConfig()
         config.filter       = ( Closure ) configs[ 'filter' ] // Allowed to be null
