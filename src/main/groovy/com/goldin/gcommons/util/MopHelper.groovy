@@ -8,6 +8,7 @@ import groovy.io.FileType
 
 /**
  * MOP updates implementations.
+ * http://evgeny-goldin.com/wiki/GCommons#MOP_Updates
  */
 class MopHelper extends BaseBean
 {
@@ -60,6 +61,7 @@ class MopHelper extends BaseBean
     
     /**
      * Splits object to "pieces" with an "each"-like function specified by name.
+     * http://evgeny-goldin.com/wiki/GCommons#MOP_Updates
      *
      * @param delegate original delegate object
      * @param args     invocation object, method and result type (optional)
@@ -127,9 +129,16 @@ class MopHelper extends BaseBean
 
     /**
      * Enhanced recursive files iteration.
+     * http://evgeny-goldin.com/wiki/GCommons#MOP_Updates
      *
      * @param delegate original delegate object
-     * @param configs  configurations Map
+     * @param configs  configurations Map with following keys:
+     * <li> {@code "filter"}
+     * <li> {@code "type"}
+     * <li> {@code "filterType"}
+     * <li> {@code "stopOnFalse"}
+     * <li> {@code "stopOnFilter"}
+     * <li> {@code "detectLoops"}
      * @param callback invocation callback
      */
     void recurse( File delegate, Map configs = [:], Closure callback )
