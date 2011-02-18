@@ -2,6 +2,7 @@ apply plugin: 'groovy'
 apply plugin: 'maven'
 apply plugin: 'idea'
 
+
 defaultTasks 'clean', 'build', 'install'
 
 sourceCompatibility = 1.6
@@ -46,14 +47,22 @@ ideaModule.testOutputDir   = new File( project.buildDir, 'idea/test' )
 
 
 /**
- * http://gradle.org/0.9/docs/dsl/org.gradle.api.tasks.testing.Test.html
- * http://gradle.org/0.9/docs/javadoc/org/gradle/api/tasks/testing/Test.html
+ * http://gradle.org/0.9.2/docs/dsl/org.gradle.api.tasks.testing.Test.html
+ * http://gradle.org/0.9.2/docs/javadoc/org/gradle/api/tasks/testing/Test.html
  */
 test.enableTestReport()
 test.testReportDir    = new File(( File ) project.buildDir, 'test/reports' )
 test.testResultsDir   = new File(( File ) project.buildDir, 'test/results' )
 test.systemProperties = System.properties.containsKey( 'slowTests' ) ? [ slowTests : 'true' ] : [:]
 test.setDebug( System.properties.containsKey( 'debug' ))
+
+
+/**
+ * http://gradle.org/0.9.2/docs/dsl/org.gradle.api.tasks.javadoc.Groovydoc.html
+ */
+
+groovydoc.destinationDir = new File(( System.getProperty( 'groovydocDir' ) ?: project.buildDir.path + '/groovydoc' ),
+                                    version.replace( '-SNAPSHOT', '' ))
 
 /**
  * Adding sources artifact
