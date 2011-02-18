@@ -73,6 +73,7 @@ groovydoc {
     links  = [ new Link( 'http://static.springsource.org/spring/docs/3.0.x/javadoc-api/', 'org.springframework' ),
                new Link( 'http://download.oracle.com/javase/6/docs/api/',                 'java' ),
                new Link( 'http://groovy.codehaus.org/api/',                               'groovy', 'org.codehaus.groovy' ),
+               new Link( 'http://commons.apache.org/net/apidocs/',                        'org.apache.commons.net' ),
                new Link( 'http://evgeny-goldin.org/javadoc/truezip/',                     'de.schlichtherle' )] as Set
 }
 
