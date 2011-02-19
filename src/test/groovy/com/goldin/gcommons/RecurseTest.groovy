@@ -62,10 +62,14 @@ class RecurseTest extends BaseTest
     @Test
     void testRecurseFiles()
     {
-        def testDir = prepareTestRecurse()
-        def names   = []
-        def c       = { names << it.name }
-        def recurse = { Map configs, Closure callback -> fileBean.recurse( testDir, configs, callback )}
+        def testDir   = prepareTestRecurse()
+        def parentDir = testDir.parentFile.parentFile.parentFile.parentFile
+        def names     = []
+        def c         = { names << it.name }
+        def recurse   = { Map configs, Closure callback -> fileBean.recurse( testDir, configs, callback )}
+
+        assert testDir.splitWith  ( 'eachFileRecurse' ) == testDir.splitWith  ( 'recurse' )
+        assert parentDir.splitWith( 'eachFileRecurse' ) == parentDir.splitWith( 'recurse' )
 
         recurse([ type: FileType.FILES ], c )
         assertSameLists( names, [ '3.txt', '7.txt', '22.txt' ])
@@ -227,13 +231,15 @@ class RecurseTest extends BaseTest
         def recurse = { Map configs, Closure callback -> fileBean.recurse( testDir, configs, callback )}
 
 
-        recurse([ filterType   : FileType.DIRECTORIES,
+        recurse([ type         : FileType.FILES,
+                  filterType   : FileType.DIRECTORIES,
                   filter       : { File dir -> ['1', '2'].any{ it == dir.name } /* Dir name is '1' or '2' */ },
                   stopOnFilter : true ], c )
         assert names == [ '3.txt' ]
 
         names = []
-        recurse([ filterType   : FileType.DIRECTORIES,
+        recurse([ type         : FileType.FILES,
+                  filterType   : FileType.DIRECTORIES,
                   filter       : { File dir -> ['1', '2'].any{ it == dir.name }} /* Dir name is '1' or '2' */ ], c )
         assertSameLists( names, [ '3.txt', '7.txt', '22.txt' ] )
 
@@ -257,25 +263,29 @@ class RecurseTest extends BaseTest
         assertSameLists( names, [ '1', '2', '3.txt', '7', '8', '22.txt' ])
 
         names = []
-        recurse([ filterType   : FileType.DIRECTORIES,
+        recurse([ type         : FileType.FILES,
+                  filterType   : FileType.DIRECTORIES,
                   filter       : { true },
                   stopOnFilter : true ], c )
         assertSameLists( names, [ '3.txt', '7.txt', '22.txt' ] )
 
         names   = []
-        recurse([ filterType   : FileType.DIRECTORIES,
+        recurse([ type         : FileType.FILES,
+                  filterType   : FileType.DIRECTORIES,
                   filter       : { it.name == '5' },
                   stopOnFilter : true ], c )
         assert names   == []
 
         names   = []
-        recurse([ filterType   : FileType.DIRECTORIES,
+        recurse([ type         : FileType.FILES,
+                  filterType   : FileType.DIRECTORIES,
                   filter       : { File dir -> [ '5', '6' ].any{ it == dir.name }},
                   stopOnFilter : true ], c )
         assert names == [ '7.txt' ]
 
         names   = []
-        recurse([ filterType   : FileType.DIRECTORIES,
+        recurse([ type         : FileType.FILES,
+                  filterType   : FileType.DIRECTORIES,
                   filter       : { File dir -> [ '5', '6' ].any{ it == dir.name }},
                   stopOnFilter : false ], c )
         assertSameLists( names, [ '3.txt', '7.txt', '22.txt' ] )

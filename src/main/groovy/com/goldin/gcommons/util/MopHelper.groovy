@@ -149,7 +149,7 @@ class MopHelper extends BaseBean
 
         def config          = new RecurseConfig()
         config.filter       = ( Closure ) configs[ 'filter' ] // Allowed to be null
-        config.fileType     = general.choose(( FileType ) configs[ 'type'         ], FileType.FILES  )
+        config.fileType     = general.choose(( FileType ) configs[ 'type'         ], FileType.ANY    )
         config.filterType   = general.choose(( FileType ) configs[ 'filterType'   ], config.fileType )
         config.stopOnFalse  = general.choose(( boolean )  configs[ 'stopOnFalse'  ], false           )
         config.stopOnFilter = general.choose(( boolean )  configs[ 'stopOnFilter' ], false           )
