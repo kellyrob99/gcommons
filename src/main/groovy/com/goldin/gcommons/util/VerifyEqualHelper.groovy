@@ -2,7 +2,6 @@ package com.goldin.gcommons.util
 
 import com.goldin.gcommons.beans.BaseBean
 import com.goldin.gcommons.beans.FileBean
-import groovy.io.FileType
 
 /**
  * {@link com.goldin.gcommons.beans.VerifyBean#equal(File, File, boolean, String)} helper class
@@ -88,7 +87,7 @@ class VerifyEqualHelper extends BaseBean
         /**
          * Verifying that each file in 'dir1' has a corresponding and equal file in 'dir2'
          */
-        dir1.recurse( type: FileType.ANY ) {
+        dir1.recurse {
 
             File dir1File ->
             File dir2File = new File( dir2, dir1File.canonicalPath.replace( dir1Path, '' ))
@@ -105,7 +104,7 @@ class VerifyEqualHelper extends BaseBean
          */
         if ( ! pattern )
         {
-            dir2.recurse( type: FileType.ANY ) {
+            dir2.recurse {
 
                 File dir2File ->
 
