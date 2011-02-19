@@ -10,7 +10,7 @@ defaultTasks 'clean', 'build', 'install'
 
 sourceCompatibility = 1.6
 group               = 'com.goldin'
-version             = '0.6-SNAPSHOT'
+version             = '0.5'
 
 groovyVersion       = '1.8.0-beta-4'
 antVersion          = '1.8.2'
@@ -90,6 +90,14 @@ groovydoc {
                new Link( 'http://groovy.codehaus.org/api/',                               'groovy', 'org.codehaus.groovy' ),
                new Link( 'http://commons.apache.org/net/apidocs/',                        'org.apache.commons.net' ),
                new Link( 'http://evgeny-goldin.org/javadoc/truezip/',                     'de.schlichtherle' )] as Set
+
+    /**
+     * "Groovydoc not creating external links in generated HTML"
+     * http://gradle.1045684.n5.nabble.com/Groovydoc-not-creating-external-links-in-generated-HTML-td3315578.html
+     * http://stackoverflow.com/questions/986297/how-do-i-reference-a-classpath-from-gradle-0-6
+     * http://jira.codehaus.org/browse/GRADLE-1391
+     */
+    groovyClasspath = configurations.compile
 }
 
 /**
