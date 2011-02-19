@@ -117,7 +117,7 @@ class MopHelper extends BaseBean
         def result = []
         m.doMethodInvoke( o, { result << it } )
 
-        if ( type )
+        if (( type ) && ( type != Object.class ))
         {
             result.each{ assert type.isInstance( it ), \
                          "Object [$it][${ it.class.name }] returned by method [$methodName] is not an instance of type [$type.name]" }
