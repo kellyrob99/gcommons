@@ -1,4 +1,5 @@
 import org.gradle.api.tasks.javadoc.Groovydoc.Link
+import java.text.SimpleDateFormat
 
 apply plugin: 'groovy'
 apply plugin: 'maven'
@@ -65,11 +66,14 @@ test {
 /**
  * http://gradle.org/0.9.2/docs/dsl/org.gradle.api.tasks.javadoc.Groovydoc.html
  */
+def d    = new Date()
+def time = new SimpleDateFormat( "HH:mm '(GMT'Z')'" ).format( d )
+def date = new SimpleDateFormat( 'MMMM dd, yyyy' ).format( d )
 groovydoc {
     destinationDir = new File(( System.getProperty( 'groovydocDir' ) ?: project.buildDir.path + '/groovydoc' ),
                               ( version.contains( '-SNAPSHOT' ) ? '' : version ))
     header = '<a href="http://evgeny-goldin.com/wiki/GCommons">evgeny-goldin.com/wiki/GCommons</a>'
-    footer = '<a href="http://evgeny-goldin.com/">Evgeny Goldin</a>'
+    footer = '<a href="http://evgeny-goldin.com/">Evgeny Goldin</a>. GrovyDoc is generated at ' + "$time on $date."
     links  = [ new Link( 'http://static.springsource.org/spring/docs/3.0.x/javadoc-api/', 'org.springframework' ),
                new Link( 'http://download.oracle.com/javase/6/docs/api/',                 'java' ),
                new Link( 'http://groovy.codehaus.org/api/',                               'groovy', 'org.codehaus.groovy' ),
