@@ -31,6 +31,12 @@ class GCommons
      */
     private static <T extends BaseBean> T getBean( Class<T> beanClass, boolean refresh )
     {
+        /**
+         * When run under @Grab, static { .. } context has libraries missing in class loading hierarchy
+         * and can not be used to trigger context initialization. Thus it only happens when the first actual
+         * call is made and therefore protected by synchronized block.
+         */
+
         synchronized ( GCommons.class )
         {
             if ( ! CONTEXT )
