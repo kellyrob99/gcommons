@@ -2,10 +2,9 @@ package com.goldin.gcommons.beans
 
 import com.goldin.gcommons.BaseTest
 import org.apache.commons.net.ftp.FTPFile
-import org.junit.Ignore
 import org.junit.Test
 
-/**
+ /**
  * {@link NetBean} tests
  */
 class NetBeanTest extends BaseTest
@@ -59,7 +58,7 @@ class NetBeanTest extends BaseTest
     }
 
 
-    @Ignore /* FTP works very slow these days */
+    @Test
     void shouldListFtpFiles()
     {
         def htmlFiles = netBean.listFiles( ZYMIC_FTP, ['*.html'] )
@@ -87,7 +86,7 @@ class NetBeanTest extends BaseTest
     }
 
 
-    @Ignore /* FTP works very slow these days */
+    @Test
     void shouldListFtpFilesWithExcludes()
     {
         def fileNames = [ 'wagon-file-1.0-beta-7.jar', 'wagon-provider-api-1.0-beta-7.jar', 'xercesMinimal-1.9.6.2.jar' ]
