@@ -32,15 +32,42 @@ class NetBeanTest extends BaseTest
     void shouldRecognizeNetworkPath()
     {
         assert   netBean.isFtp( 'ftp://user' )
+        assert   netBean.isFtp( 'ftp://user',  'ftp://user' )
+        assert   netBean.isFtp( 'ftp://user',  'ftp://user', 'ftp://user' )
+        assert ! netBean.isFtp( 'ftp://user',  'ftp://user', 'ftp://user', 'ftp1://user' )
+        assert ! netBean.isFtp( 'ftp2://user', 'ftp://user', 'ftp://user', 'ftp://user' )
+        assert ! netBean.isFtp( 'scp://user',  'ftp://user', 'ftp://user', 'ftp://user' )
+        assert ! netBean.isFtp( ' ftp://user', 'ftp://user', 'ftp://user' )
         assert   netBean.isFtp( 'ftp://user:password@host:path' )
         assert ! netBean.isFtp( 'stp://user:password@host:path' )
         assert ! netBean.isFtp( 'scp://user:password@host:path' )
+
         assert   netBean.isScp( 'scp://user' )
+        assert   netBean.isScp( 'scp://user', 'scp://user' )
+        assert   netBean.isScp( 'scp://user', 'scp://user', 'scp://user' )
+        assert ! netBean.isScp( ' scp://user', 'scp://user', 'scp://user' )
+        assert ! netBean.isScp( 'http://user', 'scp://user', 'scp://user' )
+        assert ! netBean.isScp( 'scp://user', 'scp ://user' )
         assert   netBean.isScp( 'scp://user:password@host:path' )
         assert ! netBean.isScp( 'ftp://user:password@host:path' )
+
         assert   netBean.isHttp( 'http://user' )
+        assert   netBean.isHttp( 'http://user', 'http://user' )
+        assert   netBean.isHttp( 'http://user', 'http://user', 'http://user' )
+        assert ! netBean.isHttp( 'http ://user', 'http://user', 'http://user' )
+        assert ! netBean.isHttp( 'http://user', 'scp://user', 'http://user' )
+        assert ! netBean.isHttp( 'http://user', 'http://user', 'ftp://user' )
         assert   netBean.isHttp( 'http://user:password@host:path' )
         assert ! netBean.isHttp( 'htp://user:password@host:path' )
+
+        assert   netBean.isNet( 'http://user:password@host:path' )
+        assert   netBean.isNet( 'scp://user', 'ftp://user' )
+        assert   netBean.isNet( 'scp://user' )
+        assert   netBean.isNet( 'ftp://user' )
+        assert   netBean.isNet( 'http://user:password@host:path', 'scp://user', 'ftp://user' )
+        assert ! netBean.isNet( 'htp://user:password@host:path', 'scp://user', 'ftp://user' )
+        assert ! netBean.isNet( 'http://user:password@host:path', 'scp ://user', 'ftp://user' )
+        assert ! netBean.isNet( 'http://user:password@host:path', 'scp://user', 'fttp://user' )
     }
 
 

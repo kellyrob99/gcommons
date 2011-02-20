@@ -11,10 +11,10 @@ import org.apache.commons.net.ftp.FTPReply
  */
 class NetBean extends BaseBean
 {
-    boolean isHttp ( String s ) { s && s.toLowerCase().startsWith( 'http://' ) }
-    boolean isScp  ( String s ) { s && s.toLowerCase().startsWith( 'scp://'  ) }
-    boolean isFtp  ( String s ) { s && s.toLowerCase().startsWith( 'ftp://'  ) }
-    boolean isNet  ( String s ) { isHttp( s ) || isScp( s ) || isFtp( s ) }
+    boolean isHttp ( String ... s ) { s.every{ it && it.toLowerCase().startsWith( 'http://' ) }}
+    boolean isScp  ( String ... s ) { s.every{ it && it.toLowerCase().startsWith( 'scp://'  ) }}
+    boolean isFtp  ( String ... s ) { s.every{ it && it.toLowerCase().startsWith( 'ftp://'  ) }}
+    boolean isNet  ( String ... s ) { s.every{ isHttp( it ) || isScp( it ) || isFtp( it ) }}
 
 
     /**
