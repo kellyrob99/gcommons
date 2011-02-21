@@ -275,6 +275,37 @@ class FileBeanTest extends BaseTest
 
 
     @Test
+    void shouldCopy()
+    {
+        def resourcesDir = new File( 'src/test/resources' )
+        def filesToCopy  = [ 'image-3-abc.sima', 'image-3-abc.sima1', 'image-3-abc.zip', 'apache-maven-3.0.1.jar' ]
+        def testDir1     = testDir( 'copy-1' )
+        def testDir2     = testDir( 'copy-2' )
+        def testDir3     = testDir( 'copy-3' )
+
+        for ( fileName in filesToCopy )
+        {
+            fileBean.copy( new File( resourcesDir, fileName ), testDir1 )
+            fileBean.copy( new File( resourcesDir, fileName ), testDir2, fileName )
+            fileBean.copy( new File( resourcesDir, fileName ), testDir3, fileName + '-3' )
+        }
+
+        verifyBean.equal( testDir1, testDir2 )
+        shouldFailAssert { verifyBean.equal( testDir1, testDir3 )}
+        shouldFailAssert { verifyBean.equal( testDir2, testDir3 )}
+        
+        verifyBean.file( filesToCopy.collect { new File( testDir1, it )} as File[] )
+        verifyBean.file( filesToCopy.collect { new File( testDir2, it )} as File[] )
+        verifyBean.file( filesToCopy.collect { new File( testDir3, it + '-3' )} as File[] )
+
+        assert testDir1.directorySize() == testDir2.directorySize()
+        assert testDir1.directorySize() == testDir3.directorySize()
+        assert testDir2.directorySize() == testDir3.directorySize()
+    }
+
+
+
+    @Test
     void shouldUnpack()
     {
         def resourcesDir = new File( 'src/test/resources' )

@@ -239,14 +239,16 @@ class FileBean extends BaseBean implements InitializingBean
      *
      * @param file      source file
      * @param directory destination directory
+     * @param newName   file name in the target directory, same name by default
+     *
      * @return destination file created
      */
-    File copy ( File file, File directory )
+    File copy ( File file, File directory, String newName = file.name )
     {
         verify.file( file )
         verify.notNull( directory )
 
-        File destinationFile = new File( directory, file.name )
+        File destinationFile = new File( directory, newName )
         if ( destinationFile.exists()) { delete( destinationFile )}
 
         FileUtils.newFileUtils().copyFile( file, destinationFile )
