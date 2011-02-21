@@ -23,7 +23,7 @@ class VerifyBean extends BaseBean
 
         for ( o in objects )
         {
-            assert ( o == null ), "Object specified [$o] is *not* null"
+            assert ( o == null ), "Object specified [$o] is not null"
         }
     }
 
@@ -38,7 +38,7 @@ class VerifyBean extends BaseBean
 
         for ( o in objects )
         {
-            assert ( o != null ), "Object specified [$o] *is* null"
+            assert ( o != null ), "Object specified [$o] is null"
         }
 
         first( objects )
@@ -56,7 +56,7 @@ class VerifyBean extends BaseBean
 
         for ( file in files )
         {
-            assert file.exists(), "File specified [$file.canonicalPath] *does not* exist"
+            assert file.exists(), "[$file.canonicalPath] does not exist"
         }
 
         first( files )
@@ -74,7 +74,7 @@ class VerifyBean extends BaseBean
 
         for ( file in files )
         {
-            assert file.isFile(), "File specified [$file.canonicalPath] is *not* an existing file"
+            assert file.isFile(), "File [$file.canonicalPath] does not exist"
         }
 
         first( files )
@@ -92,8 +92,8 @@ class VerifyBean extends BaseBean
 
         for ( file in files )
         {
-            assert file.isFile(),    "File specified [$file.canonicalPath] is *not* an existing file"
-            assert file.size() > 0 , "File specified [$file.canonicalPath] *is* empty"
+            assert file.isFile(),    "File [$file.canonicalPath] does not exist"
+            assert file.size() > 0 , "File [$file.canonicalPath] is empty"
         }
 
         first( files )
@@ -111,7 +111,7 @@ class VerifyBean extends BaseBean
 
         for ( directory in directories )
         {
-            assert directory.isDirectory(), "Directory specified [$directory.canonicalPath] is *not* an existing directory"
+            assert directory.isDirectory(), "Directory [$directory.canonicalPath] does not exist"
         }
 
         first( directories )
@@ -142,9 +142,17 @@ class VerifyBean extends BaseBean
     {
         assert file1.exists() && file2.exists()
 
-        ( file1.isFile() && file2.isFile()) ?
+        int nFiles =  [ file1, file2 ].every { it.isFile() } ?
             verifyEqualHelper.verifyEqualFiles       ( file1, file2, pattern, verifyChecksum, endOfLine ) :
             verifyEqualHelper.verifyEqualDirectories ( file1, file2, pattern, verifyChecksum, endOfLine )
+
+        if (( ! pattern ) && ( [ file1, file2 ].every { it.isDirectory() } ))
+        {
+            assert file1.directorySize() == file2.directorySize(), \
+                   "Directory sizes of [$file1.canonicalPath] and [$file2.canonicalPath] are not the same"
+        }
+
+        nFiles
     }
 
 
@@ -159,7 +167,7 @@ class VerifyBean extends BaseBean
 
         for ( s in strings )
         {
-            assert s?.trim()?.length(), "String specified [$s] *is* null or empty"
+            assert s?.trim()?.length(), "String specified [$s] is null or empty"
         }
 
         first( strings )
@@ -177,7 +185,7 @@ class VerifyBean extends BaseBean
 
         for ( c in collections )
         {
-            assert c?.size(), "Collection specified $c *is* null or empty"
+            assert c?.size(), "Collection specified $c is null or empty"
         }
 
         first( collections )
