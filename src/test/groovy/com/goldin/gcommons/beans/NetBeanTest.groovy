@@ -68,6 +68,15 @@ class NetBeanTest extends BaseTest
         assert ! netBean.isNet( 'htp://user:password@host:path', 'scp://user', 'ftp://user' )
         assert ! netBean.isNet( 'http://user:password@host:path', 'scp ://user', 'ftp://user' )
         assert ! netBean.isNet( 'http://user:password@host:path', 'scp://user', 'fttp://user' )
+
+        assert ! netBean.isFtp()
+        assert ! netBean.isFtp( null )
+        assert ! netBean.isScp()
+        assert ! netBean.isScp( null )
+        assert ! netBean.isHttp()
+        assert ! netBean.isHttp( null )
+        assert ! netBean.isNet()
+        assert ! netBean.isNet( null )
     }
 
 
