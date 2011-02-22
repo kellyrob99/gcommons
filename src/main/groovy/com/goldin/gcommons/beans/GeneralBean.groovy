@@ -1,7 +1,9 @@
 package com.goldin.gcommons.beans
 
+import com.goldin.gcommons.GCommons
 import java.lang.reflect.Array
 import org.springframework.util.AntPathMatcher
+import org.apache.commons.exec.*
 
 /**
  * General usage methods
@@ -133,6 +135,111 @@ class GeneralBean extends BaseBean
         else
         {
             (( T[] ) Array.newInstance( type, 0 ))
+        }
+    }
+
+    
+    /**
+     * Determines if current OS is Windows according to "os.name" system property
+     * @return true  if current OS is Windows,
+     *         false otherwise
+     */
+    boolean isWindows()
+    {
+        System.getProperty( 'os.name' ).toLowerCase().contains( 'windows' )
+    }
+
+
+    /**
+     * Strategy for executing the command, see {@link #execute}
+     */
+    static enum ExecOption
+    {
+        /**
+         * Apache Commons Exec {@link java.util.concurrent.Executor} is used
+         */
+        CommonsExec,
+
+        /**
+         * {@link Runtime#getRuntime()} is used
+         */
+        Runtime,
+
+
+        /**
+         * {@link ProcessBuilder} is used
+         */
+        ProcessBuilder
+    }
+
+
+    /**
+     * Executes the command specified.
+     *
+     * @param command    command to execute
+     * @param timeoutMs  command's timeout in ms, 5 min by default
+     * @param stdout     OutputStream to send command's stdout to, System.out by default
+     * @param stderr     OutputStream to send command's stderr to, System.err by default
+     * @param option     strategy for executing the command, ExecOption.CommonsExec by default
+     *
+     * @return           command's exit value
+     */
+    int execute ( String       command,
+                  ExecOption   option      = ExecOption.CommonsExec,
+                  OutputStream stdout      = System.out,
+                  OutputStream stderr      = System.err,
+                  long         timeoutMs   = ( 5 * GCommons.constants().MILLIS_IN_MINUTE ) /* 5 min */,
+                  File         directory   = new File( GCommons.constants().USER_DIR ),
+                  Map          environment = new HashMap( System.getenv()))
+    {
+        GCommons.verify().notNullOrEmpty( command )
+
+        switch ( option )
+        {
+            case ExecOption.CommonsExec:
+
+                Executor                    executor = new DefaultExecutor()
+                DefaultExecuteResultHandler handler  = new DefaultExecuteResultHandler()
+
+                executor.with {
+                    streamHandler = new PumpStreamHandler( stdout, stderr )
+                    watchdog      = new ExecuteWatchdog( timeoutMs )
+                    workingDirectory = directory
+                }
+
+                executor.execute( CommandLine.parse( command ), environment, handler )
+                handler.waitFor()
+
+                if ( handler.exception )
+                {
+                    throw new RuntimeException( "Failed to invoke [$command]: ${ handler.exception }",
+                                                handler.exception )
+                }
+
+                return handler.exitValue
+
+            case ExecOption.Runtime:
+
+                Process p = command.execute()
+
+                p.consumeProcessOutputStream( stdout )
+                p.consumeProcessErrorStream( stderr )
+                p.waitForOrKill( timeoutMs )
+                return p.exitValue()
+
+            case ExecOption.ProcessBuilder:
+
+                ProcessBuilder builder = new ProcessBuilder( command ).directory( directory )
+                builder.environment() << environment
+
+                Process p = builder.start()
+                p.consumeProcessOutputStream( stdout )
+                p.consumeProcessErrorStream( stderr )
+                p.waitForOrKill( timeoutMs )
+                return p.exitValue()
+
+            default:
+                assert false : "Unknown option [$option]. Known options are ${ ExecOption.values() }"
         }
     }
 }

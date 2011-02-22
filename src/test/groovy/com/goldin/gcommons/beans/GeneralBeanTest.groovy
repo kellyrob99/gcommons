@@ -3,8 +3,9 @@ package com.goldin.gcommons.beans
 import com.goldin.gcommons.BaseTest
 import java.nio.BufferOverflowException
 import org.junit.Test
+import com.goldin.gcommons.beans.GeneralBean.ExecOption
 
- /**
+/**
  * {@link com.goldin.gcommons.beans.GeneralBean} tests
  */
 class GeneralBeanTest extends BaseTest
@@ -266,5 +267,33 @@ class GeneralBeanTest extends BaseTest
         assert [:] == generalBean.choose( [:] )
         assert [:] == generalBean.choose( null, [:], null )
         assert []  == generalBean.choose( null, [], [:], null )
+    }
+
+    
+    @Test
+    void shouldExecute()
+    {
+        List<String> commonCommands  = [ 'call java -version', 'call groovy --version', 'call gradle -version', 'call mvn -version' ]
+        List<String> windowsCommands = [ 'dir'    ]
+        List<String> unixCommands    = [ 'ls -al' ]
+        List<String> osCommands      = unixCommands + commonCommands
+        File         tempFile        = null
+
+        if ( generalBean.isWindows())
+        {
+            tempFile = fileBean.tempFile( '.bat' )
+            tempFile.write(( windowsCommands + commonCommands ).join( constantsBean.CRLF ))
+            osCommands = [ tempFile.canonicalPath ]
+        }
+
+        for ( command in osCommands )
+        {
+            assert ! generalBean.execute( command )
+            assert ! generalBean.execute( command, ExecOption.CommonsExec )
+            assert ! generalBean.execute( command, ExecOption.ProcessBuilder )
+            assert ! generalBean.execute( command, ExecOption.Runtime )
+        }
+
+        if ( tempFile ) { fileBean.delete( tempFile ) }
     }
 }

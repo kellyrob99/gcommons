@@ -58,11 +58,13 @@ class FileBean extends BaseBean implements InitializingBean
 
     /**
      * Creates a temp file.
+     *
+     * @param suffix temp file suffix
      * @return temp file created.
      */
-    File tempFile()
+    File tempFile( String suffix = '' )
     {
-        File.createTempFile( GeneralBean.class.name, '' )
+        File.createTempFile( GeneralBean.class.name, suffix )
     }
 
 
