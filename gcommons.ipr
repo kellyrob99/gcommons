@@ -321,7 +321,6 @@
         <inspection_tool class="JUnitAssertAlwaysFails" enabled="true" level="WARNING" enabled_by_default="true" />
         <inspection_tool class="JUnitAssertAlwaysSucceeds" enabled="true" level="WARNING" enabled_by_default="true" />
         <inspection_tool class="JUnitFailWithoutMessage" enabled="true" level="WARNING" enabled_by_default="true" />
-        <inspection_tool class="JUnitPublicNonTestMethod" enabled="true" level="WARNING" enabled_by_default="true" />
         <inspection_tool class="JUnitSetUpCallsSuper" enabled="true" level="WARNING" enabled_by_default="true" />
         <inspection_tool class="JUnitStyleAssertions" enabled="true" level="WARNING" enabled_by_default="true" />
         <inspection_tool class="JUnitTearDownCallsSuper" enabled="true" level="WARNING" enabled_by_default="true" />
