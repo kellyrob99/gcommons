@@ -276,7 +276,7 @@ class GeneralBeanTest extends BaseTest
         List<String> commonCommands  = [ 'call java -version', 'call groovy --version', 'call gradle -version', 'call mvn -version' ]
         List<String> windowsCommands = [ 'dir'    ]
         List<String> unixCommands    = [ 'ls -al' ]
-        List<String> commands        = unixCommands + commonCommands
+        List<String> commands        = null
         File         tempFile        = null
 
         if ( generalBean.isWindows())
@@ -284,6 +284,13 @@ class GeneralBeanTest extends BaseTest
             tempFile = fileBean.tempFile( '.bat' )
             tempFile.write(( windowsCommands + commonCommands ).join( constantsBean.CRLF ))
             commands = [ tempFile.canonicalPath ]
+        }
+        else
+        {
+            tempFile = fileBean.tempFile( '.sh' )
+            tempFile.write(( unixCommands + commonCommands ).join( constantsBean.CRLF ))
+            commands = [ 'chmod +x ' + tempFile.canonicalPath,
+                         tempFile.canonicalPath ]
         }
 
         getLog( this ).info( "Commands to run are: $commands" )
@@ -296,6 +303,6 @@ class GeneralBeanTest extends BaseTest
             assert ! generalBean.execute( command, ExecOption.Runtime )
         }
 
-        if ( tempFile ) { fileBean.delete( tempFile ) }
+        fileBean.delete( tempFile )
     }
 }
