@@ -276,17 +276,19 @@ class GeneralBeanTest extends BaseTest
         List<String> commonCommands  = [ 'call java -version', 'call groovy --version', 'call gradle -version', 'call mvn -version' ]
         List<String> windowsCommands = [ 'dir'    ]
         List<String> unixCommands    = [ 'ls -al' ]
-        List<String> osCommands      = unixCommands + commonCommands
+        List<String> commands        = unixCommands + commonCommands
         File         tempFile        = null
 
         if ( generalBean.isWindows())
         {
             tempFile = fileBean.tempFile( '.bat' )
             tempFile.write(( windowsCommands + commonCommands ).join( constantsBean.CRLF ))
-            osCommands = [ tempFile.canonicalPath ]
+            commands = [ tempFile.canonicalPath ]
         }
 
-        for ( command in osCommands )
+        getLog( this ).info( "Commands to run are: $commands" )
+
+        for ( command in commands )
         {
             assert ! generalBean.execute( command )
             assert ! generalBean.execute( command, ExecOption.CommonsExec )
