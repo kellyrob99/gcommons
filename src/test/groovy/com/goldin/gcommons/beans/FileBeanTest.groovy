@@ -119,7 +119,8 @@ class FileBeanTest extends BaseTest
     @Test
     void shouldCalculateChecksum()
     {
-        def file = new File( 'src/test/resources/apache-maven-3.0.1.zip' )
+        def file = testResource( 'apache-maven-3.0.1.zip' )
+        
         assert fileBean.checksum( file )        == fileBean.checksum( file, 'SHA-1' )
         assert fileBean.checksum( file )        == '7db54443784f547a36a7adb293bfeca2d2c9d15c'
         assert fileBean.checksum( file, 'MD5' ) == '3aeeb8b545ae1b6aa8b2015dce24eec7'
@@ -172,20 +173,12 @@ class FileBeanTest extends BaseTest
     }
 
 
-    /**
-     * Mapping of test archives and their sizes in bytes when unpacked
-     */
-    private static final Map SMALL_ARCHIVES = [ 'apache-maven-3.0.1' : 3344327  ]
-    private static final Map LARGE_ARCHIVES = [ 'gradle-0.9'         : 27848286 ]
-    private static final Map TEST_ARCHIVES  = SMALL_ARCHIVES + ( System.properties[ 'slowTests' ] ? LARGE_ARCHIVES : [:] )
-
-
     @Test
     void shouldPack()
     {
-        def resourcesDir = new File( 'src/test/resources' )
+        Map testArchives = testArchives()
 
-        for ( archiveName in TEST_ARCHIVES.keySet())
+        for ( archiveName in testArchives.keySet())
         {
             def unpackDir    = testDir( 'unpack' )
             def packDir      = testDir( 'pack' )
@@ -195,7 +188,7 @@ class FileBeanTest extends BaseTest
             def zipDir       = testDir( 'zip'   )
             def tarGzDir     = testDir( 'targz' )
 
-            fileBean.unpack( new File( resourcesDir, "${archiveName}.jar" ), unpackDir )
+            fileBean.unpack( testResource( "${archiveName}.jar" ), unpackDir )
 
             fileBean.pack( unpackDir, new File( packDir, "${archiveName}.jar"    ))
             fileBean.pack( unpackDir, new File( packDir, "${archiveName}.tar"    ))
@@ -216,12 +209,12 @@ class FileBeanTest extends BaseTest
             verifyBean.equal( zipDir,    tarGzDir )
             verifyBean.equal( tarGzDir,  unpackDir )
 
-            assert unpackDir.directorySize() == TEST_ARCHIVES[ archiveName ]
-            assert jarDir.directorySize()    == TEST_ARCHIVES[ archiveName ]
-            assert tarDir.directorySize()    == TEST_ARCHIVES[ archiveName ]
-            assert tgzDir.directorySize()    == TEST_ARCHIVES[ archiveName ]
-            assert zipDir.directorySize()    == TEST_ARCHIVES[ archiveName ]
-            assert tarGzDir.directorySize()  == TEST_ARCHIVES[ archiveName ]
+            assert unpackDir.directorySize() == testArchives[ archiveName ]
+            assert jarDir.directorySize()    == testArchives[ archiveName ]
+            assert tarDir.directorySize()    == testArchives[ archiveName ]
+            assert tgzDir.directorySize()    == testArchives[ archiveName ]
+            assert zipDir.directorySize()    == testArchives[ archiveName ]
+            assert tarGzDir.directorySize()  == testArchives[ archiveName ]
         }
     }
 
@@ -247,14 +240,14 @@ class FileBeanTest extends BaseTest
             assert unpackDir.listFiles().any{ it.name.endsWith( '.jar' ) }
         }
 
-        for ( archiveName in TEST_ARCHIVES.keySet())
+        for ( archiveName in testArchives().keySet())
         {
             def packDir   = testDir( 'pack' )
             def unpackZip = testDir( 'unpackZip' )
             def unpackJar = testDir( 'unpackJar' )
 
-            c( unpackZip, fileBean.copy( new File( resourcesDir, "${archiveName}.zip" ), packDir ))
-            c( unpackJar, fileBean.copy( new File( resourcesDir, "${archiveName}.jar" ), packDir ))
+            c( unpackZip, fileBean.copy( testResource( "${archiveName}.zip" ), packDir ))
+            c( unpackJar, fileBean.copy( testResource( "${archiveName}.jar" ), packDir ))
 
             verifyBean.equal( unpackZip, unpackJar )
             verifyBean.equal( unpackZip, unpackJar, true, '*.jar'   )
@@ -277,7 +270,6 @@ class FileBeanTest extends BaseTest
     @Test
     void shouldCopy()
     {
-        def resourcesDir = new File( 'src/test/resources' )
         def filesToCopy  = [ 'image-3-abc.sima', 'image-3-abc.sima1', 'image-3-abc.zip', 'apache-maven-3.0.1.jar' ]
         def testDir1     = testDir( 'copy-1' )
         def testDir2     = testDir( 'copy-2' )
@@ -285,9 +277,9 @@ class FileBeanTest extends BaseTest
 
         for ( fileName in filesToCopy )
         {
-            fileBean.copy( new File( resourcesDir, fileName ), testDir1 )
-            fileBean.copy( new File( resourcesDir, fileName ), testDir2, fileName )
-            fileBean.copy( new File( resourcesDir, fileName ), testDir3, fileName + '-3' )
+            fileBean.copy( testResource( fileName ), testDir1 )
+            fileBean.copy( testResource( fileName ), testDir2, fileName )
+            fileBean.copy( testResource( fileName ), testDir3, fileName + '-3' )
         }
 
         verifyBean.equal( testDir1, testDir2 )
@@ -308,21 +300,22 @@ class FileBeanTest extends BaseTest
     @Test
     void shouldUnpack()
     {
-        def resourcesDir = new File( 'src/test/resources' )
+        Map testArchives = testArchives()
         def imageDirZip  = testDir( 'image-3-abc-zip'  )
         def imageDirSima = testDir( 'image-3-abc-sima' )
-        fileBean.unpack( new File( resourcesDir, 'image-3-abc.zip'  ),  imageDirZip )
-        fileBean.unpack( new File( resourcesDir, 'image-3-abc.sima' ), imageDirSima )
+        
+        fileBean.unpack( testResource( 'image-3-abc.zip'  ),  imageDirZip )
+        fileBean.unpack( testResource( 'image-3-abc.sima' ), imageDirSima )
         assert new File( imageDirZip, '1.png' ).size() == 187933
         verifyBean.equal( imageDirZip, imageDirSima )
 
         def errorMessage = shouldFailWithCause( IllegalArgumentException )
         {
-            fileBean.unpack( new File( resourcesDir, 'image-3-abc.sima1' ), imageDirSima )
+            fileBean.unpack( testResource( 'image-3-abc.sima1' ), imageDirSima )
         }
         assert errorMessage == '"sima1" (no archive driver installed for these suffixes)'
 
-        for ( archiveName in TEST_ARCHIVES.keySet())
+        for ( archiveName in testArchives.keySet())
         {
             def jarDir       = testDir( 'jar'   )
             def tarDir       = testDir( 'tar'   )
@@ -330,11 +323,11 @@ class FileBeanTest extends BaseTest
             def zipDir       = testDir( 'zip'   )
             def tarGzDir     = testDir( 'targz' )
 
-            fileBean.unpack( new File( resourcesDir, "${archiveName}.jar" ),    jarDir   )
-            fileBean.unpack( new File( resourcesDir, "${archiveName}.tar" ),    tarDir   )
-            fileBean.unpack( new File( resourcesDir, "${archiveName}.tgz" ),    tgzDir   )
-            fileBean.unpack( new File( resourcesDir, "${archiveName}.zip" ),    zipDir   )
-            fileBean.unpack( new File( resourcesDir, "${archiveName}.tar.gz" ), tarGzDir )
+            fileBean.unpack( testResource( "${archiveName}.jar" ),    jarDir   )
+            fileBean.unpack( testResource( "${archiveName}.tar" ),    tarDir   )
+            fileBean.unpack( testResource( "${archiveName}.tgz" ),    tgzDir   )
+            fileBean.unpack( testResource( "${archiveName}.zip" ),    zipDir   )
+            fileBean.unpack( testResource( "${archiveName}.tar.gz" ), tarGzDir )
 
             verifyBean.equal( jarDir,   tarDir )
             verifyBean.equal( tarDir,   tgzDir )
@@ -342,11 +335,11 @@ class FileBeanTest extends BaseTest
             verifyBean.equal( zipDir,   tarGzDir )
             verifyBean.equal( tarGzDir, jarDir )
 
-            assert jarDir.directorySize()   == TEST_ARCHIVES[ archiveName ]
-            assert tarDir.directorySize()   == TEST_ARCHIVES[ archiveName ]
-            assert tgzDir.directorySize()   == TEST_ARCHIVES[ archiveName ]
-            assert zipDir.directorySize()   == TEST_ARCHIVES[ archiveName ]
-            assert tarGzDir.directorySize() == TEST_ARCHIVES[ archiveName ]
+            assert jarDir.directorySize()   == testArchives[ archiveName ]
+            assert tarDir.directorySize()   == testArchives[ archiveName ]
+            assert tgzDir.directorySize()   == testArchives[ archiveName ]
+            assert zipDir.directorySize()   == testArchives[ archiveName ]
+            assert tarGzDir.directorySize() == testArchives[ archiveName ]
         }
     }
 
@@ -354,23 +347,22 @@ class FileBeanTest extends BaseTest
     @Test
     void shouldUnpackZipEntries()
     {
-        def resourcesDir = new File( 'src/test/resources' )
-        def mavenZip     = new File( resourcesDir, 'apache-maven-3.0.1.zip' )
-        def mavenJar     = new File( resourcesDir, 'apache-maven-3.0.1.jar' )
-        def mavenTar     = new File( resourcesDir, 'apache-maven-3.0.1.tar' )
-        def mavenTgz     = new File( resourcesDir, 'apache-maven-3.0.1.tgz' )
-        def mavenTarGz   = new File( resourcesDir, 'apache-maven-3.0.1.tar.gz' )
-        def plexusJar    = new File( resourcesDir, 'plexus-component-annotations-1.5.5.jar' )
-        def testArchives = TEST_ARCHIVES.keySet().collect { it + '.zip' }
-        def mavenDir1    = testDir( 'apache-maven-1'  )
-        def mavenDir2    = testDir( 'apache-maven-2'  )
-        def mavenDir3    = testDir( 'apache-maven-3'  )
-        def mavenDir4    = testDir( 'apache-maven-4'  )
-        def mavenDir5    = testDir( 'apache-maven-5'  )
-        def mavenDir6    = testDir( 'apache-maven-6'  )
-        def mavenDir7    = testDir( 'apache-maven-7'  )
-        def mavenDir8    = testDir( 'apache-maven-8'  )
-        def mavenDir9    = testDir( 'apache-maven-9'  )
+        def  mavenZip     = testResource( 'apache-maven-3.0.1.zip' )
+        def  mavenJar     = testResource( 'apache-maven-3.0.1.jar' )
+        def  mavenTar     = testResource( 'apache-maven-3.0.1.tar' )
+        def  mavenTgz     = testResource( 'apache-maven-3.0.1.tgz' )
+        def  mavenTarGz   = testResource( 'apache-maven-3.0.1.tar.gz' )
+        def  plexusJar    = testResource( 'plexus-component-annotations-1.5.5.jar' )
+        List archives     = testArchives().keySet().collect { it + '.zip' }
+        def  mavenDir1    = testDir( 'apache-maven-1'  )
+        def  mavenDir2    = testDir( 'apache-maven-2'  )
+        def  mavenDir3    = testDir( 'apache-maven-3'  )
+        def  mavenDir4    = testDir( 'apache-maven-4'  )
+        def  mavenDir5    = testDir( 'apache-maven-5'  )
+        def  mavenDir6    = testDir( 'apache-maven-6'  )
+        def  mavenDir7    = testDir( 'apache-maven-7'  )
+        def  mavenDir8    = testDir( 'apache-maven-8'  )
+        def  mavenDir9    = testDir( 'apache-maven-9'  )
 
         def entries      = [ 'apache-maven-3.0.1\\lib\\aether-api-1.8.jar',
                              'apache-maven-3.0.1/lib/commons-cli-1.2.jar',
@@ -396,8 +388,8 @@ class FileBeanTest extends BaseTest
         fileBean.unpack( plexusJar, mavenDir6 )
         fileBean.unpackZipEntries( plexusJar, mavenDir7, entries2, true )
 
-        testArchives.each {
-            def testArchiveFile = new File( resourcesDir, it )
+        archives.each {
+            def testArchiveFile = testResource( it )
             fileBean.unpack( testArchiveFile,  mavenDir8 )
             fileBean.unpackZipEntries( testArchiveFile,  mavenDir9, new ZipFile( testArchiveFile ).entries*.name, true )
         }
@@ -427,8 +419,8 @@ class FileBeanTest extends BaseTest
         assert mavenDir5.directorySize() == 235902
         assert mavenDir6.directorySize() == 3420
         assert mavenDir7.directorySize() == 3420
-        assert mavenDir8.directorySize() == TEST_ARCHIVES.values().sum()
-        assert mavenDir9.directorySize() == TEST_ARCHIVES.values().sum()
+        assert mavenDir8.directorySize() == testArchives().values().sum()
+        assert mavenDir9.directorySize() == testArchives().values().sum()
 
         verifyBean.file( new File( mavenDir1, 'aether-api-1.8.jar' ),
                          new File( mavenDir1, 'commons-cli-1.2.jar' ),
@@ -471,7 +463,7 @@ class FileBeanTest extends BaseTest
         shouldFailAssert { fileBean.unpackZipEntries( mavenZip,   mavenDir1, [ '' ] )}
 
         // File that doesn't exist
-        shouldFailAssert { fileBean.unpackZipEntries( new File( resourcesDir, 'doesnt-exist.file' ), mavenDir1, entries )}
+        shouldFailAssert { fileBean.unpackZipEntries( new File( 'doesnt-exist.file' ), mavenDir1, entries )}
 
         // Should execute normally and not fail
         shouldFailAssert { shouldFailWith( RuntimeException ) { fileBean.unpackZipEntries( plexusJar,  mavenDir7, [ '/org/codehaus/plexus/component/'], true )}}
@@ -485,9 +477,8 @@ class FileBeanTest extends BaseTest
     @Test
     void shouldUnpackZipEntriesWithPattern()
     {
-        def resourcesDir = new File( 'src/test/resources' )
-        def mavenZip     = new File( resourcesDir, 'apache-maven-3.0.1.zip' )
-        def mavenJar     = new File( resourcesDir, 'apache-maven-3.0.1.jar' )
+        def mavenZip     = testResource( 'apache-maven-3.0.1.zip' )
+        def mavenJar     = testResource( 'apache-maven-3.0.1.jar' )
         def mavenDir1    = testDir( 'apache-maven-1' )
         def mavenDir2    = testDir( 'apache-maven-2' )
         def mavenDir3    = testDir( 'apache-maven-3' )

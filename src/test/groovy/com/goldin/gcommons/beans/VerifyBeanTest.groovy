@@ -92,4 +92,36 @@ class VerifyBeanTest extends BaseTest
         verifyBean.directory( f.getParentFile())
         verifyBean.directory( f.getParentFile().getParentFile())
     }
+
+    @Test
+    void shouldVerifyEqual()
+    {
+        for ( archiveName in testArchives().keySet())
+        {
+            File dir1 = testDir( 'unpack-1' )
+            File dir2 = testDir( 'unpack-2' )
+
+            fileBean.unpack( testResource( archiveName + '.zip' ), dir1 )
+            fileBean.unpack( testResource( archiveName + '.jar' ), dir2 )
+
+            verifyBean.with {
+                equal( dir1, dir2 )
+                equal( dir1, dir2, false )
+                equal( dir1, dir2, true, '**/*.xml' )
+                equal( dir1, dir2, true, '**/*.xml', 'windows' )
+                equal( dir1, dir2, true, '**/*.xml', 'linux'   )
+                equal( dir1, dir2, true, '**/*.jar' )
+            }
+            
+            fileBean.delete( fileBean.files( dir2, [ '**/*.xml' ] ) as File[] )
+
+            shouldFailAssert { verifyBean.equal( dir1, dir2 )}
+            shouldFailAssert { verifyBean.equal( dir1, dir2, false )}
+            shouldFailAssert { shouldFailAssert { verifyBean.equal( dir2, dir1, true, '**/*.xml' )}}
+            shouldFailAssert { verifyBean.equal( dir1, dir2, true, '**/*.xml' )}
+            shouldFailAssert { verifyBean.equal( dir1, dir2, true, '**/*.xml', 'windows' )}
+            shouldFailAssert { verifyBean.equal( dir1, dir2, true, '**/*.xml', 'linux'   )}
+            shouldFailAssert { shouldFailAssert { verifyBean.equal( dir1, dir2, true, '**/*.jar' )}}
+        }
+    }
 }

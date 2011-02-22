@@ -2,7 +2,7 @@ package com.goldin.gcommons.beans
 
 import com.goldin.gcommons.util.VerifyEqualHelper
 
-/**
+ /**
  * Verification methods
  */
 class VerifyBean extends BaseBean
@@ -148,8 +148,10 @@ class VerifyBean extends BaseBean
 
         if (( ! pattern ) && ( [ file1, file2 ].every { it.isDirectory() } ))
         {
-            assert file1.directorySize() == file2.directorySize(), \
-                   "Directory sizes of [$file1.canonicalPath] and [$file2.canonicalPath] are not the same"
+            long   dir1Size =  file1.directorySize()
+            long   dir2Size =  file2.directorySize()
+            assert dir1Size == dir2Size, \
+                   "Directory sizes of [$file1.canonicalPath] and [$file2.canonicalPath] are not the same: [$dir1Size] != [$dir2Size]"
         }
 
         nFiles

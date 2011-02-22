@@ -21,6 +21,26 @@ class BaseTest
     final NetBean        netBean       = GCommons.net()
     final GroovyBean     groovyBean    = GCommons.groovy()
 
+    
+    /**
+     * Retrieves test archives map: name => unpacked size.
+     * @return test archives map: name => unpacked size.
+     */
+    Map<String, Long> testArchives()
+    {
+        [ 'apache-maven-3.0.1' : 3344327L ] + ( System.getProperty( 'slowTests' ) ? [ 'gradle-0.9' : 27848286L ] :
+                                                                                     Collections.emptyMap())
+    }
+
+
+    /**
+     * Retrieves test resource specified.
+     * 
+     * @param path resource path
+     * @return test resource specified
+     */
+    File testResource( String path ) { verifyBean.file( new File( 'src/test/resources', path )) }
+
 
     /**
      * Providing a public access to {@link GroovyTestCase#shouldFail(Class, Closure)}
