@@ -289,7 +289,7 @@ class GeneralBeanTest extends BaseTest
         {
             tempFile = fileBean.tempFile( '.sh' )
             tempFile.write(( unixCommands + commonCommands ).join( constantsBean.CRLF ))
-            commands = [ 'chmod +x ' + tempFile.canonicalPath,
+            commands = [ 'sudo chmod +x ' + tempFile.canonicalPath,
                          tempFile.canonicalPath ]
         }
 
