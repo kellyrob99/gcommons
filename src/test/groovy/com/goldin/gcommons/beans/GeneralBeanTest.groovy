@@ -273,24 +273,25 @@ class GeneralBeanTest extends BaseTest
     @Test
     void shouldExecute()
     {
-        List<String> commonCommands  = [ 'call java -version', 'call groovy --version', 'call gradle -version', 'call mvn -version' ]
+        List<String> commonCommands  = [ 'java -version', 'groovy --version', 'gradle -version', 'mvn -version' ]
         List<String> windowsCommands = [ 'dir'    ]
-        List<String> unixCommands    = [ 'ls -al' ]
+        List<String> unixCommands    = []
         List<String> commands        = null
         File         tempFile        = null
 
         if ( generalBean.isWindows())
         {
             tempFile = fileBean.tempFile( '.bat' )
-            tempFile.write(( windowsCommands + commonCommands ).join( constantsBean.CRLF ))
+            tempFile.write(( windowsCommands + commonCommands.collect { "call $it" }).join( constantsBean.CRLF ))
             commands = [ tempFile.canonicalPath ]
         }
         else
         {
-            tempFile = fileBean.tempFile( '.sh' )
-            tempFile.write(( unixCommands + commonCommands ).join( constantsBean.CRLF ))
-            commands = [ 'sudo chmod +x ' + tempFile.canonicalPath,
-                         tempFile.canonicalPath ]
+//            tempFile = fileBean.tempFile( '.sh' )
+//            tempFile.write(( unixCommands + commonCommands ).join( constantsBean.CRLF ))
+//            commands = [ 'sudo chmod +x ' + tempFile.canonicalPath,
+//                         tempFile.canonicalPath ]
+            commands = unixCommands + commonCommands
         }
 
         getLog( this ).info( "Commands to run are: $commands" )
