@@ -258,8 +258,6 @@ class FileBean extends BaseBean implements InitializingBean
         verify.file( destinationFile )
         assert file.size() == destinationFile.size()
 
-        getLog( this ).info( "[$file.canonicalPath] copied to [$destinationFile.canonicalPath]" )
-
         destinationFile
     }
 
