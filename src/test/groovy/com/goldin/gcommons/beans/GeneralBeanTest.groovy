@@ -3,7 +3,7 @@ package com.goldin.gcommons.beans
 import com.goldin.gcommons.BaseTest
 import java.nio.BufferOverflowException
 import org.junit.Test
-import com.goldin.gcommons.beans.GeneralBean.ExecOption
+
 
 /**
  * {@link com.goldin.gcommons.beans.GeneralBean} tests
