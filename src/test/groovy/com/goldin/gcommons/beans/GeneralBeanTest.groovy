@@ -273,35 +273,24 @@ class GeneralBeanTest extends BaseTest
     @Test
     void shouldExecute()
     {
-        List<String> commonCommands  = [ 'java -version', 'groovy --version', 'gradle -version', 'mvn -version' ]
-        List<String> windowsCommands = [ 'dir'    ]
-        List<String> unixCommands    = []
-        List<String> commands        = null
-        File         tempFile        = null
-
-        if ( generalBean.isWindows())
+        if ( ! generalBean.isWindows())
         {
-            tempFile = fileBean.tempFile( '.bat' )
-            tempFile.write(( windowsCommands + commonCommands.collect { "call $it" }).join( constantsBean.CRLF ))
-            commands = [ tempFile.canonicalPath ]
-        }
-        else
-        {
-//            tempFile = fileBean.tempFile( '.sh' )
-//            tempFile.write(( unixCommands + commonCommands ).join( constantsBean.CRLF ))
-//            commands = [ 'sudo chmod +x ' + tempFile.canonicalPath,
-//                         tempFile.canonicalPath ]
-            commands = unixCommands + commonCommands
+            // http://evgeny-goldin.org/youtrack/issue/gc-35
+            return
         }
 
-        getLog( this ).info( "Commands to run are: $commands" )
+        List<String> commands = [ 'java -version', 'groovy --version', 'gradle -version', 'mvn -version' ]
+        File         tempFile = fileBean.tempFile( '.bat' )
+        tempFile.write(( [ 'dir'    ] + commands.collect { "call $it" }).join( constantsBean.CRLF ))
+        def          command  = tempFile.canonicalPath
 
-        for ( command in commands )
-        {
-            assert ! generalBean.execute( command )
-            assert ! generalBean.execute( command, ExecOption.CommonsExec )
-            assert ! generalBean.execute( command, ExecOption.ProcessBuilder )
-            assert ! generalBean.execute( command, ExecOption.Runtime )
+        getLog( this ).info( "Command to run: $command" )
+
+        generalBean.with {
+            assert 0 == execute( command )
+            assert 0 == execute( command, ExecOption.CommonsExec )
+            assert 0 == execute( command, ExecOption.ProcessBuilder )
+            assert 0 == execute( command, ExecOption.Runtime )
         }
 
         fileBean.delete( tempFile )
