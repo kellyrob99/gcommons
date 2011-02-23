@@ -151,29 +151,6 @@ class GeneralBean extends BaseBean
 
 
     /**
-     * Strategy for executing the command, see {@link #execute}
-     */
-    static enum ExecOption
-    {
-        /**
-         * Apache Commons Exec {@link java.util.concurrent.Executor} is used
-         */
-        CommonsExec,
-
-        /**
-         * {@link Runtime#getRuntime()} is used
-         */
-        Runtime,
-
-
-        /**
-         * {@link ProcessBuilder} is used
-         */
-        ProcessBuilder
-    }
-
-
-    /**
      * Executes the command specified.
      *
      * @param command    command to execute
@@ -242,4 +219,27 @@ class GeneralBean extends BaseBean
                 assert false : "Unknown option [$option]. Known options are ${ ExecOption.values() }"
         }
     }
+}
+
+
+/**
+ * Strategy for executing the command, see {@link GeneralBean#execute}
+ */
+public enum ExecOption
+{
+    /**
+     * Apache Commons Exec {@link Executor} is used
+     */
+    CommonsExec,
+
+    /**
+     * {@link Runtime#getRuntime()} is used
+     */
+    Runtime,
+
+
+    /**
+     * {@link ProcessBuilder} is used
+     */
+    ProcessBuilder
 }
