@@ -98,6 +98,7 @@ class FileBean extends BaseBean implements InitializingBean
                 if ( f.listFiles())   { getLog( this ).warn( "Failed to cleanup directory [$f.canonicalPath]" )}
                 if ( ! f.delete())    { getLog( this ).warn( "Failed to delete [$f.canonicalPath]" )}
             }
+// http://evgeny-goldin.org/youtrack/issue/gc-15
 //            assert ( ! f.exists())
         }
 
@@ -467,7 +468,7 @@ class FileBean extends BaseBean implements InitializingBean
         def sourceArchivePath        = sourceArchive.canonicalPath
         def destinationDirectoryPath = destinationDirectory.canonicalPath
         def archiveExtension         = extension( sourceArchive )
-        def entries                  = new HashSet<String>( /* Cleanup and normalize: '\' => '/', no leading slash */
+        def entries                  = new HashSet<String>( /* Cleanup and normalize: '\' => '/' + no leading slash */
             zipEntries*.trim().findAll{ it }*.replace( '\\', '/' )*.replaceAll( /^\//, '' ))
 
         assert entries, \
@@ -491,59 +492,7 @@ class FileBean extends BaseBean implements InitializingBean
             entriesCounter      = "[${ matchingEntries.size() }] "
             entriesWord         = (( matchingEntries.size() == 1 ) ? 'entry' : 'entries' )
 
-            for ( zipEntry in matchingEntries )
-            {
-                def entryName  = zipEntry.name
-                def targetFile = new File( destinationDirectory,
-                                           ( preservePath ? entryName : entryName.replaceAll( /^.*\//, '' /* leaving last chunk of the path*/ )))
-
-                if ( entryName.endsWith( '/' ))
-                {   // Directory entry
-                    assert zipEntry.size == 0, "Zip entry [$entryName] ends with '/' but it's size is not zero [$zipEntry.size]"
-                    if ( targetFile.isDirectory())
-                    {
-                        if ( verbose ) { getLog( this ).info( "[$sourceArchivePath]/[$entryName] is a directory that already exists, doing nothing" )}
-                    }
-                    else
-                    {
-                        mkdirs( targetFile )
-                        if ( verbose ) { getLog( this ).info( "[$sourceArchivePath]/[$entryName] is a directory, [$targetFile.canonicalPath] is created" )}
-                    }
-
-                    continue
-                }
-                else
-                {   // File entry
-                    mkdirs( targetFile.parentFile )
-                }
-
-                def bytesWritten = 0
-                delete( targetFile )
-
-                new BufferedOutputStream( new FileOutputStream( targetFile )).withStream {
-                    OutputStream os ->
-
-                    def    is = zipFile.getInputStream( zipEntry )
-                    assert is, "Failed to read entry [$entryName] InputStream from [$sourceArchivePath]"
-
-                    is.eachByte( 10240 ) {
-                        byte[] buffer, int length ->
-                        bytesWritten += length
-                        os.write( buffer, 0, length )
-                    }
-                }
-
-                verify.file( targetFile )
-                assert ( bytesWritten == zipEntry.size ) && ( targetFile.size() == zipEntry.size ), \
-                       "Zip entry [$entryName]: size is [$zipEntry.size], [$bytesWritten] bytes written, " +
-                       "[${ targetFile.size() }] file size of [$targetFile.canonicalPath]"
-
-                if ( verbose )
-                {
-                    getLog( this ).info( "[$sourceArchivePath]/[$entryName] is written to [$targetFile.canonicalPath], " +
-                                         "[$bytesWritten] byte${ general.s( bytesWritten ) }" )
-                }
-            }
+            matchingEntries.each{ unpackZipEntry( sourceArchive, zipFile, it, destinationDirectory, preservePath, verbose )}
 
             verify.directory( destinationDirectory )
             getLog( this ).info( "[$sourceArchivePath] $entriesCounter$entriesWord unpacked to [$destinationDirectoryPath] " +
@@ -559,41 +508,127 @@ class FileBean extends BaseBean implements InitializingBean
     }
 
 
+
     /**
      * Finds Zip entries that match user patterns specified.
      *
      * @param zipEntries  Zip entries to scan
      * @param userEntries user pattern to match
+     * 
      * @return Zip entries that match user patterns specified
      */
     private List<ZipEntry> findMatchingEntries ( List<ZipEntry> zipEntries, Collection<String> userEntries )
     {
         assert zipEntries && userEntries
-        List<ZipEntry> matchingZipEntries = []
+
+        def                patternedUserEntry      = { String userEntry -> userEntry.contains( '?' ) || userEntry.contains( '*' )}
+        Collection<String> patternedUserEntries    = userEntries.findAll( patternedUserEntry )
+        Collection<String> nonPatternedUserEntries = userEntries - patternedUserEntries
 
         /**
-         * Collecting Zip entries that match at least one of user patterns
+         * Determines if Zip entry matches one of user user entries
          */
-        for ( ZipEntry zipEntry in zipEntries )
-        {
-            if ( userEntries.any{ general.match( zipEntry.name, it ) } )
-            {
-                matchingZipEntries << zipEntry
-            }
+        def entryMatch = {
+            ZipEntry           zipEntry,
+            Collection<String> patternedEntries,
+            Collection<String> nonPatternedEntries ->
+
+            assert ( zipEntry && ( patternedEntries || nonPatternedEntries ))
+            patternedEntries.any   { general.match( zipEntry.name, it ) } ||
+            nonPatternedEntries.any{ zipEntry.name == it }
         }
 
+        List<ZipEntry> matchingEntries = zipEntries.findAll{ entryMatch( it, patternedUserEntries, nonPatternedUserEntries ) }
+        assert matchingEntries, "No Zip entries were matched by $userEntries"
+
         /**
-         * Making sure each user pattern was matched at least once
+         * Making sure each user pattern was matched
          */
         for ( userEntry in userEntries )
         {
-            assert matchingZipEntries.any{ general.match( it.name, userEntry ) }, \
+            def patternedEntry = patternedUserEntry( userEntry )
+            assert zipEntries.any{ entryMatch( it, ( patternedEntry ? [ userEntry ] : [] ),
+                                                   ( patternedEntry ? [] : [ userEntry ] )) }, \
                    "Failed to match [$userEntry] pattern in Zip entries $zipEntries"
         }
 
-        verify.notNullOrEmpty( matchingZipEntries )
+        verify.notNullOrEmpty( matchingEntries )
     }
 
+    
+    /**
+     * Unpacks zip entry to directory specified.
+     * 
+     * @param archive              original Zip archive
+     * @param zipFile              zip file instance created from original archive (optional)
+     * @param zipEntry             zip entry to unpack
+     * @param destinationDirectory directory to unpack the entry to
+     * @param preservePath         whether entry path in Zip should be preserved
+     * @param verbose              whether to log the process
+     *
+     * @return whether entry was actually unpacked, <code>false</code> for directory entries ending with a "/"
+     */
+    boolean unpackZipEntry( File     archive,
+                            ZipFile  zipFile = new ZipFile( archive ),
+                            ZipEntry zipEntry,
+                            File     destinationDirectory,
+                            boolean  preservePath,
+                            boolean  verbose )
+    {
+        def entryName  = zipEntry.name
+        def targetFile = new File( destinationDirectory,
+                                   ( preservePath ? entryName : entryName.replaceAll( /^.*\//, '' /* leaving last chunk of the path*/ )))
+
+        if ( entryName.endsWith( '/' ))
+        {   // Directory entry
+            assert zipEntry.size == 0, "Zip entry [$entryName] ends with '/' but it's size is not zero [$zipEntry.size]"
+            if ( targetFile.isDirectory())
+            {
+                if ( verbose ) { getLog( this ).info( "[$archive.canonicalPath]/[$entryName] is a directory that already exists, doing nothing" )}
+            }
+            else
+            {
+                mkdirs( targetFile )
+                if ( verbose ) { getLog( this ).info( "[$archive.canonicalPath]/[$entryName] is a directory, [$targetFile.canonicalPath] is created" )}
+            }
+
+            return false
+        }
+        else
+        {   // File entry
+            mkdirs( targetFile.parentFile )
+        }
+
+        def bytesWritten = 0
+        delete( targetFile )
+
+        new BufferedOutputStream( new FileOutputStream( targetFile )).withStream {
+            OutputStream os ->
+
+            def    is = zipFile.getInputStream( zipEntry )
+            assert is, "Failed to read entry [$entryName] InputStream from [$archive.canonicalPath]"
+
+            is.eachByte( 10240 ) {
+                byte[] buffer, int length ->
+                bytesWritten += length
+                os.write( buffer, 0, length )
+            }
+        }
+
+        verify.file( targetFile )
+        assert ( bytesWritten == zipEntry.size ) && ( targetFile.size() == zipEntry.size ), \
+               "Zip entry [$entryName]: size is [$zipEntry.size], [$bytesWritten] bytes written, " +
+               "[${ targetFile.size() }] file size of [$targetFile.canonicalPath]"
+
+        if ( verbose )
+        {
+            getLog( this ).info( "[$archive.canonicalPath]/[$entryName] is written to [$targetFile.canonicalPath], " +
+                                 "[$bytesWritten] byte${ general.s( bytesWritten ) }" )
+        }
+
+        true
+    }
+    
 
     /**
      * Retrieves file's extension.

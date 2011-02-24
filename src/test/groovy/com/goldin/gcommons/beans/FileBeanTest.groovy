@@ -531,11 +531,17 @@ class FileBeanTest extends BaseTest
         shouldFailWithCause( AssertionError ) {
             fileBean.unpackZipEntries( mavenZip, mavenDir8, [ '**/*.no-such-file' ], true ) }
         shouldFailWithCause( AssertionError ) {
+            fileBean.unpackZipEntries( mavenZip, mavenDir8, [ 'no-such-file', '**/*.no-such-file' ], true ) }
+        shouldFailWithCause( AssertionError ) {
             fileBean.unpackZipEntries( mavenZip, mavenDir8, [ '**/*.jar', '**/*.ppt' ], true ) }
+        shouldFailWithCause( AssertionError ) {
+            fileBean.unpackZipEntries( mavenZip, mavenDir8, [ '**/*.jar', 'no-such-file' ], true ) }
         shouldFailWithCause( AssertionError ) {
             fileBean.unpackZipEntries( mavenZip, mavenDir8, [ '**/*.exe', 'apache-maven-3.0.1/conf/**', ], true ) }
         shouldFailWithCause( AssertionError ) {
             fileBean.unpackZipEntries( mavenZip, mavenDir8, [ '**/*.xml', 'apache-maven-3.3.1/**', ], true ) }
+        shouldFailWithCause( AssertionError ) {
+            fileBean.unpackZipEntries( mavenZip, mavenDir8, [ '**/*.xml', 'apache-maven-3.3.1', ], true ) }
     }
 
 
