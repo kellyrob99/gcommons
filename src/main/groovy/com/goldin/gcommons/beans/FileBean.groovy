@@ -514,7 +514,7 @@ class FileBean extends BaseBean implements InitializingBean
      *
      * @param zipEntries  Zip entries to scan
      * @param userEntries user pattern to match
-     * 
+     *
      * @return Zip entries that match user patterns specified
      */
     private List<ZipEntry> findMatchingEntries ( List<ZipEntry> zipEntries, Collection<String> userEntries )
@@ -530,15 +530,15 @@ class FileBean extends BaseBean implements InitializingBean
          */
         def entryMatch = {
             ZipEntry           zipEntry,
-            Collection<String> patternedEntries,
-            Collection<String> nonPatternedEntries ->
+            Collection<String> nonPatternedEntries,
+            Collection<String> patternedEntries ->
 
-            assert ( zipEntry && ( patternedEntries || nonPatternedEntries ))
-            patternedEntries.any   { general.match( zipEntry.name, it ) } ||
-            nonPatternedEntries.any{ zipEntry.name == it }
+            assert ( zipEntry && ( nonPatternedEntries || patternedEntries ))
+            nonPatternedEntries.any{ zipEntry.name == it } ||
+            patternedEntries.any   { general.match( zipEntry.name, it ) }
         }
 
-        List<ZipEntry> matchingEntries = zipEntries.findAll{ entryMatch( it, patternedUserEntries, nonPatternedUserEntries ) }
+        List<ZipEntry> matchingEntries = zipEntries.findAll{ entryMatch( it, nonPatternedUserEntries, patternedUserEntries ) }
         assert matchingEntries, "No Zip entries were matched by $userEntries"
 
         /**
@@ -547,18 +547,18 @@ class FileBean extends BaseBean implements InitializingBean
         for ( userEntry in userEntries )
         {
             def patternedEntry = patternedUserEntry( userEntry )
-            assert zipEntries.any{ entryMatch( it, ( patternedEntry ? [ userEntry ] : [] ),
-                                                   ( patternedEntry ? [] : [ userEntry ] )) }, \
+            assert zipEntries.any{ entryMatch( it, ( patternedEntry ? [] : [ userEntry ] ),
+                                                   ( patternedEntry ? [ userEntry ] : [] )) }, \
                    "Failed to match [$userEntry] pattern in Zip entries $zipEntries"
         }
 
         verify.notNullOrEmpty( matchingEntries )
     }
 
-    
+
     /**
      * Unpacks zip entry to directory specified.
-     * 
+     *
      * @param archive              original Zip archive
      * @param zipFile              zip file instance created from original archive (optional)
      * @param zipEntry             zip entry to unpack
@@ -628,7 +628,7 @@ class FileBean extends BaseBean implements InitializingBean
 
         true
     }
-    
+
 
     /**
      * Retrieves file's extension.
