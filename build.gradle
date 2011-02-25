@@ -69,6 +69,7 @@ test {
 def d    = new Date()
 def time = new SimpleDateFormat( "HH:mm '(GMT'Z')'" ).format( d )
 def date = new SimpleDateFormat( 'MMMM dd, yyyy' ).format( d )
+groovydoc.setUse( true )
 groovydoc {
     destinationDir = new File(( System.getProperty( 'groovydocDir' ) ?: project.buildDir.path + '/groovydoc' ),
                               ( version.contains( '-SNAPSHOT' ) ? '' : version ))
@@ -92,7 +93,7 @@ groovydoc {
     link 'http://download.oracle.com/javase/6/docs/api/',                 'java.'
     link 'http://groovy.codehaus.org/api/',                               'groovy.', 'org.codehaus.groovy.'
     link 'http://commons.apache.org/net/apidocs/',                        'org.apache.commons.net.'
-    link 'http://evgeny-goldin.org/javadoc/truezip/',                     'de.schlichtherle.'
+    link 'http://truezip.java.net/apidocs/',                              'de.schlichtherle.'
 
     /**
      * "Groovydoc not creating external links in generated HTML"
