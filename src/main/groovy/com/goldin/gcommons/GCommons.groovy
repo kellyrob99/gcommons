@@ -42,6 +42,7 @@ class GCommons
         {
             if ( ! CONTEXT )
             {
+                long t  = System.currentTimeMillis()
                 CONTEXT = newContext()
                 LOG     = LoggerFactory.getLogger( GCommons.class )
                 MopHelper helper = ( MopHelper ) getBean( MopHelper, false )
@@ -49,7 +50,7 @@ class GCommons
                 File.metaClass.recurse       = { Map configs = [:], Closure callback -> helper.recurse(( File ) delegate, configs, callback ) }
                 File.metaClass.directorySize = { helper.directorySize(( File ) delegate ) }
 
-                LOG.info( "GCommons context initialized: [$CONTEXT.beanDefinitionCount] beans - $CONTEXT.beanDefinitionNames" )
+                LOG.info( "GCommons context initialized: [$CONTEXT.beanDefinitionCount] beans - $CONTEXT.beanDefinitionNames ([${ System.currentTimeMillis() - t }] ms)" )
             }
         }
 
